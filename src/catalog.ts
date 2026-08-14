@@ -1,0 +1,173 @@
+import "server-only";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { CategoryRow, ProductRow, ProductVariationRow } from "@/types/database";
+import { Product, CourseLevel } from "@/types";
+
+export interface ProductWithDetails extends ProductRow {
+  product_images: { url: string; alt_text: string; display_order: number }[];
+  product_variations: ProductVariationRow[];
+  digital_assets: { delivery_type: string }[];
+  course_links: { level: string | null; modules: number | null }[];
+  service_details: { includes: string[]; is_quote_only: boolean }[];
+}
+
+/**
+ * Camada de acesso a dados do catálogo (Etapa 13, correção do achado
+ * "não conformidade": Etapa 8 usava arrays mock em @/data/products.ts,
+ * desconectados do back-end real construído nas Etapas 9/10. Este módulo
+ * substitui aquele mock por consultas reais ao Supabase.
+ *
+ * Fica em `lib/data/` (não em `actions/`) porque são apenas LEITURAS,
+ * usadas em Server Components — não precisam do contrato de
+ * ActionResult (que é para mutações disparadas pelo usuário).
+ */
+
+export async function getActiveCategories(): Promise<CategoryRow[]> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("categories")
+    .select("*")
+    .eq("active", true)
+    .order("display_order");
+
+  if (error) throw new Error(`Falha ao carregar categorias: ${error.message}`);
+  return data;
+}
+
+export async function getTopLevelCategories(): Promise<CategoryRow[]> {
+  const categories = await getActiveCategories();
+  return categories.filter((c) => !c.parent_slug);
+}
+
+export async function getCategoryBySlug(slug: string): Promise<CategoryRow | null> {
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase.from("categories").select("*").eq("slug", slug).eq("active", true).maybeSingle();
+  return data;
+}
+
+const PRODUCT_DETAIL_SELECT = `
+  *,
+  product_images ( url, alt_text, display_order ),
+  product_variations ( * ),
+  digital_assets ( delivery_type ),
+  course_links ( level, modules ),
+  service_details ( includes, is_quote_only )
+`;
+
+export async function getActiveProducts(): Promise<ProductWithDetails[]> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("products")
+    .select(PRODUCT_DETAIL_SELECT)
+    .eq("status", "ativo")
+    .order("created_at", { ascending: false });
+
+  if (error) throw new Error(`Falha ao carregar produtos: ${error.message}`);
+  return data as unknown as ProductWithDetails[];
+}
+
+export async function getFeaturedProducts(): Promise<ProductWithDetails[]> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("products")
+    .select(PRODUCT_DETAIL_SELECT)
+    .eq("status", "ativo")
+    .eq("featured", true)
+    .limit(8);
+
+  if (error) throw new Error(`Falha ao carregar produtos em destaque: ${error.message}`);
+  return data as unknown as ProductWithDetails[];
+}
+
+export async function getProductsByCategory(categorySlug: string): Promise<ProductWithDetails[]> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("products")
+    .select(PRODUCT_DETAIL_SELECT)
+    .eq("status", "ativo")
+    .eq("category_slug", categorySlug);
+
+  if (error) throw new Error(`Falha ao carregar produtos da categoria: ${error.message}`);
+  return data as unknown as ProductWithDetails[];
+}
+
+export async function getProductBySlug(slug: string): Promise<ProductWithDetails | null> {
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase
+    .from("products")
+    .select(PRODUCT_DETAIL_SELECT)
+    .eq("slug", slug)
+    .eq("status", "ativo")
+    .maybeSingle();
+
+  return data as unknown as ProductWithDetails | null;
+}
+
+export async function getRelatedProducts(product: ProductRow, limit = 3): Promise<ProductWithDetails[]> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("products")
+    .select(PRODUCT_DETAIL_SELECT)
+    .eq("status", "ativo")
+    .eq("category_slug", product.category_slug)
+    .neq("id", product.id)
+    .limit(limit);
+
+  if (error) return [];
+  return data as unknown as ProductWithDetails[];
+}
+
+export async function searchProducts(query: string): Promise<ProductWithDetails[]> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("products")
+    .select(PRODUCT_DETAIL_SELECT)
+    .eq("status", "ativo")
+    .or(`name.ilike.%${query}%,short_description.ilike.%${query}%`)
+    .limit(30);
+
+  if (error) throw new Error(`Falha na busca: ${error.message}`);
+  return data as unknown as ProductWithDetails[];
+}
+
+/**
+ * Converte a linha vinda do Supabase (snake_case, com joins) para o
+ * formato `Product` já consumido pelos componentes de UI construídos na
+ * Etapa 8 (camelCase). Mantém toda a camada visual já validada sem
+ * retrabalho — só a origem do dado muda, de mock para banco real.
+ */
+export function mapToProduct(row: ProductWithDetails): Product {
+  const serviceDetail = row.service_details?.[0];
+  const courseLink = row.course_links?.[0];
+  const digitalAsset = row.digital_assets?.[0];
+
+  const images = [...(row.product_images ?? [])]
+    .sort((a, b) => a.display_order - b.display_order)
+    .map((img) => ({ url: img.url, alt: img.alt_text }));
+
+  return {
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    type: row.type,
+    categorySlug: row.category_slug,
+    shortDescription: row.short_description ?? "",
+    description: row.description ?? "",
+    price: Number(row.price),
+    promoPrice: row.promo_price ? Number(row.promo_price) : undefined,
+    status: row.status,
+    featured: row.featured,
+    images: images.length > 0 ? images : [{ url: "/placeholder-product.svg", alt: row.name }],
+    variations: row.product_variations?.map((v) => ({
+      id: v.id,
+      attributes: v.attributes,
+      stock: v.stock,
+      sku: v.sku,
+    })),
+    digitalFormat: digitalAsset?.delivery_type,
+    courseLevel: (courseLink?.level as CourseLevel) ?? undefined,
+    courseModules: courseLink?.modules ?? undefined,
+    serviceIncludes: serviceDetail?.includes,
+    isQuoteOnly: serviceDetail?.is_quote_only ?? false,
+  };
+}
