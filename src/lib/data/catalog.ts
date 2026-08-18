@@ -11,17 +11,6 @@ export interface ProductWithDetails extends ProductRow {
   service_details: { includes: string[]; is_quote_only: boolean }[];
 }
 
-/**
- * Camada de acesso a dados do catálogo (Etapa 13, correção do achado
- * "não conformidade": Etapa 8 usava arrays mock em @/data/products.ts,
- * desconectados do back-end real construído nas Etapas 9/10. Este módulo
- * substitui aquele mock por consultas reais ao Supabase.
- *
- * Fica em `lib/data/` (não em `actions/`) porque são apenas LEITURAS,
- * usadas em Server Components — não precisam do contrato de
- * ActionResult (que é para mutações disparadas pelo usuário).
- */
-
 export async function getActiveCategories(): Promise<CategoryRow[]> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
@@ -60,6 +49,7 @@ export async function getActiveProducts(): Promise<ProductWithDetails[]> {
     .from("products")
     .select(PRODUCT_DETAIL_SELECT)
     .eq("status", "ativo")
+    .eq("hidden", false)
     .order("created_at", { ascending: false });
 
   if (error) throw new Error(`Falha ao carregar produtos: ${error.message}`);
@@ -72,6 +62,7 @@ export async function getFeaturedProducts(): Promise<ProductWithDetails[]> {
     .from("products")
     .select(PRODUCT_DETAIL_SELECT)
     .eq("status", "ativo")
+    .eq("hidden", false)
     .eq("featured", true)
     .limit(8);
 
@@ -85,6 +76,7 @@ export async function getProductsByCategory(categorySlug: string): Promise<Produ
     .from("products")
     .select(PRODUCT_DETAIL_SELECT)
     .eq("status", "ativo")
+    .eq("hidden", false)
     .eq("category_slug", categorySlug);
 
   if (error) throw new Error(`Falha ao carregar produtos da categoria: ${error.message}`);
@@ -109,6 +101,7 @@ export async function getRelatedProducts(product: ProductRow, limit = 3): Promis
     .from("products")
     .select(PRODUCT_DETAIL_SELECT)
     .eq("status", "ativo")
+    .eq("hidden", false)
     .eq("category_slug", product.category_slug)
     .neq("id", product.id)
     .limit(limit);
@@ -123,6 +116,7 @@ export async function searchProducts(query: string): Promise<ProductWithDetails[
     .from("products")
     .select(PRODUCT_DETAIL_SELECT)
     .eq("status", "ativo")
+    .eq("hidden", false)
     .or(`name.ilike.%${query}%,short_description.ilike.%${query}%`)
     .limit(30);
 
@@ -130,12 +124,6 @@ export async function searchProducts(query: string): Promise<ProductWithDetails[
   return data as unknown as ProductWithDetails[];
 }
 
-/**
- * Converte a linha vinda do Supabase (snake_case, com joins) para o
- * formato `Product` já consumido pelos componentes de UI construídos na
- * Etapa 8 (camelCase). Mantém toda a camada visual já validada sem
- * retrabalho — só a origem do dado muda, de mock para banco real.
- */
 export function mapToProduct(row: ProductWithDetails): Product {
   const serviceDetail = row.service_details?.[0];
   const courseLink = row.course_links?.[0];
