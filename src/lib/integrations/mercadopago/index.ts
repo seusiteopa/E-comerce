@@ -1,5 +1,5 @@
 import "server-only";
-import { MercadoPagoConfig, Preference } from "mercadopago";
+import { MercadoPagoConfig, Preference, Payment } from "mercadopago";
 import crypto from "crypto";
 import { logger } from "@/lib/logger";
 
@@ -16,6 +16,7 @@ export interface CreatePaymentPreferenceInput {
   totalAmount: number;
   description: string;
   payerEmail: string;
+  payerDocument: string;
 }
 
 export interface CreatePaymentPreferenceResult {
@@ -44,7 +45,10 @@ export async function createPaymentPreference(
             currency_id: "BRL",
           },
         ],
-        payer: { email: input.payerEmail },
+        payer: {
+          email: input.payerEmail,
+          identification: { type: "CPF", number: input.payerDocument },
+        },
         external_reference: input.orderId,
         back_urls: {
           success: `${siteUrl}/checkout/confirmacao?pedido=${input.orderId}`,
@@ -70,6 +74,71 @@ export async function createPaymentPreference(
       error: error instanceof Error ? error.message : String(error),
     });
     throw new Error("Não foi possível iniciar o pagamento. Tente novamente em instantes.");
+  }
+}
+
+export interface CreatePixPaymentInput {
+  orderId: string;
+  totalAmount: number;
+  description: string;
+  payerEmail: string;
+  payerDocument: string;
+}
+
+export interface CreatePixPaymentResult {
+  paymentId: string;
+  status: string;
+  qrCodeBase64: string;
+  qrCode: string;
+}
+
+export async function createPixPayment(
+  input: CreatePixPaymentInput
+): Promise<CreatePixPaymentResult> {
+  const client = getClient();
+  const payment = new Payment(client);
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!siteUrl) throw new Error("NEXT_PUBLIC_SITE_URL não configurado.");
+
+  try {
+    const result = await payment.create({
+      body: {
+        transaction_amount: input.totalAmount,
+        description: input.description,
+        payment_method_id: "pix",
+        payer: {
+          email: input.payerEmail,
+          identification: { type: "CPF", number: input.payerDocument },
+        },
+        external_reference: input.orderId,
+        notification_url: `${siteUrl}/api/webhooks/mercadopago`,
+      },
+      requestOptions: { idempotencyKey: input.orderId },
+    });
+
+    const qrCodeBase64 = result.point_of_interaction?.transaction_data?.qr_code_base64;
+    const qrCode = result.point_of_interaction?.transaction_data?.qr_code;
+
+    if (!result.id || !qrCodeBase64 || !qrCode) {
+      throw new Error("Resposta inesperada do Mercado Pago ao criar pagamento Pix.");
+    }
+
+    logger.info("Pagamento Pix criado", { orderId: input.orderId, integration: "mercadopago" });
+
+    return {
+      paymentId: String(result.id),
+      status: result.status ?? "pending",
+      qrCodeBase64,
+      qrCode,
+    };
+  } catch (error) {
+    logger.error("Erro ao criar pagamento Pix", {
+      orderId: input.orderId,
+      integration: "mercadopago",
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw new Error("Não foi possível gerar o Pix. Tente novamente em instantes.");
   }
 }
 
