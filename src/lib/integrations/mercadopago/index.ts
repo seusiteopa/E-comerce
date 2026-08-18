@@ -3,15 +3,6 @@ import { MercadoPagoConfig, Preference } from "mercadopago";
 import crypto from "crypto";
 import { logger } from "@/lib/logger";
 
-/**
- * Módulo de fronteira com o Mercado Pago (Etapa 2/7: uma troca futura de
- * gateway de pagamento deve alterar só este arquivo).
- *
- * Etapa 10: implementação real, usando o SDK oficial. A instância do
- * client é criada sob demanda (não no topo do módulo) para não quebrar o
- * build em ambientes onde a variável de ambiente ainda não está definida
- * (ex: preview/CI sem segredo configurado).
- */
 function getClient() {
   const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
   if (!accessToken) {
@@ -32,11 +23,6 @@ export interface CreatePaymentPreferenceResult {
   checkoutUrl: string;
 }
 
-/**
- * Cria a "preferência de pagamento" no Mercado Pago (Etapa 4/7, fluxo 7.1,
- * passo 1-2). O `external_reference` é o nosso próprio `orderId` — é assim
- * que o webhook consegue relacionar a notificação de volta ao pedido certo.
- */
 export async function createPaymentPreference(
   input: CreatePaymentPreferenceInput
 ): Promise<CreatePaymentPreferenceResult> {
@@ -87,16 +73,6 @@ export async function createPaymentPreference(
   }
 }
 
-/**
- * Valida a assinatura do webhook do Mercado Pago (header `x-signature`),
- * seguindo o esquema HMAC-SHA256 documentado pelo Mercado Pago: a
- * assinatura é calculada sobre um "manifest" com o id do recurso, o
- * request-id e o timestamp, usando o segredo configurado no painel do
- * Mercado Pago (MERCADOPAGO_WEBHOOK_SECRET).
- *
- * Sem essa validação, qualquer requisição poderia forjar uma notificação
- * de "pagamento aprovado" (Etapa 4/7/9 — ponto de segurança não negociável).
- */
 export function verifyWebhookSignature(params: {
   signatureHeader: string | null;
   requestIdHeader: string | null;
@@ -110,9 +86,8 @@ export function verifyWebhookSignature(params: {
     return false;
   }
 
-  if (!params.signatureHeader || !params.requestIdHeader) return false;
+  if (!params.signatureHeader) return false;
 
-  // Formato do header: "ts=1700000000,v1=<hash>"
   const parts = Object.fromEntries(
     params.signatureHeader.split(",").map((p) => {
       const [key, value] = p.split("=");
@@ -124,17 +99,20 @@ export function verifyWebhookSignature(params: {
   const receivedHash = parts["v1"];
   if (!ts || !receivedHash) return false;
 
-  const manifest = `id:${params.dataId};request-id:${params.requestIdHeader};ts:${ts};`;
+  const manifestParts = [`id:${params.dataId}`];
+  if (params.requestIdHeader) manifestParts.push(`request-id:${params.requestIdHeader}`);
+  manifestParts.push(`ts:${ts}`);
+  const manifest = manifestParts.join(";") + ";";
+
   const expectedHash = crypto.createHmac("sha256", secret).update(manifest).digest("hex");
 
   try {
     return crypto.timingSafeEqual(Buffer.from(expectedHash), Buffer.from(receivedHash));
   } catch {
-    return false; // tamanhos diferentes de buffer também caem aqui, com segurança
+    return false;
   }
 }
 
-/** Consulta o status real de um pagamento direto na API do Mercado Pago (fonte de verdade). */
 export async function fetchPaymentStatus(paymentId: string): Promise<{
   status: "pending" | "approved" | "rejected" | "cancelled" | "refunded";
   externalReference: string | null;
