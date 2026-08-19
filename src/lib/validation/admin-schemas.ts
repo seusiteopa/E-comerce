@@ -11,7 +11,7 @@ export const productAdminSchema = z
     promoPrice: z.number().nonnegative().optional(),
     status: z.enum(["ativo", "inativo", "rascunho"]).default("rascunho"),
     featured: z.boolean().default(false),
-    isQuoteOnly: z.boolean().default(false),
+    isQuoteOnly: z.boolean().default(false),hidden: z.boolean().default(false),
   })
   .refine((data) => !data.promoPrice || data.promoPrice < data.price, {
     message: "O preço promocional precisa ser menor que o preço normal.",
