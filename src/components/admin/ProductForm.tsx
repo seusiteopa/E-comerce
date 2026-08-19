@@ -82,9 +82,13 @@ export default function ProductForm({ categories }: { categories: CategoryRow[] 
       </div>
 
       <div className="flex flex-wrap gap-6">
-        <label className="flex items-center gap-2 text-sm text-ink">
+         <label className="flex items-center gap-2 text-sm text-ink">
           <input type="checkbox" name="featured" className="h-4 w-4 accent-[#173F82]" />
           Produto em destaque
+        </label>
+        <label className="flex items-center gap-2 text-sm text-ink">
+          <input type="checkbox" name="hidden" className="h-4 w-4 accent-[#173F82]" />
+          Produto exclusivo (link único, não aparece na loja)
         </label>
         {type === "servico" && (
           <label className="flex items-center gap-2 text-sm text-ink">
