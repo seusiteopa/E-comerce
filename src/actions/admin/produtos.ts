@@ -45,6 +45,7 @@ export async function createProductAction(formData: FormData): Promise<ActionRes
     status: (formData.get("status") as string) || "rascunho",
     featured: formData.get("featured") === "on",
     isQuoteOnly: formData.get("isQuoteOnly") === "on",
+    hidden: formData.get("hidden") === "on",
   };
 
   const parsed = productAdminSchema.safeParse(raw);
@@ -68,6 +69,7 @@ export async function createProductAction(formData: FormData): Promise<ActionRes
       promo_price: parsed.data.promoPrice ?? null,
       status: parsed.data.status,
       featured: parsed.data.featured,
+      hidden: parsed.data.hidden,
     })
     .select()
     .single();
