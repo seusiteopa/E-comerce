@@ -58,6 +58,7 @@ export interface ProductRow {
   promo_price: number | null;
   status: ProductStatus;
   featured: boolean;
+  hidden: boolean;
   created_at: string;
   updated_at: string;
 }
