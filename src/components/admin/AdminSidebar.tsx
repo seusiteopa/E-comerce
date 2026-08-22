@@ -11,7 +11,9 @@ import {
   MessageSquareText,
   GraduationCap,
   Settings,
+  LogOut,
 } from "lucide-react";
+import { logoutAction } from "@/actions/auth";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -28,7 +30,7 @@ const navItems = [
 
 export default function AdminSidebar() {
   return (
-    <aside className="hidden w-64 shrink-0 border-r border-line bg-surface lg:block">
+    <aside className="hidden w-64 shrink-0 flex-col border-r border-line bg-surface lg:flex lg:h-screen lg:sticky lg:top-0">
       <div className="flex h-16 items-center gap-3 border-b border-line px-6">
         <Image src="/brand/vecorion-icone-navy-transparente.png" alt="Vecorion" width={36} height={19} className="h-5 w-auto" />
         <span className="text-sm font-semibold text-ink">Painel Admin</span>
@@ -48,6 +50,15 @@ export default function AdminSidebar() {
           );
         })}
       </nav>
+      <form action={logoutAction} className="mt-auto border-t border-line p-4">
+        <button
+          type="submit"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink-soft transition-colors hover:bg-paper hover:text-ink"
+        >
+          <LogOut size={17} aria-hidden="true" />
+          Sair da conta
+        </button>
+      </form>
     </aside>
   );
 }

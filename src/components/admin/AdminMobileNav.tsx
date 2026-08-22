@@ -17,7 +17,9 @@ import {
   Settings,
   Menu,
   X,
+  LogOut,
 } from "lucide-react";
+import { logoutAction } from "@/actions/auth";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -86,6 +88,15 @@ export default function AdminMobileNav() {
           >
             Ver loja
           </Link>
+          <form action={logoutAction}>
+            <button
+              type="submit"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink-soft hover:text-ink"
+            >
+              <LogOut size={17} aria-hidden="true" />
+              Sair da conta
+            </button>
+          </form>
         </nav>
       )}
     </div>
