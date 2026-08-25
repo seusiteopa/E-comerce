@@ -6,6 +6,7 @@ import { requireAdminProfile, ForbiddenError, UnauthorizedError } from "@/lib/au
 import { productAdminSchema } from "@/lib/validation/admin-schemas";
 import { ActionResult, actionSuccess, actionError } from "@/lib/action-result";
 import { logger } from "@/lib/logger";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 
 function slugify(name: string) {
   return name
@@ -114,6 +115,39 @@ export async function createProductAction(formData: FormData): Promise<ActionRes
   // adicionados em uma etapa seguinte do formulário (fora do escopo desta action).
   if (parsed.data.type === "servico" && parsed.data.isQuoteOnly) {
     await supabase.from("service_details").insert({ product_id: product.id, is_quote_only: true, includes: [] });
+  }
+
+  // Upload de fotos e vídeo (opcional) para o Cloudinary, associados ao
+  // produto recém-criado. Falha de upload não desfaz a criação do produto —
+  // o admin pode adicionar as mídias depois se algo der errado aqui.
+  const photoFiles = formData.getAll("photos").filter((f): f is File => f instanceof File && f.size > 0);
+  const videoFile = formData.get("video");
+
+  const mediaRows: { product_id: string; url: string; alt_text: string; display_order: number; media_type: string }[] = [];
+
+  for (let i = 0; i < photoFiles.length; i++) {
+    try {
+      const url = await uploadToCloudinary(photoFiles[i], "image", `vecorion/produtos/${product.id}`);
+      mediaRows.push({ product_id: product.id, url, alt_text: parsed.data.name, display_order: i, media_type: "imagem" });
+    } catch (err) {
+      logger.error("Falha ao enviar foto do produto para o Cloudinary", { productId: product.id, error: (err as Error).message });
+    }
+  }
+
+  if (videoFile instanceof File && videoFile.size > 0) {
+    try {
+      const url = await uploadToCloudinary(videoFile, "video", `vecorion/produtos/${product.id}`);
+      mediaRows.push({ product_id: product.id, url, alt_text: parsed.data.name, display_order: mediaRows.length, media_type: "video" });
+    } catch (err) {
+      logger.error("Falha ao enviar vídeo do produto para o Cloudinary", { productId: product.id, error: (err as Error).message });
+    }
+  }
+
+  if (mediaRows.length > 0) {
+    const { error: mediaError } = await supabase.from("product_images").insert(mediaRows);
+    if (mediaError) {
+      logger.error("Falha ao salvar mídias do produto no banco", { productId: product.id, error: mediaError.message });
+    }
   }
 
   revalidatePath("/admin/produtos");

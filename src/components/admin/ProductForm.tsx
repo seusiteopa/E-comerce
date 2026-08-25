@@ -135,14 +135,39 @@ export default function ProductForm({ categories }: { categories: CategoryRow[] 
         </select>
       </div>
 
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="photos" className="text-sm font-medium text-ink">Fotos do produto</label>
+          <input
+            id="photos"
+            name="photos"
+            type="file"
+            accept="image/*"
+            multiple
+            className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none file:mr-3 file:rounded-lg file:border-0 file:bg-navy file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white"
+          />
+          <p className="mt-1 text-xs text-ink-soft">Pode selecionar várias fotos de uma vez. Sobem automaticamente pro Cloudinary.</p>
+        </div>
+        <div>
+          <label htmlFor="video" className="text-sm font-medium text-ink">Vídeo do produto (opcional)</label>
+          <input
+            id="video"
+            name="video"
+            type="file"
+            accept="video/*"
+            className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none file:mr-3 file:rounded-lg file:border-0 file:bg-navy file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white"
+          />
+        </div>
+      </div>
+
       {error && <p role="alert" className="text-sm text-status-danger">{error}</p>}
 
       <Button type="submit" disabled={isPending}>
-        {isPending ? "Salvando..." : "Salvar produto"}
+        {isPending ? "Salvando e enviando mídias..." : "Salvar produto"}
       </Button>
 
       <p className="text-xs text-ink-soft">
-        Imagens, variações, arquivo digital e vínculo de curso são adicionados depois de criar o produto (edição).
+        Variações, arquivo digital e vínculo de curso são adicionados depois de criar o produto (edição).
       </p>
     </form>
   );
