@@ -4,7 +4,7 @@ import { CategoryRow, ProductRow, ProductVariationRow } from "@/types/database";
 import { Product, CourseLevel } from "@/types";
 
 export interface ProductWithDetails extends ProductRow {
-  product_images: { url: string; alt_text: string; display_order: number }[];
+  product_images: { url: string; alt_text: string; display_order: number; media_type: string }[];
   product_variations: ProductVariationRow[];
   digital_assets: { delivery_type: string }[];
   course_links: { level: string | null; modules: number | null }[];
@@ -36,7 +36,7 @@ export async function getCategoryBySlug(slug: string): Promise<CategoryRow | nul
 
 const PRODUCT_DETAIL_SELECT = `
   *,
-  product_images ( url, alt_text, display_order ),
+  product_images ( url, alt_text, display_order, media_type ),
   product_variations ( * ),
   digital_assets ( delivery_type ),
   course_links ( level, modules ),
@@ -131,7 +131,7 @@ export function mapToProduct(row: ProductWithDetails): Product {
 
   const images = [...(row.product_images ?? [])]
     .sort((a, b) => a.display_order - b.display_order)
-    .map((img) => ({ url: img.url, alt: img.alt_text }));
+    .map((img) => ({ url: img.url, alt: img.alt_text, mediaType: (img.media_type as "imagem" | "video") ?? "imagem" }));
 
   return {
     id: row.id,
@@ -145,7 +145,7 @@ export function mapToProduct(row: ProductWithDetails): Product {
     promoPrice: row.promo_price ? Number(row.promo_price) : undefined,
     status: row.status,
     featured: row.featured,
-    images: images.length > 0 ? images : [{ url: "/placeholder-product.svg", alt: row.name }],
+    images: images.length > 0 ? images : [{ url: "/placeholder-product.svg", alt: row.name, mediaType: "imagem" as const }],
     variations: row.product_variations?.map((v) => ({
       id: v.id,
       attributes: v.attributes,

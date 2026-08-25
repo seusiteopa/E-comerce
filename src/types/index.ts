@@ -31,7 +31,7 @@ export interface Product {
   promoPrice?: number;
   status: ProductStatus;
   featured: boolean;
-  images: { url: string; alt: string }[];
+  images: { url: string; alt: string; mediaType: "imagem" | "video" }[];
   // Campos específicos por tipo (Etapa 3: só o bloco relevante é preenchido)
   variations?: ProductVariation[]; // físico
   digitalFormat?: string; // digital

@@ -135,6 +135,22 @@ export default function ProductForm({ categories }: { categories: CategoryRow[] 
         </select>
       </div>
 
+      {type === "digital" && (
+        <div>
+          <label htmlFor="digitalFile" className="text-sm font-medium text-ink">Arquivo digital (ebook, PDF, ZIP...)</label>
+          <input
+            id="digitalFile"
+            name="digitalFile"
+            type="file"
+            accept=".pdf,.epub,.zip,.mp4,.mov,.doc,.docx"
+            className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none file:mr-3 file:rounded-lg file:border-0 file:bg-navy file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white"
+          />
+          <p className="mt-1 text-xs text-ink-soft">
+            Fica guardado de forma privada — o link de download só é liberado depois do pagamento aprovado.
+          </p>
+        </div>
+      )}
+
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="photos" className="text-sm font-medium text-ink">Fotos do produto</label>

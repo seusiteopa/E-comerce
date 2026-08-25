@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import { requireAdminProfile, ForbiddenError, UnauthorizedError } from "@/lib/auth";
 import { productAdminSchema } from "@/lib/validation/admin-schemas";
 import { ActionResult, actionSuccess, actionError } from "@/lib/action-result";
@@ -115,6 +116,40 @@ export async function createProductAction(formData: FormData): Promise<ActionRes
   // adicionados em uma etapa seguinte do formulário (fora do escopo desta action).
   if (parsed.data.type === "servico" && parsed.data.isQuoteOnly) {
     await supabase.from("service_details").insert({ product_id: product.id, is_quote_only: true, includes: [] });
+  }
+
+  // Arquivo digital (ebook, PDF, ZIP...) — guardado em bucket PRIVADO no
+  // Supabase Storage via service role (nunca exposto publicamente). O link
+  // de download só é gerado depois do pagamento aprovado (ver
+  // generateDigitalDownloadLink em lib/integrations/storage/digital-delivery.ts).
+  if (parsed.data.type === "digital") {
+    const digitalFile = formData.get("digitalFile");
+    if (digitalFile instanceof File && digitalFile.size > 0) {
+      try {
+        const serviceClient = createSupabaseServiceClient();
+        const extension = digitalFile.name.split(".").pop() ?? "bin";
+        const storagePath = `${product.id}/${slug}.${extension}`;
+
+        const { error: uploadError } = await serviceClient.storage
+          .from("produtos-digitais")
+          .upload(storagePath, digitalFile, { upsert: true });
+
+        if (uploadError) {
+          logger.error("Falha ao enviar arquivo digital para o Storage", { productId: product.id, error: uploadError.message });
+        } else {
+          const { error: assetError } = await serviceClient.from("digital_assets").insert({
+            product_id: product.id,
+            storage_path: storagePath,
+            delivery_type: "download",
+          });
+          if (assetError) {
+            logger.error("Falha ao registrar arquivo digital no banco", { productId: product.id, error: assetError.message });
+          }
+        }
+      } catch (err) {
+        logger.error("Erro inesperado ao processar arquivo digital", { productId: product.id, error: (err as Error).message });
+      }
+    }
   }
 
   // Upload de fotos e vídeo (opcional) para o Cloudinary, associados ao

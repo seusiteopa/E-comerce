@@ -22,6 +22,12 @@ const nextConfig: NextConfig = {
     // o Next serve automaticamente o melhor formato suportado pelo
     // navegador do visitante, com fallback transparente.
     formats: ["image/avif", "image/webp"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      },
+    ],
   },
 
   async headers() {

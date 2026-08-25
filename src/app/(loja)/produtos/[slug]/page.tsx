@@ -5,6 +5,7 @@ import Container from "@/components/ui/Container";
 import { LevelBadge, CategoryBadge } from "@/components/ui/Badge";
 import PriceTag from "@/components/ui/PriceTag";
 import ProductActions from "@/components/loja/ProductActions";
+import ProductGallery from "@/components/loja/ProductGallery";
 import ProductCard from "@/components/loja/ProductCard";
 import {
   getProductBySlug,
@@ -47,26 +48,32 @@ export default async function ProductPage({ params }: ProductPageProps) {
   return (
     <>
       <section className="bg-paper py-16 sm:py-20">
-        <Container className="max-w-3xl">
+        <Container className="max-w-5xl">
           <nav aria-label="Trilha de navegação" className="text-xs text-ink-soft">
             <Link href="/produtos" className="hover:text-navy">Produtos</Link>
             <span className="mx-2">/</span>
             <span>{category?.name}</span>
           </nav>
 
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <CategoryBadge label={category?.name ?? ""} />
-            {product.type === "curso" && product.courseLevel && <LevelBadge level={product.courseLevel} />}
-          </div>
+          <div className="mt-6 grid gap-10 lg:grid-cols-2 lg:items-start">
+            <ProductGallery media={product.images} productName={product.name} />
 
-          <h1 className="mt-4 text-3xl font-semibold leading-tight text-ink sm:text-4xl">{product.name}</h1>
-          <div className="mt-3">
-            <PriceTag price={product.price} promoPrice={product.promoPrice} isQuoteOnly={product.isQuoteOnly} size="lg" />
-          </div>
-          <p className="mt-4 text-base leading-relaxed text-ink-soft">{product.description}</p>
+            <div>
+              <div className="flex flex-wrap items-center gap-3">
+                <CategoryBadge label={category?.name ?? ""} />
+                {product.type === "curso" && product.courseLevel && <LevelBadge level={product.courseLevel} />}
+              </div>
 
-          <div className="mt-8">
-            <ProductActions product={product} />
+              <h1 className="mt-4 text-3xl font-semibold leading-tight text-ink sm:text-4xl">{product.name}</h1>
+              <div className="mt-3">
+                <PriceTag price={product.price} promoPrice={product.promoPrice} isQuoteOnly={product.isQuoteOnly} size="lg" />
+              </div>
+              <p className="mt-4 text-base leading-relaxed text-ink-soft">{product.description}</p>
+
+              <div className="mt-8">
+                <ProductActions product={product} />
+              </div>
+            </div>
           </div>
         </Container>
       </section>
