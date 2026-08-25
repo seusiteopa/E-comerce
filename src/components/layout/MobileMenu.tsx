@@ -32,7 +32,7 @@ export default function MobileMenu() {
             <input
               type="search"
               name="q"
-              placeholder="Buscar produtos, cursos, serviços..."
+              placeholder="Buscar produtos..."
               className="w-full bg-transparent text-sm outline-none"
             />
           </form>

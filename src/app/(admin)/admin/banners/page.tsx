@@ -1,12 +1,15 @@
 import AdminHeader from "@/components/admin/AdminHeader";
 import Container from "@/components/ui/Container";
-import AdminDataTable, { AdminColumn } from "@/components/admin/AdminDataTable";
+import BannerForm from "@/components/admin/BannerForm";
+import BannerListItem from "@/components/admin/BannerListItem";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireAdminProfile } from "@/lib/auth";
 
 interface BannerRow {
   id: string;
   title: string | null;
+  image_url: string;
+  link_url: string | null;
   position: string;
   active: boolean;
 }
@@ -14,20 +17,35 @@ interface BannerRow {
 export default async function AdminBannersPage() {
   await requireAdminProfile();
   const supabase = await createSupabaseServerClient();
-  const { data } = await supabase.from("banners").select("id, title, position, active").order("display_order");
+  const { data } = await supabase
+    .from("banners")
+    .select("id, title, image_url, link_url, position, active")
+    .order("display_order");
   const rows = (data ?? []) as BannerRow[];
-
-  const columns: AdminColumn<BannerRow>[] = [
-    { header: "Título", primary: true, cell: (r) => r.title ?? "—" },
-    { header: "Posição", primary: true, cell: (r) => r.position },
-    { header: "Ativo", primary: true, cell: (r) => (r.active ? "Sim" : "Não") },
-  ];
 
   return (
     <>
       <AdminHeader title="Banners" />
       <Container className="py-8">
-        <AdminDataTable columns={columns} rows={rows} emptyLabel="Nenhum banner cadastrado ainda." />
+        <p className="mb-6 max-w-2xl text-sm text-ink-soft">
+          O banner &quot;Principal&quot; ativo aparece no topo da loja. Se nenhum estiver ativo, a home mostra um
+          visual padrão simples.
+        </p>
+
+        <div className="grid gap-8 lg:grid-cols-[1fr_1.2fr]">
+          <BannerForm />
+
+          <div className="flex flex-col gap-3">
+            {rows.length === 0 && (
+              <p className="rounded-xl border border-dashed border-line p-8 text-center text-sm text-ink-soft">
+                Nenhum banner cadastrado ainda.
+              </p>
+            )}
+            {rows.map((banner) => (
+              <BannerListItem key={banner.id} banner={banner} />
+            ))}
+          </div>
+        </div>
       </Container>
     </>
   );

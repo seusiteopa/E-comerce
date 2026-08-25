@@ -38,6 +38,7 @@ export async function createProductAction(formData: FormData): Promise<ActionRes
     name: formData.get("name") as string,
     type: formData.get("type") as string,
     categorySlug: formData.get("categorySlug") as string,
+    newCategoryName: (formData.get("newCategoryName") as string) || undefined,
     shortDescription: (formData.get("shortDescription") as string) || undefined,
     description: formData.get("description") as string,
     price: Number(formData.get("price")),
@@ -56,13 +57,42 @@ export async function createProductAction(formData: FormData): Promise<ActionRes
   const supabase = await createSupabaseServerClient();
   const slug = slugify(parsed.data.name);
 
+  let categorySlug = parsed.data.categorySlug;
+
+  if (parsed.data.newCategoryName) {
+    const newSlug = slugify(parsed.data.newCategoryName);
+    const { data: existing } = await supabase
+      .from("categories")
+      .select("slug")
+      .eq("slug", newSlug)
+      .maybeSingle();
+
+    if (!existing) {
+      const { error: categoryError } = await supabase.from("categories").insert({
+        slug: newSlug,
+        name: parsed.data.newCategoryName,
+        product_type: parsed.data.type,
+        active: true,
+      });
+      if (categoryError) {
+        logger.error("Erro ao criar categoria inline", { error: categoryError.message });
+        return actionError("Não foi possível criar a nova categoria.");
+      }
+    }
+    categorySlug = newSlug;
+  }
+
+  if (!categorySlug) {
+    return actionError("Selecione uma categoria ou informe o nome de uma categoria nova.");
+  }
+
   const { data: product, error } = await supabase
     .from("products")
     .insert({
       slug,
       name: parsed.data.name,
       type: parsed.data.type,
-      category_slug: parsed.data.categorySlug,
+      category_slug: categorySlug,
       short_description: parsed.data.shortDescription ?? null,
       description: parsed.data.description,
       price: parsed.data.price,

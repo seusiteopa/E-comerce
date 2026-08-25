@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
   const productRow = await getProductBySlug(slug);
-  if (!productRow) notFound();
+  if (!productRow || productRow.hidden) notFound();
 
   const product = mapToProduct(productRow);
   const category = await getCategoryBySlug(product.categorySlug);

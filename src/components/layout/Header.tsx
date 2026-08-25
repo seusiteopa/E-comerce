@@ -21,7 +21,7 @@ export default function Header() {
           <input
             type="search"
             name="q"
-            placeholder="Buscar produtos, cursos, serviços..."
+            placeholder="Buscar produtos..."
             aria-label="Buscar na loja"
             className="w-full bg-transparent text-sm outline-none"
           />

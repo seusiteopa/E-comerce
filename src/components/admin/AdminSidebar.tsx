@@ -3,13 +3,11 @@ import Image from "next/image";
 import {
   LayoutDashboard,
   Package,
-  FolderTree,
   ShoppingBag,
   Users,
   Ticket,
   Image as ImageIcon,
   MessageSquareText,
-  GraduationCap,
   Settings,
   LogOut,
 } from "lucide-react";
@@ -18,13 +16,11 @@ import { logoutAction } from "@/actions/auth";
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/produtos", label: "Produtos", icon: Package },
-  { href: "/admin/categorias", label: "Categorias", icon: FolderTree },
   { href: "/admin/pedidos", label: "Pedidos", icon: ShoppingBag },
   { href: "/admin/clientes", label: "Clientes", icon: Users },
   { href: "/admin/cupons", label: "Cupons", icon: Ticket },
   { href: "/admin/banners", label: "Banners", icon: ImageIcon },
   { href: "/admin/orcamentos", label: "Orçamentos", icon: MessageSquareText },
-  { href: "/admin/cursos-pendentes", label: "Cursos Pendentes", icon: GraduationCap },
   { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ];
 

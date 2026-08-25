@@ -3,7 +3,7 @@ import { Package, Download, Heart, MapPin, User } from "lucide-react";
 
 const items = [
   { href: "/conta/pedidos", label: "Meus Pedidos", icon: Package },
-  { href: "/conta/downloads", label: "Downloads e Cursos", icon: Download },
+  { href: "/conta/downloads", label: "Downloads", icon: Download },
   { href: "/conta/favoritos", label: "Favoritos", icon: Heart },
   { href: "/conta/enderecos", label: "Endereços", icon: MapPin },
   { href: "/conta/dados", label: "Dados da Conta", icon: User },

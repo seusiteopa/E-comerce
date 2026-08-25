@@ -10,7 +10,7 @@ export default function ProductForm({ categories }: { categories: CategoryRow[] 
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [type, setType] = useState("fisico");
-  const [isQuoteOnly, setIsQuoteOnly] = useState(false);
+  const [creatingCategory, setCreatingCategory] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   function handleSubmit(formData: FormData) {
@@ -46,17 +46,51 @@ export default function ProductForm({ categories }: { categories: CategoryRow[] 
           >
             <option value="fisico">Físico</option>
             <option value="digital">Digital</option>
-            <option value="curso">Curso</option>
-            <option value="servico">Serviço</option>
           </select>
         </div>
         <div>
           <label htmlFor="categorySlug" className="text-sm font-medium text-ink">Categoria</label>
-          <select id="categorySlug" name="categorySlug" required className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy">
-            {filteredCategories.map((c) => (
-              <option key={c.slug} value={c.slug}>{c.name}</option>
-            ))}
-          </select>
+          {!creatingCategory ? (
+            <>
+              <select
+                id="categorySlug"
+                name="categorySlug"
+                required={!creatingCategory}
+                defaultValue=""
+                className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy"
+              >
+                <option value="" disabled>Selecione...</option>
+                {filteredCategories.map((c) => (
+                  <option key={c.slug} value={c.slug}>{c.name}</option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => setCreatingCategory(true)}
+                className="mt-2 text-xs font-semibold text-navy hover:underline"
+              >
+                + Criar nova categoria
+              </button>
+            </>
+          ) : (
+            <>
+              <input
+                id="newCategoryName"
+                name="newCategoryName"
+                type="text"
+                required
+                placeholder="Nome da nova categoria"
+                className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy"
+              />
+              <button
+                type="button"
+                onClick={() => setCreatingCategory(false)}
+                className="mt-2 text-xs font-semibold text-ink-soft hover:underline"
+              >
+                Usar categoria existente
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -90,18 +124,6 @@ export default function ProductForm({ categories }: { categories: CategoryRow[] 
           <input type="checkbox" name="hidden" className="h-4 w-4 accent-[#173F82]" />
           Produto exclusivo (link único, não aparece na loja)
         </label>
-        {type === "servico" && (
-          <label className="flex items-center gap-2 text-sm text-ink">
-            <input
-              type="checkbox"
-              name="isQuoteOnly"
-              checked={isQuoteOnly}
-              onChange={(e) => setIsQuoteOnly(e.target.checked)}
-              className="h-4 w-4 accent-[#173F82]"
-            />
-            Sob orçamento (sem preço fechado)
-          </label>
-        )}
       </div>
 
       <div>

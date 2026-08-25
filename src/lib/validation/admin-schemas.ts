@@ -4,7 +4,8 @@ export const productAdminSchema = z
   .object({
     name: z.string().trim().min(2, "Informe o nome do produto."),
     type: z.enum(["fisico", "digital", "curso", "servico"]),
-    categorySlug: z.string().trim().min(1, "Selecione uma categoria."),
+    categorySlug: z.string().trim().optional().default(""),
+    newCategoryName: z.string().trim().optional().default(""),
     shortDescription: z.string().trim().max(200).optional(),
     description: z.string().trim().min(10, "Descreva o produto com mais detalhe."),
     price: z.number().nonnegative("O preço não pode ser negativo."),
