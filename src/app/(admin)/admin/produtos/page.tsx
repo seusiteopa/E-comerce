@@ -4,6 +4,7 @@ import Container from "@/components/ui/Container";
 import AdminDataTable, { AdminColumn } from "@/components/admin/AdminDataTable";
 import { LinkButton } from "@/components/ui/Button";
 import { ProductTypeBadge } from "@/components/ui/Badge";
+import DeleteProductButton from "@/components/admin/DeleteProductButton";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireAdminProfile } from "@/lib/auth";
 import { formatCurrency } from "@/lib/format";
@@ -20,6 +21,18 @@ export default async function AdminProdutosPage() {
     { header: "Tipo", primary: true, cell: (r) => <ProductTypeBadge type={r.type} /> },
     { header: "Preço", cell: (r) => formatCurrency(Number(r.price)) },
     { header: "Status", primary: true, cell: (r) => r.status },
+    {
+      header: "Ações",
+      primary: true,
+      cell: (r) => (
+        <div className="flex items-center gap-3">
+          <Link href={`/admin/produtos/${r.id}/editar`} className="text-xs font-semibold text-navy hover:underline">
+            Editar
+          </Link>
+          <DeleteProductButton productId={r.id} productName={r.name} />
+        </div>
+      ),
+    },
   ];
 
   return (

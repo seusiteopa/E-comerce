@@ -72,3 +72,13 @@ h1, h2, h3, h4 {
   outline-offset: 3px;
   border-radius: 2px;
 }
+
+/* Suporte a "notch"/câmera-furo quando instalado como app (standalone) —
+   sem isso, conteúdo fixo no topo/base pode ficar atrás da barra do
+   sistema em aparelhos com entalhe. */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}

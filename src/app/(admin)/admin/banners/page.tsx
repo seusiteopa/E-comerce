@@ -12,6 +12,7 @@ interface BannerRow {
   link_url: string | null;
   position: string;
   active: boolean;
+  media_type: string;
 }
 
 export default async function AdminBannersPage() {
@@ -19,7 +20,7 @@ export default async function AdminBannersPage() {
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase
     .from("banners")
-    .select("id, title, image_url, link_url, position, active")
+    .select("id, title, image_url, link_url, position, active, media_type")
     .order("display_order");
   const rows = (data ?? []) as BannerRow[];
 

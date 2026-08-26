@@ -189,6 +189,133 @@ export async function createProductAction(formData: FormData): Promise<ActionRes
   return actionSuccess({ productId: product.id });
 }
 
+export async function updateProductAction(productId: string, formData: FormData): Promise<ActionResult> {
+  try {
+    await guardAdmin();
+  } catch {
+    return actionError("Acesso restrito ao painel administrativo.");
+  }
+
+  const raw = {
+    name: formData.get("name") as string,
+    type: formData.get("type") as string,
+    categorySlug: formData.get("categorySlug") as string,
+    newCategoryName: (formData.get("newCategoryName") as string) || undefined,
+    shortDescription: (formData.get("shortDescription") as string) || undefined,
+    description: formData.get("description") as string,
+    price: Number(formData.get("price")),
+    promoPrice: formData.get("promoPrice") ? Number(formData.get("promoPrice")) : undefined,
+    status: (formData.get("status") as string) || "rascunho",
+    featured: formData.get("featured") === "on",
+    isQuoteOnly: formData.get("isQuoteOnly") === "on",
+    hidden: formData.get("hidden") === "on",
+  };
+
+  const parsed = productAdminSchema.safeParse(raw);
+  if (!parsed.success) {
+    return actionError("Verifique os campos do produto.", flatten(parsed.error));
+  }
+
+  const supabase = await createSupabaseServerClient();
+
+  let categorySlug = parsed.data.categorySlug;
+  if (parsed.data.newCategoryName) {
+    const newSlug = slugify(parsed.data.newCategoryName);
+    const { data: existing } = await supabase.from("categories").select("slug").eq("slug", newSlug).maybeSingle();
+    if (!existing) {
+      const { error: categoryError } = await supabase.from("categories").insert({
+        slug: newSlug,
+        name: parsed.data.newCategoryName,
+        product_type: parsed.data.type,
+        active: true,
+      });
+      if (categoryError) return actionError("Não foi possível criar a nova categoria.");
+    }
+    categorySlug = newSlug;
+  }
+  if (!categorySlug) {
+    return actionError("Selecione uma categoria ou informe o nome de uma categoria nova.");
+  }
+
+  const { error } = await supabase
+    .from("products")
+    .update({
+      name: parsed.data.name,
+      type: parsed.data.type,
+      category_slug: categorySlug,
+      short_description: parsed.data.shortDescription ?? null,
+      description: parsed.data.description,
+      price: parsed.data.price,
+      promo_price: parsed.data.promoPrice ?? null,
+      status: parsed.data.status,
+      featured: parsed.data.featured,
+      hidden: parsed.data.hidden,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", productId);
+
+  if (error) {
+    logger.error("Erro ao atualizar produto", { productId, error: error.message });
+    return actionError("Não foi possível salvar as alterações do produto.");
+  }
+
+  // Fotos/vídeo novos são ADICIONADOS às mídias já existentes (não substituem).
+  // Para remover uma mídia específica, usa deleteProductImageAction.
+  const photoFiles = formData.getAll("photos").filter((f): f is File => f instanceof File && f.size > 0);
+  const videoFile = formData.get("video");
+
+  if (photoFiles.length > 0 || (videoFile instanceof File && videoFile.size > 0)) {
+    const { data: existingImages } = await supabase
+      .from("product_images")
+      .select("display_order")
+      .eq("product_id", productId)
+      .order("display_order", { ascending: false })
+      .limit(1);
+    let nextOrder = (existingImages?.[0]?.display_order ?? -1) + 1;
+
+    const mediaRows: { product_id: string; url: string; alt_text: string; display_order: number; media_type: string }[] = [];
+
+    for (const photo of photoFiles) {
+      try {
+        const url = await uploadToCloudinary(photo, "image", `vecorion/produtos/${productId}`);
+        mediaRows.push({ product_id: productId, url, alt_text: parsed.data.name, display_order: nextOrder++, media_type: "imagem" });
+      } catch (err) {
+        logger.error("Falha ao enviar foto do produto para o Cloudinary", { productId, error: (err as Error).message });
+      }
+    }
+    if (videoFile instanceof File && videoFile.size > 0) {
+      try {
+        const url = await uploadToCloudinary(videoFile, "video", `vecorion/produtos/${productId}`);
+        mediaRows.push({ product_id: productId, url, alt_text: parsed.data.name, display_order: nextOrder++, media_type: "video" });
+      } catch (err) {
+        logger.error("Falha ao enviar vídeo do produto para o Cloudinary", { productId, error: (err as Error).message });
+      }
+    }
+    if (mediaRows.length > 0) {
+      await supabase.from("product_images").insert(mediaRows);
+    }
+  }
+
+  revalidatePath("/admin/produtos");
+  revalidatePath(`/admin/produtos/${productId}/editar`);
+  return actionSuccess(undefined);
+}
+
+export async function deleteProductImageAction(imageId: string): Promise<ActionResult> {
+  try {
+    await guardAdmin();
+  } catch {
+    return actionError("Acesso restrito ao painel administrativo.");
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.from("product_images").delete().eq("id", imageId);
+  if (error) return actionError("Não foi possível remover essa mídia.");
+
+  revalidatePath("/admin/produtos");
+  return actionSuccess(undefined);
+}
+
 export async function updateProductStatusAction(productId: string, status: "ativo" | "inativo" | "rascunho"): Promise<ActionResult> {
   try {
     await guardAdmin();

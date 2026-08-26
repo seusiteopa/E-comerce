@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "@fontsource/inter/400.css";
 import "@fontsource/inter/500.css";
 import "@fontsource/inter/600.css";
@@ -11,6 +11,17 @@ import "@fontsource/ibm-plex-mono/500.css";
 import "./globals.css";
 import { CartProvider } from "@/lib/cart-context";
 import { siteConfig, contact } from "@/data/site";
+import PwaManager from "@/components/PwaManager";
+
+// viewport-fit=cover libera a área por baixo do notch/câmera-furo para o
+// CSS usar (env(safe-area-inset-*)), necessário pro app rodar em modo
+// standalone (instalado) sem conteúdo cortado em aparelhos com notch.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#173F82",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -51,6 +62,11 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+  },
+  appleWebApp: {
+    capable: true,
+    title: siteConfig.storeName,
+    statusBarStyle: "black-translucent",
   },
 };
 
@@ -104,6 +120,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Pular para o conteúdo principal
         </a>
         <OrganizationJsonLd />
+        <PwaManager />
         <CartProvider>{children}</CartProvider>
       </body>
     </html>

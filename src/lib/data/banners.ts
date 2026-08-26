@@ -7,6 +7,7 @@ export interface BannerRow {
   title: string | null;
   position: string;
   display_order: number;
+  media_type: string;
 }
 
 /** Busca banners ativos de uma posição, respeitando janela de vigência (starts_at/ends_at). */
@@ -16,7 +17,7 @@ export async function getActiveBanners(position: string): Promise<BannerRow[]> {
 
   const { data, error } = await supabase
     .from("banners")
-    .select("id, image_url, link_url, title, position, display_order, starts_at, ends_at")
+    .select("id, image_url, link_url, title, position, display_order, media_type, starts_at, ends_at")
     .eq("position", position)
     .eq("active", true)
     .order("display_order");

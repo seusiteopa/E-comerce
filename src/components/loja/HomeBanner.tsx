@@ -1,18 +1,17 @@
 import Image from "next/image";
-import Link from "next/link";
 import Container from "@/components/ui/Container";
 import { LinkButton } from "@/components/ui/Button";
 import { BannerRow } from "@/lib/data/banners";
+import HomeBannerCarousel from "@/components/loja/HomeBannerCarousel";
 
 /**
- * Banner principal da home. Se existir banner cadastrado no admin, mostra a
- * imagem em tela cheia (com link, se houver). Se não existir nenhum ainda,
- * mostra um estado padrão simples — a loja nunca fica com um espaço vazio.
+ * Banner principal da home. Se existir banner cadastrado no admin, mostra
+ * um carrossel (foto ou vídeo, girando automaticamente se houver mais de
+ * uma mídia). Se não existir nenhum ainda, mostra um estado padrão simples
+ * — a loja nunca fica com um espaço vazio.
  */
 export default function HomeBanner({ banners }: { banners: BannerRow[] }) {
-  const banner = banners[0];
-
-  if (!banner) {
+  if (banners.length === 0) {
     return (
       <section className="bg-paper py-16 sm:py-24">
         <Container className="flex flex-col items-center text-center">
@@ -35,22 +34,9 @@ export default function HomeBanner({ banners }: { banners: BannerRow[] }) {
     );
   }
 
-  const image = (
-    <div className="relative aspect-[16/7] w-full sm:aspect-[21/7]">
-      <Image
-        src={banner.image_url}
-        alt={banner.title ?? ""}
-        fill
-        className="object-cover"
-        priority
-        sizes="100vw"
-      />
-    </div>
-  );
-
   return (
     <section>
-      {banner.link_url ? <Link href={banner.link_url}>{image}</Link> : image}
+      <HomeBannerCarousel banners={banners} variant="principal" />
     </section>
   );
 }

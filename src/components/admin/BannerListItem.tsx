@@ -13,6 +13,7 @@ interface BannerListItemProps {
     link_url: string | null;
     position: string;
     active: boolean;
+    media_type?: string;
   };
 }
 
@@ -38,7 +39,11 @@ export default function BannerListItem({ banner }: BannerListItemProps) {
   return (
     <div className="flex items-center gap-4 rounded-xl border border-line bg-surface p-3">
       <div className="relative h-14 w-24 shrink-0 overflow-hidden rounded-lg bg-paper">
-        <Image src={banner.image_url} alt={banner.title ?? ""} fill className="object-cover" />
+        {banner.media_type === "video" ? (
+          <video src={banner.image_url} className="h-full w-full object-cover" muted />
+        ) : (
+          <Image src={banner.image_url} alt={banner.title ?? ""} fill className="object-cover" />
+        )}
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-ink">{banner.title ?? "Sem título"}</p>
