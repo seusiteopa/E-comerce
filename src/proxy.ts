@@ -33,14 +33,18 @@ export async function proxy(request: NextRequest) {
 
   const isAccountRoute = pathname.startsWith("/conta");
   const isAdminRoute = pathname.startsWith("/admin");
+  // O manifesto do app precisa ser público — o navegador o busca sem
+  // credenciais ao oferecer "Instalar aplicativo", então bloqueá-lo atrás
+  // do login faz a instalação falhar silenciosamente (ícone genérico).
+  const isAdminManifest = pathname === "/admin/manifest.webmanifest";
 
-  if ((isAccountRoute || isAdminRoute) && !user) {
+  if ((isAccountRoute || isAdminRoute) && !user && !isAdminManifest) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("redirecionar", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (isAdminRoute && user) {
+  if (isAdminRoute && user && !isAdminManifest) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")

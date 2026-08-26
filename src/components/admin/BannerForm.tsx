@@ -27,18 +27,30 @@ export default function BannerForm() {
   return (
     <form id="banner-form" action={handleSubmit} className="flex flex-col gap-4 rounded-2xl border border-line bg-surface p-6">
       <div>
-        <label htmlFor="imageUrl" className="text-sm font-medium text-ink">URL da imagem do banner</label>
+        <label htmlFor="photos" className="text-sm font-medium text-ink">Fotos do banner (até 3)</label>
         <input
-          id="imageUrl"
-          name="imageUrl"
-          type="url"
-          required
-          placeholder="https://..."
-          className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy"
+          id="photos"
+          name="photos"
+          type="file"
+          accept="image/*"
+          multiple
+          className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none file:mr-3 file:rounded-lg file:border-0 file:bg-navy file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white"
         />
-        <p className="mt-1 text-xs text-ink-soft">
-          Por enquanto, cole o link direto da imagem (formato recomendado: 21:7, ex. 2100×700px). Upload direto de arquivo chega em breve.
+        <p className="mt-1 text-xs font-medium text-navy">
+          Dimensão recomendada: 2100 × 700px (proporção 21:7). Sobem automaticamente pro Cloudinary. Mais de uma foto = giram em carrossel.
         </p>
+      </div>
+
+      <div>
+        <label htmlFor="video" className="text-sm font-medium text-ink">Vídeo do banner (opcional, no máximo 1)</label>
+        <input
+          id="video"
+          name="video"
+          type="file"
+          accept="video/*"
+          className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none file:mr-3 file:rounded-lg file:border-0 file:bg-navy file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white"
+        />
+        <p className="mt-1 text-xs text-ink-soft">Mesma proporção 21:7 recomendada, até 30 segundos.</p>
       </div>
 
       <div>
@@ -63,6 +75,7 @@ export default function BannerForm() {
           <option value="principal">Principal (topo da home)</option>
           <option value="secundario">Secundário</option>
         </select>
+        <p className="mt-1 text-xs text-ink-soft">Pode ter um banner "Principal" e um "Secundário" ativos ao mesmo tempo, em posições diferentes da home.</p>
       </div>
 
       <label className="flex items-center gap-2 text-sm text-ink">
@@ -73,7 +86,7 @@ export default function BannerForm() {
       {error && <p role="alert" className="text-sm text-status-danger">{error}</p>}
 
       <Button type="submit" disabled={isPending}>
-        {isPending ? "Salvando..." : "Adicionar banner"}
+        {isPending ? "Enviando mídias..." : "Adicionar banner"}
       </Button>
     </form>
   );

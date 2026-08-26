@@ -59,6 +59,10 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith("/api/")) return;
+  // Admin nunca passa pelo service worker: dados mudam o tempo todo e são
+  // sensíveis a ficar "presos" em cache ou em fallback de offline — sempre
+  // direto pra rede, sem interferência nenhuma daqui.
+  if (url.pathname.startsWith("/admin")) return;
 
   // Navegação (troca de página) — network-first, com fallback pro cache
   // e, em último caso, pra tela offline. Cobre loja e admin igualmente;
