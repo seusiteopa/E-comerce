@@ -7,6 +7,17 @@ import type { NextConfig } from "next";
  * altera comportamento de negócio, só desempenho/segurança/SEO.
  */
 const nextConfig: NextConfig = {
+  // Limite padrão do Next para payload de Server Actions é 1MB — muito
+  // pouco para envio de fotos/vídeo de produto e banner (ver
+  // uploadToCloudinary). Netlify Functions tem seu próprio teto de
+  // payload (~vale a pena manter vídeos enxutos, na prática); 20mb cobre
+  // bem fotos e vídeos curtos de produto/banner.
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "20mb",
+    },
+  },
+
   // Remove o header "X-Powered-By: Next.js" das respostas — informação
   // de stack técnico não deveria ser exposta publicamente (superfície de
   // reconhecimento reduzida para um possível atacante).

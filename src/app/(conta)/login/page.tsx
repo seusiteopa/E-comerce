@@ -18,7 +18,14 @@ function LoginForm() {
     startTransition(async () => {
       const result = await loginAction(formData);
       if (result.success) {
-        router.push(searchParams.get("redirecionar") ?? "/conta/pedidos");
+        const explicitRedirect = searchParams.get("redirecionar");
+        if (explicitRedirect) {
+          router.push(explicitRedirect);
+        } else if (result.data.isAdmin) {
+          router.push("/admin");
+        } else {
+          router.push("/conta/pedidos");
+        }
       } else {
         setError(result.error);
       }

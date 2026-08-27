@@ -344,6 +344,14 @@ export async function deleteProductAction(productId: string): Promise<ActionResu
 
   if (error) {
     logger.error("Erro ao excluir produto", { productId, error: error.message });
+    // 23503 = violação de chave estrangeira — o produto já foi vendido
+    // (tem order_items apontando pra ele) e não pode ser apagado sem
+    // quebrar o histórico de pedidos. Orientar a marcar como inativo.
+    if (error.code === "23503") {
+      return actionError(
+        "Esse produto já tem pedidos vinculados a ele e não pode ser excluído (isso preservaria o histórico de vendas). Em vez disso, edite o produto e mude o status para \"Inativo\" — ele some da loja sem apagar o histórico."
+      );
+    }
     return actionError("Não foi possível excluir o produto.");
   }
 

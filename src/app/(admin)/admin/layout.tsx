@@ -2,17 +2,12 @@ import type { Metadata } from "next";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminMobileNav from "@/components/admin/AdminMobileNav";
 
-// Sobrescreve o manifesto da loja (definido em src/app/manifest.ts) só para
-// as páginas /admin — permite instalar um "app" separado, com nome e ícone
-// próprios, que abre direto no painel administrativo.
+// Um único app instalável para o domínio inteiro (evita o conflito de dois
+// apps/manifests/service workers para a mesma origem no Android). O admin
+// usa o mesmo manifesto da loja — quem entra como administrador já é
+// levado direto para /admin no login (ver src/app/(conta)/login/page.tsx).
 export const metadata: Metadata = {
   title: "Vecorion Admin",
-  manifest: "/admin/manifest.webmanifest",
-  appleWebApp: {
-    capable: true,
-    title: "Vecorion Admin",
-    statusBarStyle: "black-translucent",
-  },
 };
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

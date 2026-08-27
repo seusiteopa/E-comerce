@@ -38,7 +38,7 @@ export async function signUpAction(formData: FormData): Promise<ActionResult> {
   return actionSuccess(undefined);
 }
 
-export async function loginAction(formData: FormData): Promise<ActionResult> {
+export async function loginAction(formData: FormData): Promise<ActionResult<{ isAdmin: boolean }>> {
   const parsed = loginSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
@@ -49,13 +49,22 @@ export async function loginAction(formData: FormData): Promise<ActionResult> {
   }
 
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
 
   if (error) {
     return actionError("E-mail ou senha incorretos.");
   }
 
-  return actionSuccess(undefined);
+  // Login único para todo mundo — quem é administrador vai direto pro
+  // painel /admin ao entrar; clientes comuns vão pra área normal da conta.
+  // Evita precisar de dois "apps" instalados para o mesmo domínio.
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", data.user.id)
+    .single();
+
+  return actionSuccess({ isAdmin: profile?.role === "administrador" });
 }
 
 export async function logoutAction() {
