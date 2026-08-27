@@ -4,15 +4,42 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import { createBannerAction } from "@/actions/admin/banners";
+import { uploadFileToCloudinary } from "@/lib/cloudinary-client";
 
 export default function BannerForm() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [uploadStatus, setUploadStatus] = useState<string | null>(null);
 
   function handleSubmit(formData: FormData) {
     setError(null);
     startTransition(async () => {
+      try {
+        const photoFiles = formData.getAll("photos").filter((f): f is File => f instanceof File && f.size > 0).slice(0, 3);
+        const videoFile = formData.get("video");
+
+        formData.delete("photos");
+        formData.delete("video");
+
+        for (let i = 0; i < photoFiles.length; i++) {
+          setUploadStatus(`Enviando foto ${i + 1} de ${photoFiles.length}...`);
+          const url = await uploadFileToCloudinary(photoFiles[i], "image", "vecorion/banners");
+          formData.append("photoUrls", url);
+        }
+
+        if (videoFile instanceof File && videoFile.size > 0) {
+          setUploadStatus("Enviando vídeo...");
+          const url = await uploadFileToCloudinary(videoFile, "video", "vecorion/banners");
+          formData.append("videoUrl", url);
+        }
+        setUploadStatus(null);
+      } catch (err) {
+        setUploadStatus(null);
+        setError(`Não foi possível enviar a mídia: ${(err as Error).message}`);
+        return;
+      }
+
       const result = await createBannerAction(formData);
       if (result.success) {
         router.refresh();
@@ -86,7 +113,7 @@ export default function BannerForm() {
       {error && <p role="alert" className="text-sm text-status-danger">{error}</p>}
 
       <Button type="submit" disabled={isPending}>
-        {isPending ? "Enviando mídias..." : "Adicionar banner"}
+        {uploadStatus ?? (isPending ? "Salvando..." : "Adicionar banner")}
       </Button>
     </form>
   );

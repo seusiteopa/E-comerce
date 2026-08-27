@@ -2,13 +2,21 @@
 
 import { useEffect, useRef, useState } from "react";
 import { buyExclusiveProductAction } from "@/actions/oferta";
+import ProductGallery from "@/components/loja/ProductGallery";
+
+interface OfertaMedia {
+  url: string;
+  alt: string;
+  mediaType: "imagem" | "video";
+}
 
 interface OfertaCheckoutProps {
   slug: string;
   name: string;
   description: string;
   price: number;
-  imageUrl: string | null;
+  media: OfertaMedia[];
+  isDigital: boolean;
 }
 
 interface PixState {
@@ -18,7 +26,7 @@ interface PixState {
 
 const priceFormatter = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 
-export default function OfertaCheckout({ slug, name, description, price, imageUrl }: OfertaCheckoutProps) {
+export default function OfertaCheckout({ slug, name, description, price, media, isDigital }: OfertaCheckoutProps) {
   const [payerName, setPayerName] = useState("");
   const [payerEmail, setPayerEmail] = useState("");
   const [cpf, setCpf] = useState("");
@@ -126,12 +134,28 @@ export default function OfertaCheckout({ slug, name, description, price, imageUr
 
   return (
     <div className="mx-auto min-h-screen max-w-md px-6 py-10">
-      {imageUrl && (
-        <img src={imageUrl} alt={name} className="mb-5 aspect-square w-full rounded-2xl object-cover" />
+      {media.length > 0 && (
+        <div className="mb-5">
+          <ProductGallery media={media} productName={name} />
+        </div>
       )}
       <h1 className="text-xl font-bold text-ink">{name}</h1>
       {description && <p className="mt-2 text-sm text-ink-soft">{description}</p>}
       <p className="mt-4 text-2xl font-bold text-navy">{priceFormatter.format(price)}</p>
+
+      <p className="mt-2 flex items-center gap-2 text-xs text-ink-soft">
+        {isDigital ? (
+          <>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="shrink-0"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" /></svg>
+            Produto digital — entrega imediata por link após o pagamento, sem frete.
+          </>
+        ) : (
+          <>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="shrink-0"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h11v10H3zM14 10h4l3 3v4h-7z" /><circle cx="7" cy="19" r="1.5" /><circle cx="18" cy="19" r="1.5" /></svg>
+            Frete calculado e combinado à parte após a confirmação do pagamento.
+          </>
+        )}
+      </p>
 
       <div className="mt-6 flex flex-col gap-3">
         <div>

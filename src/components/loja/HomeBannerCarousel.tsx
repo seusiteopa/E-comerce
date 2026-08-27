@@ -14,22 +14,39 @@ interface Banner {
 
 export default function HomeBannerCarousel({ banners, variant }: { banners: Banner[]; variant: "principal" | "secundario" }) {
   const [index, setIndex] = useState(0);
+  const active = banners[index];
+
+  function goNext() {
+    setIndex((i) => (i + 1) % banners.length);
+  }
 
   useEffect(() => {
     if (banners.length <= 1) return;
-    const timer = setInterval(() => setIndex((i) => (i + 1) % banners.length), 6000);
-    return () => clearInterval(timer);
-  }, [banners.length]);
+    // Vídeo avança sozinho quando termina (onEnded, abaixo) — aqui só
+    // controla o tempo de exibição das fotos, pra não cortar o vídeo no
+    // meio independente da duração dele.
+    if (active?.media_type === "video") return;
+    const timer = setTimeout(goNext, 6000);
+    return () => clearTimeout(timer);
+  }, [index, banners.length, active?.media_type]);
 
   if (banners.length === 0) return null;
-  const active = banners[index];
 
   const aspect = variant === "principal" ? "aspect-[21/9] sm:aspect-[21/7]" : "aspect-[21/9] sm:aspect-[3/1]";
 
   const media = (
     <div className={`relative w-full overflow-hidden rounded-2xl bg-paper ${aspect}`}>
       {active.media_type === "video" ? (
-        <video key={active.id} src={active.image_url} autoPlay muted loop playsInline className="h-full w-full object-cover" />
+        <video
+          key={active.id}
+          src={active.image_url}
+          autoPlay
+          muted
+          playsInline
+          loop={banners.length <= 1}
+          onEnded={banners.length > 1 ? goNext : undefined}
+          className="h-full w-full object-cover"
+        />
       ) : (
         <Image key={active.id} src={active.image_url} alt={active.title ?? ""} fill className="object-cover" priority={variant === "principal"} />
       )}

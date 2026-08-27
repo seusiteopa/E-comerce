@@ -7,7 +7,6 @@ import { requireAdminProfile, ForbiddenError, UnauthorizedError } from "@/lib/au
 import { productAdminSchema } from "@/lib/validation/admin-schemas";
 import { ActionResult, actionSuccess, actionError } from "@/lib/action-result";
 import { logger } from "@/lib/logger";
-import { uploadToCloudinary } from "@/lib/cloudinary";
 
 function slugify(name: string) {
   return name
@@ -152,30 +151,20 @@ export async function createProductAction(formData: FormData): Promise<ActionRes
     }
   }
 
-  // Upload de fotos e vídeo (opcional) para o Cloudinary, associados ao
-  // produto recém-criado. Falha de upload não desfaz a criação do produto —
-  // o admin pode adicionar as mídias depois se algo der errado aqui.
-  const photoFiles = formData.getAll("photos").filter((f): f is File => f instanceof File && f.size > 0);
-  const videoFile = formData.get("video");
+  // Fotos e vídeo já foram enviados direto pro Cloudinary pelo navegador
+  // (ver src/lib/cloudinary-client.ts) — aqui só recebe as URLs prontas,
+  // sem o arquivo em si passar pelo servidor.
+  const photoUrls = formData.getAll("photoUrls").filter((v): v is string => typeof v === "string" && v.length > 0);
+  const videoUrl = formData.get("videoUrl") as string | null;
 
   const mediaRows: { product_id: string; url: string; alt_text: string; display_order: number; media_type: string }[] = [];
 
-  for (let i = 0; i < photoFiles.length; i++) {
-    try {
-      const url = await uploadToCloudinary(photoFiles[i], "image", `vecorion/produtos/${product.id}`);
-      mediaRows.push({ product_id: product.id, url, alt_text: parsed.data.name, display_order: i, media_type: "imagem" });
-    } catch (err) {
-      logger.error("Falha ao enviar foto do produto para o Cloudinary", { productId: product.id, error: (err as Error).message });
-    }
-  }
+  photoUrls.forEach((url, i) => {
+    mediaRows.push({ product_id: product.id, url, alt_text: parsed.data.name, display_order: i, media_type: "imagem" });
+  });
 
-  if (videoFile instanceof File && videoFile.size > 0) {
-    try {
-      const url = await uploadToCloudinary(videoFile, "video", `vecorion/produtos/${product.id}`);
-      mediaRows.push({ product_id: product.id, url, alt_text: parsed.data.name, display_order: mediaRows.length, media_type: "video" });
-    } catch (err) {
-      logger.error("Falha ao enviar vídeo do produto para o Cloudinary", { productId: product.id, error: (err as Error).message });
-    }
+  if (videoUrl) {
+    mediaRows.push({ product_id: product.id, url: videoUrl, alt_text: parsed.data.name, display_order: mediaRows.length, media_type: "video" });
   }
 
   if (mediaRows.length > 0) {
@@ -259,12 +248,13 @@ export async function updateProductAction(productId: string, formData: FormData)
     return actionError("Não foi possível salvar as alterações do produto.");
   }
 
-  // Fotos/vídeo novos são ADICIONADOS às mídias já existentes (não substituem).
-  // Para remover uma mídia específica, usa deleteProductImageAction.
-  const photoFiles = formData.getAll("photos").filter((f): f is File => f instanceof File && f.size > 0);
-  const videoFile = formData.get("video");
+  // Fotos/vídeo novos (já enviados pro Cloudinary pelo navegador) são
+  // ADICIONADOS às mídias existentes (não substituem). Para remover uma
+  // mídia específica, usa deleteProductImageAction.
+  const photoUrls = formData.getAll("photoUrls").filter((v): v is string => typeof v === "string" && v.length > 0);
+  const videoUrl = formData.get("videoUrl") as string | null;
 
-  if (photoFiles.length > 0 || (videoFile instanceof File && videoFile.size > 0)) {
+  if (photoUrls.length > 0 || videoUrl) {
     const { data: existingImages } = await supabase
       .from("product_images")
       .select("display_order")
@@ -275,21 +265,11 @@ export async function updateProductAction(productId: string, formData: FormData)
 
     const mediaRows: { product_id: string; url: string; alt_text: string; display_order: number; media_type: string }[] = [];
 
-    for (const photo of photoFiles) {
-      try {
-        const url = await uploadToCloudinary(photo, "image", `vecorion/produtos/${productId}`);
-        mediaRows.push({ product_id: productId, url, alt_text: parsed.data.name, display_order: nextOrder++, media_type: "imagem" });
-      } catch (err) {
-        logger.error("Falha ao enviar foto do produto para o Cloudinary", { productId, error: (err as Error).message });
-      }
-    }
-    if (videoFile instanceof File && videoFile.size > 0) {
-      try {
-        const url = await uploadToCloudinary(videoFile, "video", `vecorion/produtos/${productId}`);
-        mediaRows.push({ product_id: productId, url, alt_text: parsed.data.name, display_order: nextOrder++, media_type: "video" });
-      } catch (err) {
-        logger.error("Falha ao enviar vídeo do produto para o Cloudinary", { productId, error: (err as Error).message });
-      }
+    photoUrls.forEach((url) => {
+      mediaRows.push({ product_id: productId, url, alt_text: parsed.data.name, display_order: nextOrder++, media_type: "imagem" });
+    });
+    if (videoUrl) {
+      mediaRows.push({ product_id: productId, url: videoUrl, alt_text: parsed.data.name, display_order: nextOrder++, media_type: "video" });
     }
     if (mediaRows.length > 0) {
       await supabase.from("product_images").insert(mediaRows);

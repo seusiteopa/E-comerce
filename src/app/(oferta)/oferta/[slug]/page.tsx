@@ -20,7 +20,9 @@ export default async function OfertaPage({ params }: OfertaPageProps) {
   if (!product || !product.hidden) notFound();
 
   const price = Number(product.promo_price ?? product.price);
-  const image = product.product_images?.[0]?.url ?? null;
+  const media = [...(product.product_images ?? [])]
+    .sort((a, b) => a.display_order - b.display_order)
+    .map((img) => ({ url: img.url, alt: img.alt_text, mediaType: (img.media_type as "imagem" | "video") ?? "imagem" }));
 
   return (
     <OfertaCheckout
@@ -28,7 +30,8 @@ export default async function OfertaPage({ params }: OfertaPageProps) {
       name={product.name}
       description={product.short_description ?? product.description ?? ""}
       price={price}
-      imageUrl={image}
+      media={media}
+      isDigital={product.type === "digital"}
     />
   );
 }

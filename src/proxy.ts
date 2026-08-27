@@ -33,26 +33,31 @@ export async function proxy(request: NextRequest) {
 
   const isAccountRoute = pathname.startsWith("/conta");
   const isAdminRoute = pathname.startsWith("/admin");
-  // O manifesto do app precisa ser público — o navegador o busca sem
-  // credenciais ao oferecer "Instalar aplicativo", então bloqueá-lo atrás
-  // do login faz a instalação falhar silenciosamente (ícone genérico).
-  const isAdminManifest = pathname === "/admin/manifest.webmanifest";
 
-  if ((isAccountRoute || isAdminRoute) && !user && !isAdminManifest) {
+  if ((isAccountRoute || isAdminRoute) && !user) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("redirecionar", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (isAdminRoute && user && !isAdminManifest) {
+  if ((isAccountRoute || isAdminRoute) && user) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
       .eq("id", user.id)
       .single();
+    const isAdmin = profile?.role === "administrador";
 
-    if (profile?.role !== "administrador") {
+    if (isAdminRoute && !isAdmin) {
       return NextResponse.redirect(new URL("/", request.url));
+    }
+
+    // Quem é administrador e navega para qualquer link de "minha conta"
+    // (ex: ícone no cabeçalho, sempre apontando para /conta/pedidos) é
+    // levado direto para o painel — só existe uma conta cadastrada como
+    // admin, então não faz sentido ela ver a área de cliente comum.
+    if (isAccountRoute && isAdmin) {
+      return NextResponse.redirect(new URL("/admin", request.url));
     }
   }
 

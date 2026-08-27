@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import { createProductAction, updateProductAction, deleteProductImageAction } from "@/actions/admin/produtos";
+import { uploadFileToCloudinary } from "@/lib/cloudinary-client";
 import { CategoryRow, ProductRow } from "@/types/database";
 
 interface ExistingMedia {
@@ -27,11 +28,41 @@ export default function ProductForm({
   const [creatingCategory, setCreatingCategory] = useState(false);
   const [media, setMedia] = useState(existingMedia);
   const [isPending, startTransition] = useTransition();
+  const [uploadStatus, setUploadStatus] = useState<string | null>(null);
   const isEdit = Boolean(product);
 
   function handleSubmit(formData: FormData) {
     setError(null);
     startTransition(async () => {
+      try {
+        // Fotos/vídeo vão direto do navegador pro Cloudinary primeiro — o
+        // arquivo em si nunca passa pela Function do servidor, só a URL
+        // final. Evita o teto de tamanho de requisição do Netlify.
+        const photoFiles = formData.getAll("photos").filter((f): f is File => f instanceof File && f.size > 0);
+        const videoFile = formData.get("video");
+        const folder = `vecorion/produtos/${product?.id ?? "novo"}`;
+
+        formData.delete("photos");
+        formData.delete("video");
+
+        for (let i = 0; i < photoFiles.length; i++) {
+          setUploadStatus(`Enviando foto ${i + 1} de ${photoFiles.length}...`);
+          const url = await uploadFileToCloudinary(photoFiles[i], "image", folder);
+          formData.append("photoUrls", url);
+        }
+
+        if (videoFile instanceof File && videoFile.size > 0) {
+          setUploadStatus("Enviando vídeo...");
+          const url = await uploadFileToCloudinary(videoFile, "video", folder);
+          formData.append("videoUrl", url);
+        }
+        setUploadStatus(null);
+      } catch (err) {
+        setUploadStatus(null);
+        setError(`Não foi possível enviar a mídia: ${(err as Error).message}`);
+        return;
+      }
+
       const result = isEdit
         ? await updateProductAction(product!.id, formData)
         : await createProductAction(formData);
@@ -234,7 +265,7 @@ export default function ProductForm({
       {error && <p role="alert" className="text-sm text-status-danger">{error}</p>}
 
       <Button type="submit" disabled={isPending}>
-        {isPending ? "Salvando..." : isEdit ? "Salvar alterações" : "Salvar produto"}
+        {uploadStatus ?? (isPending ? "Salvando..." : isEdit ? "Salvar alterações" : "Salvar produto")}
       </Button>
 
       {!isEdit && (

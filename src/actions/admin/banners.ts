@@ -5,7 +5,6 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireAdminProfile, ForbiddenError, UnauthorizedError } from "@/lib/auth";
 import { ActionResult, actionSuccess, actionError } from "@/lib/action-result";
 import { logger } from "@/lib/logger";
-import { uploadToCloudinary } from "@/lib/cloudinary";
 
 async function guardAdmin() {
   try {
@@ -19,11 +18,12 @@ async function guardAdmin() {
 }
 
 /**
- * Cria um banner a partir de arquivos enviados (até 3 fotos + 1 vídeo por
- * envio, todos com a mesma posição/título/link). Cada arquivo vira uma
- * linha própria em `banners`, na sequência de display_order — permite ter
- * banner "principal" e "secundário" ativos ao mesmo tempo, cada um podendo
- * ter várias mídias que giram no carrossel da home.
+ * Cria um banner a partir de mídias já enviadas pro Cloudinary pelo
+ * navegador (até 3 fotos + 1 vídeo por envio, todos com a mesma
+ * posição/título/link). Cada mídia vira uma linha própria em `banners`,
+ * na sequência de display_order — permite ter banner "principal" e
+ * "secundário" ativos ao mesmo tempo, cada um podendo ter várias mídias
+ * que giram no carrossel da home.
  */
 export async function createBannerAction(formData: FormData): Promise<ActionResult<{ count: number }>> {
   try {
@@ -37,11 +37,10 @@ export async function createBannerAction(formData: FormData): Promise<ActionResu
   const position = (formData.get("position") as string) || "principal";
   const active = formData.get("active") === "on";
 
-  const photos = formData.getAll("photos").filter((f): f is File => f instanceof File && f.size > 0).slice(0, 3);
-  const videoFile = formData.get("video");
-  const video = videoFile instanceof File && videoFile.size > 0 ? videoFile : null;
+  const photoUrls = formData.getAll("photoUrls").filter((v): v is string => typeof v === "string" && v.length > 0).slice(0, 3);
+  const videoUrl = formData.get("videoUrl") as string | null;
 
-  if (photos.length === 0 && !video) {
+  if (photoUrls.length === 0 && !videoUrl) {
     return actionError("Envie ao menos uma foto ou um vídeo para o banner.");
   }
 
@@ -57,26 +56,12 @@ export async function createBannerAction(formData: FormData): Promise<ActionResu
 
   const rows: { image_url: string; link_url: string | null; title: string | null; position: string; active: boolean; display_order: number; media_type: string }[] = [];
 
-  for (const photo of photos) {
-    try {
-      const url = await uploadToCloudinary(photo, "image", "vecorion/banners");
-      rows.push({ image_url: url, link_url: linkUrl, title, position, active, display_order: nextOrder++, media_type: "imagem" });
-    } catch (err) {
-      logger.error("Falha ao enviar foto do banner para o Cloudinary", { error: (err as Error).message });
-    }
-  }
+  photoUrls.forEach((url) => {
+    rows.push({ image_url: url, link_url: linkUrl, title, position, active, display_order: nextOrder++, media_type: "imagem" });
+  });
 
-  if (video) {
-    try {
-      const url = await uploadToCloudinary(video, "video", "vecorion/banners");
-      rows.push({ image_url: url, link_url: linkUrl, title, position, active, display_order: nextOrder++, media_type: "video" });
-    } catch (err) {
-      logger.error("Falha ao enviar vídeo do banner para o Cloudinary", { error: (err as Error).message });
-    }
-  }
-
-  if (rows.length === 0) {
-    return actionError("Não foi possível enviar nenhuma mídia do banner. Tente novamente.");
+  if (videoUrl) {
+    rows.push({ image_url: videoUrl, link_url: linkUrl, title, position, active, display_order: nextOrder++, media_type: "video" });
   }
 
   const { error } = await supabase.from("banners").insert(rows);
