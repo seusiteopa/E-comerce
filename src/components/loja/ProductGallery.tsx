@@ -24,7 +24,7 @@ export default function ProductGallery({ media, productName }: { media: GalleryM
             src={active.url}
             controls
             playsInline
-            className="h-full w-full object-cover"
+            className="h-full w-full object-contain"
           />
         ) : (
           <Image
@@ -33,7 +33,7 @@ export default function ProductGallery({ media, productName }: { media: GalleryM
             alt={active.alt || productName}
             fill
             sizes="(max-width: 768px) 100vw, 480px"
-            className="object-cover"
+            className="object-contain"
             priority={activeIndex === 0}
           />
         )}

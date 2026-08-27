@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import { createProductAction, updateProductAction, deleteProductImageAction } from "@/actions/admin/produtos";
 import { uploadFileToCloudinary } from "@/lib/cloudinary-client";
+import { uploadDigitalFileToStorage } from "@/lib/digital-upload-client";
 import { CategoryRow, ProductRow } from "@/types/database";
 
 interface ExistingMedia {
@@ -17,10 +18,12 @@ export default function ProductForm({
   categories,
   product,
   existingMedia = [],
+  currentStock,
 }: {
   categories: CategoryRow[];
   product?: ProductRow;
   existingMedia?: ExistingMedia[];
+  currentStock?: number;
 }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -55,6 +58,14 @@ export default function ProductForm({
           setUploadStatus("Enviando vídeo...");
           const url = await uploadFileToCloudinary(videoFile, "video", folder);
           formData.append("videoUrl", url);
+        }
+
+        const digitalFile = formData.get("digitalFile");
+        if (digitalFile instanceof File && digitalFile.size > 0) {
+          setUploadStatus("Enviando arquivo digital...");
+          const path = await uploadDigitalFileToStorage(digitalFile);
+          formData.delete("digitalFile");
+          formData.append("digitalFilePath", path);
         }
         setUploadStatus(null);
       } catch (err) {
@@ -172,6 +183,23 @@ export default function ProductForm({
           <input id="promoPrice" name="promoPrice" type="number" step="0.01" min="0" defaultValue={product?.promo_price ?? ""} className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy" />
         </div>
       </div>
+
+      {type === "fisico" && (
+        <div className="max-w-[220px]">
+          <label htmlFor="stock" className="text-sm font-medium text-ink">Quantidade em estoque</label>
+          <input
+            id="stock"
+            name="stock"
+            type="number"
+            step="1"
+            min="0"
+            required
+            defaultValue={currentStock ?? 0}
+            className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy"
+          />
+          <p className="mt-1 text-xs text-ink-soft">Enquanto for 0, o produto aparece como esgotado na loja.</p>
+        </div>
+      )}
 
       <div className="flex flex-wrap gap-6">
          <label className="flex items-center gap-2 text-sm text-ink">

@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import { requireAdminProfile, ForbiddenError, UnauthorizedError } from "@/lib/auth";
 import { productAdminSchema } from "@/lib/validation/admin-schemas";
 import { ActionResult, actionSuccess, actionError } from "@/lib/action-result";
@@ -117,38 +116,34 @@ export async function createProductAction(formData: FormData): Promise<ActionRes
     await supabase.from("service_details").insert({ product_id: product.id, is_quote_only: true, includes: [] });
   }
 
-  // Arquivo digital (ebook, PDF, ZIP...) — guardado em bucket PRIVADO no
-  // Supabase Storage via service role (nunca exposto publicamente). O link
-  // de download só é gerado depois do pagamento aprovado (ver
-  // generateDigitalDownloadLink em lib/integrations/storage/digital-delivery.ts).
-  if (parsed.data.type === "digital") {
-    const digitalFile = formData.get("digitalFile");
-    if (digitalFile instanceof File && digitalFile.size > 0) {
-      try {
-        const serviceClient = createSupabaseServiceClient();
-        const extension = digitalFile.name.split(".").pop() ?? "bin";
-        const storagePath = `${product.id}/${slug}.${extension}`;
-
-        const { error: uploadError } = await serviceClient.storage
-          .from("produtos-digitais")
-          .upload(storagePath, digitalFile, { upsert: true });
-
-        if (uploadError) {
-          logger.error("Falha ao enviar arquivo digital para o Storage", { productId: product.id, error: uploadError.message });
-        } else {
-          const { error: assetError } = await serviceClient.from("digital_assets").insert({
-            product_id: product.id,
-            storage_path: storagePath,
-            delivery_type: "download",
-          });
-          if (assetError) {
-            logger.error("Falha ao registrar arquivo digital no banco", { productId: product.id, error: assetError.message });
-          }
-        }
-      } catch (err) {
-        logger.error("Erro inesperado ao processar arquivo digital", { productId: product.id, error: (err as Error).message });
-      }
+  // Arquivo digital (ebook, PDF, ZIP...) já foi enviado direto pro Storage
+  // privado pelo navegador (ver src/lib/digital-upload-client.ts) — aqui só
+  // recebe o caminho pronto e registra em digital_assets.
+  const digitalFilePath = formData.get("digitalFilePath") as string | null;
+  if (parsed.data.type === "digital" && digitalFilePath) {
+    const { error: assetError } = await supabase.from("digital_assets").insert({
+      product_id: product.id,
+      storage_path: digitalFilePath,
+      delivery_type: "download",
+    });
+    if (assetError) {
+      logger.error("Falha ao registrar arquivo digital no banco", { productId: product.id, error: assetError.message });
     }
+  }
+
+  // Produto físico sem variações de atributo (tamanho/cor) ainda precisa
+  // de uma linha em product_variations para o estoque existir de fato —
+  // sem isso o checkout trata como "sem variação disponível" = esgotado
+  // sempre. Cria uma variação "padrão" (sem atributos) carregando o
+  // estoque informado no formulário.
+  if (parsed.data.type === "fisico") {
+    const stock = Math.max(0, Number(formData.get("stock")) || 0);
+    await supabase.from("product_variations").insert({
+      product_id: product.id,
+      attributes: {},
+      stock,
+      sku: `EST-${product.id.slice(0, 8).toUpperCase()}`,
+    });
   }
 
   // Fotos e vídeo já foram enviados direto pro Cloudinary pelo navegador
@@ -246,6 +241,45 @@ export async function updateProductAction(productId: string, formData: FormData)
   if (error) {
     logger.error("Erro ao atualizar produto", { productId, error: error.message });
     return actionError("Não foi possível salvar as alterações do produto.");
+  }
+
+  // Arquivo digital novo (já enviado pro Storage pelo navegador) substitui
+  // o registro existente — apaga o antigo e insere o novo.
+  const digitalFilePath = formData.get("digitalFilePath") as string | null;
+  if (parsed.data.type === "digital" && digitalFilePath) {
+    await supabase.from("digital_assets").delete().eq("product_id", productId);
+    const { error: assetError } = await supabase.from("digital_assets").insert({
+      product_id: productId,
+      storage_path: digitalFilePath,
+      delivery_type: "download",
+    });
+    if (assetError) {
+      logger.error("Falha ao registrar arquivo digital no banco", { productId, error: assetError.message });
+    }
+  }
+
+  // Estoque de produto físico sem variações — atualiza a variação "padrão"
+  // já existente, ou cria uma se ainda não existir (produto criado antes
+  // dessa funcionalidade existir, por exemplo).
+  if (parsed.data.type === "fisico") {
+    const stock = Math.max(0, Number(formData.get("stock")) || 0);
+    const { data: existingVariation } = await supabase
+      .from("product_variations")
+      .select("id")
+      .eq("product_id", productId)
+      .limit(1)
+      .maybeSingle();
+
+    if (existingVariation) {
+      await supabase.from("product_variations").update({ stock }).eq("id", existingVariation.id);
+    } else {
+      await supabase.from("product_variations").insert({
+        product_id: productId,
+        attributes: {},
+        stock,
+        sku: `EST-${productId.slice(0, 8).toUpperCase()}`,
+      });
+    }
   }
 
   // Fotos/vídeo novos (já enviados pro Cloudinary pelo navegador) são
