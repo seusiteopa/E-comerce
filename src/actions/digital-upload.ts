@@ -25,5 +25,5 @@ export async function getDigitalUploadTargetAction(extension: string) {
     throw new Error(error?.message ?? "Não foi possível preparar o upload do arquivo digital.");
   }
 
-  return { path: data.path, token: data.token };
+  return { path: data.path, token: data.token, signedUrl: data.signedUrl };
 }
