@@ -16,16 +16,36 @@ export async function uploadDigitalFileToStorage(file: File): Promise<string> {
   const extension = file.name.split(".").pop() ?? "bin";
   const { path, signedUrl } = await getDigitalUploadTargetAction(extension);
 
+  // Diagnóstico temporário: confirma que a URL recebida é válida antes de
+  // tentar usá-la, e testa separado se um fetch simples (GET) pro mesmo
+  // servidor já funciona a partir do navegador — isola se o problema é
+  // geral (qualquer fetch pro Supabase trava) ou específico do PUT.
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(signedUrl);
+  } catch {
+    throw new Error(`URL de upload veio inválida do servidor: "${signedUrl}"`);
+  }
+
+  try {
+    const probe = await fetch(`${parsedUrl.origin}/storage/v1/`, { method: "GET", mode: "cors" });
+    await probe.text().catch(() => undefined);
+  } catch (err) {
+    throw new Error(
+      `Diagnóstico: até um GET simples pro Supabase falhou do navegador (${(err as Error).name}: ${(err as Error).message}). Origem testada: ${parsedUrl.origin}`
+    );
+  }
+
   const formData = new FormData();
   formData.append("cacheControl", "3600");
   formData.append("", file);
 
   let response: Response;
   try {
-    response = await fetch(signedUrl, { method: "PUT", body: formData });
+    response = await fetch(signedUrl, { method: "PUT", mode: "cors", body: formData });
   } catch (err) {
     throw new Error(
-      `Falha de conexão ao enviar o arquivo digital (${(err as Error).name}: ${(err as Error).message}). Verifique a internet e tente de novo.`
+      `Diagnóstico: GET simples funcionou, mas o PUT falhou (${(err as Error).name}: ${(err as Error).message}). Caminho: ${parsedUrl.pathname}`
     );
   }
 
