@@ -116,14 +116,15 @@ export async function createProductAction(formData: FormData): Promise<ActionRes
     await supabase.from("service_details").insert({ product_id: product.id, is_quote_only: true, includes: [] });
   }
 
-  // Arquivo digital (ebook, PDF, ZIP...) já foi enviado direto pro Storage
-  // privado pelo navegador (ver src/lib/digital-upload-client.ts) — aqui só
-  // recebe o caminho pronto e registra em digital_assets.
-  const digitalFilePath = formData.get("digitalFilePath") as string | null;
-  if (parsed.data.type === "digital" && digitalFilePath) {
+  // Arquivo digital (ebook, PDF, ZIP...) já foi enviado direto pro
+  // Cloudinary pelo navegador (ver src/lib/cloudinary-client.ts) — aqui só
+  // recebe a URL pronta e registra em digital_assets.
+  const digitalFileUrl = formData.get("digitalFileUrl") as string | null;
+  if (parsed.data.type === "digital" && digitalFileUrl) {
     const { error: assetError } = await supabase.from("digital_assets").insert({
       product_id: product.id,
-      storage_path: digitalFilePath,
+      storage_path: digitalFileUrl,
+      provider: "cloudinary",
       delivery_type: "download",
     });
     if (assetError) {
@@ -243,14 +244,15 @@ export async function updateProductAction(productId: string, formData: FormData)
     return actionError("Não foi possível salvar as alterações do produto.");
   }
 
-  // Arquivo digital novo (já enviado pro Storage pelo navegador) substitui
-  // o registro existente — apaga o antigo e insere o novo.
-  const digitalFilePath = formData.get("digitalFilePath") as string | null;
-  if (parsed.data.type === "digital" && digitalFilePath) {
+  // Arquivo digital novo (já enviado pro Cloudinary pelo navegador)
+  // substitui o registro existente — apaga o antigo e insere o novo.
+  const digitalFileUrl = formData.get("digitalFileUrl") as string | null;
+  if (parsed.data.type === "digital" && digitalFileUrl) {
     await supabase.from("digital_assets").delete().eq("product_id", productId);
     const { error: assetError } = await supabase.from("digital_assets").insert({
       product_id: productId,
-      storage_path: digitalFilePath,
+      storage_path: digitalFileUrl,
+      provider: "cloudinary",
       delivery_type: "download",
     });
     if (assetError) {

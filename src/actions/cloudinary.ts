@@ -10,7 +10,7 @@ import { requireAdminProfile } from "@/lib/auth";
  * da Function (bem menor que o necessário para vídeo, por exemplo).
  * Reservado a administradores para não virar upload público de graça.
  */
-export async function getCloudinarySignatureAction(folder: string) {
+export async function getCloudinarySignatureAction(folder: string, options?: { uploadType?: "private"; publicId?: string }) {
   await requireAdminProfile();
 
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME!;
@@ -18,12 +18,15 @@ export async function getCloudinarySignatureAction(folder: string) {
   const apiSecret = process.env.CLOUDINARY_API_SECRET!;
 
   const timestamp = Math.floor(Date.now() / 1000);
-  const paramsToSign = { timestamp, folder };
+  const paramsToSign: Record<string, string | number> = { timestamp, folder };
+  if (options?.uploadType) paramsToSign.type = options.uploadType;
+  if (options?.publicId) paramsToSign.public_id = options.publicId;
+
   const sorted = Object.keys(paramsToSign)
     .sort()
-    .map((key) => `${key}=${paramsToSign[key as keyof typeof paramsToSign]}`)
+    .map((key) => `${key}=${paramsToSign[key]}`)
     .join("&");
   const signature = createHash("sha1").update(sorted + apiSecret).digest("hex");
 
-  return { cloudName, apiKey, timestamp, signature, folder };
+  return { cloudName, apiKey, timestamp, signature, folder, uploadType: options?.uploadType, publicId: options?.publicId };
 }

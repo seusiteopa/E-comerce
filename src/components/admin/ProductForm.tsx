@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import { createProductAction, updateProductAction, deleteProductImageAction } from "@/actions/admin/produtos";
 import { uploadFileToCloudinary } from "@/lib/cloudinary-client";
-import { uploadDigitalFileToStorage } from "@/lib/digital-upload-client";
+import { uploadDigitalFileToCloudinary } from "@/lib/cloudinary-client";
 import { CategoryRow, ProductRow } from "@/types/database";
 
 interface ExistingMedia {
@@ -63,9 +63,9 @@ export default function ProductForm({
         const digitalFile = formData.get("digitalFile");
         if (digitalFile instanceof File && digitalFile.size > 0) {
           setUploadStatus("Enviando arquivo digital...");
-          const path = await uploadDigitalFileToStorage(digitalFile);
+          const { url } = await uploadDigitalFileToCloudinary(digitalFile, `vecorion/produtos-digitais/${product?.id ?? "novo"}`);
           formData.delete("digitalFile");
-          formData.append("digitalFilePath", path);
+          formData.append("digitalFileUrl", url);
         }
         setUploadStatus(null);
       } catch (err) {
