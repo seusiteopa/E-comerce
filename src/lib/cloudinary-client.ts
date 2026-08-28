@@ -51,14 +51,23 @@ export async function uploadDigitalFileToCloudinary(file: File, folder: string):
   formData.append("folder", signedFolder);
   formData.append("public_id", publicId!);
 
-  const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`, {
-    method: "POST",
-    body: formData,
-  });
+  const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+
+  let response: Response;
+  try {
+    response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`, {
+      method: "POST",
+      body: formData,
+    });
+  } catch (err) {
+    throw new Error(
+      `Falha de conexão ao enviar o arquivo digital (${sizeMb}MB) — ${(err as Error).name}: ${(err as Error).message}. Pode ter sido uma instabilidade momentânea da rede; tente enviar de novo.`
+    );
+  }
 
   if (!response.ok) {
     const errorBody = await response.text();
-    throw new Error(`Falha no upload do arquivo digital: ${errorBody}`);
+    throw new Error(`Falha no upload do arquivo digital (${sizeMb}MB, status ${response.status}): ${errorBody}`);
   }
 
   const data = (await response.json()) as { secure_url: string };
