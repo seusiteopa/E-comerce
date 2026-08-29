@@ -38,10 +38,10 @@ export async function uploadFileToCloudinary(
  * igual ao fluxo anterior via Supabase Storage.
  */
 export async function uploadDigitalFileToCloudinary(file: File, folder: string): Promise<{ url: string }> {
-  const randomPublicId = crypto.randomUUID().replace(/-/g, "");
-  const { cloudName, apiKey, timestamp, signature, folder: signedFolder, publicId } = await getCloudinarySignatureAction(folder, {
-    publicId: randomPublicId,
-  });
+  // Sem public_id customizado — o Cloudinary já gera um identificador
+  // próprio (não previsível) sozinho. Mantém a chamada o mais parecida
+  // possível com o upload de foto/vídeo, que já funciona.
+  const { cloudName, apiKey, timestamp, signature, folder: signedFolder } = await getCloudinarySignatureAction(folder);
 
   const formData = new FormData();
   formData.append("file", file);
@@ -49,7 +49,6 @@ export async function uploadDigitalFileToCloudinary(file: File, folder: string):
   formData.append("timestamp", String(timestamp));
   formData.append("signature", signature);
   formData.append("folder", signedFolder);
-  formData.append("public_id", publicId!);
 
   const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
 
