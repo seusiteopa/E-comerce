@@ -54,7 +54,7 @@ export async function uploadDigitalFileToCloudinary(file: File, folder: string):
 
   let response: Response;
   try {
-    response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`, {
+    response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
       method: "POST",
       body: formData,
     });
