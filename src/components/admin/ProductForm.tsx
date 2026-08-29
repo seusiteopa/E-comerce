@@ -60,8 +60,14 @@ export default function ProductForm({
           formData.append("videoUrl", url);
         }
 
+        const digitalFileUrlManual = (formData.get("digitalFileUrlManual") as string)?.trim();
         const digitalFile = formData.get("digitalFile");
-        if (digitalFile instanceof File && digitalFile.size > 0) {
+        if (digitalFileUrlManual) {
+          // Link colado manualmente (arquivo já hospedado no Cloudinary
+          // via painel deles) — usa direto, sem tentar subir de novo.
+          formData.delete("digitalFile");
+          formData.set("digitalFileUrl", digitalFileUrlManual);
+        } else if (digitalFile instanceof File && digitalFile.size > 0) {
           setUploadStatus("Enviando arquivo digital...");
           const { url } = await uploadDigitalFileToCloudinary(digitalFile, `vecorion/produtos-digitais/${product?.id ?? "novo"}`);
           formData.delete("digitalFile");
@@ -236,6 +242,24 @@ export default function ProductForm({
           <p className="mt-1 text-xs text-ink-soft">
             Fica guardado de forma privada — o link de download só é liberado depois do pagamento aprovado.
           </p>
+
+          <details className="mt-2">
+            <summary className="cursor-pointer text-xs font-semibold text-navy">
+              Deu erro pra enviar? Cole o link aqui em vez disso
+            </summary>
+            <div className="mt-2">
+              <label htmlFor="digitalFileUrlManual" className="text-xs text-ink-soft">
+                Suba o arquivo direto em cloudinary.com (Assets → Upload) e cole o link (secure_url) gerado:
+              </label>
+              <input
+                id="digitalFileUrlManual"
+                name="digitalFileUrlManual"
+                type="text"
+                placeholder="https://res.cloudinary.com/..."
+                className="mt-1 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy"
+              />
+            </div>
+          </details>
         </div>
       )}
 
