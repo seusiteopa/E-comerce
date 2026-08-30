@@ -10,7 +10,7 @@ export default function Header({ logoUrl, siteName }: { logoUrl?: string; siteNa
   const resolvedName = siteName?.trim() || siteConfig.storeName;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-line bg-surface/95 backdrop-blur">
+    <header className="sticky top-0 z-50 border-b border-line bg-surface">
       <Container className="relative flex h-16 items-center justify-between gap-4">
         <Link href="/" className="flex shrink-0 items-center gap-3">
           {logoUrl ? (
