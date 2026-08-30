@@ -25,7 +25,7 @@ interface PixState {
 }
 
 export default function PaymentStep({ onBack, addressId, shippingMethod }: PaymentStepProps) {
-  const { items, clearCart } = useCart();
+  const { items, clearCart, coupon } = useCart();
   const [selected, setSelected] = useState(methods[0].id);
   const [cpf, setCpf] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -72,6 +72,7 @@ export default function PaymentStep({ onBack, addressId, shippingMethod }: Payme
       shippingMethod,
       payerDocument: digitsOnly,
       paymentMethod: selected,
+      couponCode: coupon?.code,
     });
 
     if (!result.success) {

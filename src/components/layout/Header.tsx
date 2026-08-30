@@ -6,14 +6,20 @@ import MobileMenu from "@/components/layout/MobileMenu";
 import CartIndicator from "@/components/layout/CartIndicator";
 import { mainNav, siteConfig } from "@/data/site";
 
-export default function Header() {
+export default function Header({ logoUrl, siteName }: { logoUrl?: string; siteName?: string }) {
+  const resolvedName = siteName?.trim() || siteConfig.storeName;
+
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-surface/95 backdrop-blur">
       <Container className="relative flex h-16 items-center justify-between gap-4">
         <Link href="/" className="flex shrink-0 items-center gap-3">
-          <Image src="/brand/vecorion-icone-navy-transparente.png" alt="Vecorion" width={46} height={25} priority className="h-6 w-auto" />
+          {logoUrl ? (
+            <Image src={logoUrl} alt={resolvedName} width={46} height={25} priority className="h-6 w-auto object-contain" />
+          ) : (
+            <Image src="/brand/vecorion-icone-navy-transparente.png" alt={resolvedName} width={46} height={25} priority className="h-6 w-auto" />
+          )}
           <span className="h-4 w-px bg-line" aria-hidden="true" />
-          <span className="text-sm font-medium text-ink-soft">Loja</span>
+          <span className="text-sm font-medium text-ink-soft">{resolvedName}</span>
         </Link>
 
         <form action="/busca" className="hidden max-w-md flex-1 items-center gap-2 rounded-full border border-line px-4 py-2 lg:flex">
@@ -47,7 +53,7 @@ export default function Header() {
           <MobileMenu />
         </div>
       </Container>
-      <span className="sr-only">{siteConfig.storeName}</span>
+      <span className="sr-only">{resolvedName}</span>
     </header>
   );
 }

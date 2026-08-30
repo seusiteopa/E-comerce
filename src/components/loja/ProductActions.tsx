@@ -43,12 +43,12 @@ export default function ProductActions({ product }: { product: Product }) {
   const isPhysical = product.type === "fisico";
   const isOutOfStock = isPhysical && (!selectedVariation || selectedVariation.stock === 0);
 
-  function handleAction() {
+  function buildCartItem() {
     const variationLabel = selectedVariation
       ? Object.values(selectedVariation.attributes).join(" / ")
       : undefined;
 
-    addItem({
+    return {
       productId: product.id,
       productSlug: product.slug,
       name: product.name,
@@ -58,7 +58,11 @@ export default function ProductActions({ product }: { product: Product }) {
       quantity,
       unitPrice: product.promoPrice ?? product.price,
       image: product.images[0]?.url ?? "/placeholder-product.svg",
-    });
+    };
+  }
+
+  function handleAction() {
+    addItem(buildCartItem());
 
     if (isPhysical) {
       setJustAdded(true);
@@ -67,6 +71,11 @@ export default function ProductActions({ product }: { product: Product }) {
       // Digital/curso/serviço com preço fechado: vai direto para o checkout (Etapa 5, fluxo 3.2)
       router.push("/checkout");
     }
+  }
+
+  function handleBuyNow() {
+    addItem(buildCartItem());
+    router.push("/checkout");
   }
 
   return (
@@ -104,17 +113,25 @@ export default function ProductActions({ product }: { product: Product }) {
         </div>
       )}
 
-      <Button onClick={handleAction} disabled={isOutOfStock} className="w-full sm:w-auto">
-        {justAdded ? (
-          <>
-            <Check size={16} aria-hidden="true" /> Adicionado ao carrinho
-          </>
-        ) : isOutOfStock ? (
-          "Esgotado"
-        ) : (
-          ctaLabelByType[product.type]
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <Button onClick={handleAction} disabled={isOutOfStock} variant={isPhysical ? "secondary" : "primary"} className="w-full sm:w-auto">
+          {justAdded ? (
+            <>
+              <Check size={16} aria-hidden="true" /> Adicionado ao carrinho
+            </>
+          ) : isOutOfStock ? (
+            "Esgotado"
+          ) : (
+            ctaLabelByType[product.type]
+          )}
+        </Button>
+
+        {isPhysical && (
+          <Button onClick={handleBuyNow} disabled={isOutOfStock} variant="primary" className="w-full sm:w-auto">
+            Comprar agora
+          </Button>
         )}
-      </Button>
+      </div>
 
       {product.type === "curso" && (
         <p className="text-xs text-ink-soft">

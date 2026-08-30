@@ -3,6 +3,11 @@
 import { createContext, useContext, useMemo, useState, ReactNode } from "react";
 import { CartItem } from "@/types";
 
+interface AppliedCoupon {
+  code: string;
+  discountAmount: number;
+}
+
 interface CartContextValue {
   items: CartItem[];
   addItem: (item: CartItem) => void;
@@ -11,6 +16,10 @@ interface CartContextValue {
   clearCart: () => void;
   subtotal: number;
   itemCount: number;
+  coupon: AppliedCoupon | null;
+  applyCoupon: (coupon: AppliedCoupon) => void;
+  removeCoupon: () => void;
+  lastAddedItem: { name: string; at: number } | null;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -21,9 +30,15 @@ const CartContext = createContext<CartContextValue | null>(null);
  * Etapa 8. A Etapa 9 pode manter esta mesma interface e trocar a
  * implementação interna para sincronizar com o backend, sem alterar quem
  * consome o contexto.
+ *
+ * O cupom aplicado também vive só aqui — é revalidado de verdade no
+ * servidor no momento de criar o pedido (fonte de verdade nunca é o
+ * cliente).
  */
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [coupon, setCoupon] = useState<AppliedCoupon | null>(null);
+  const [lastAddedItem, setLastAddedItem] = useState<{ name: string; at: number } | null>(null);
 
   function addItem(newItem: CartItem) {
     setItems((prev) => {
@@ -37,6 +52,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
       return [...prev, newItem];
     });
+    setLastAddedItem({ name: newItem.name, at: Date.now() });
   }
 
   function removeItem(productSlug: string, variationId?: string) {
@@ -57,6 +73,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   function clearCart() {
     setItems([]);
+    setCoupon(null);
+  }
+
+  function applyCoupon(newCoupon: AppliedCoupon) {
+    setCoupon(newCoupon);
+  }
+
+  function removeCoupon() {
+    setCoupon(null);
   }
 
   const subtotal = useMemo(
@@ -67,7 +92,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   return (
     <CartContext.Provider
-      value={{ items, addItem, removeItem, updateQuantity, clearCart, subtotal, itemCount }}
+      value={{
+        items,
+        addItem,
+        removeItem,
+        updateQuantity,
+        clearCart,
+        subtotal,
+        itemCount,
+        coupon,
+        applyCoupon,
+        removeCoupon,
+        lastAddedItem,
+      }}
     >
       {children}
     </CartContext.Provider>

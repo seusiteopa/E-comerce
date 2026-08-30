@@ -35,8 +35,10 @@ export default function HomeBanner({ banners }: { banners: BannerRow[] }) {
   }
 
   return (
-    <section>
-      <HomeBannerCarousel banners={banners} variant="principal" />
+    <section className="pt-4 sm:pt-6">
+      <Container>
+        <HomeBannerCarousel banners={banners} variant="principal" />
+      </Container>
     </section>
   );
 }

@@ -12,7 +12,7 @@ import CartSummary from "@/components/carrinho/CartSummary";
 type Step = "identificacao" | "endereco" | "frete" | "pagamento";
 
 export default function CheckoutFlow() {
-  const { items, subtotal } = useCart();
+  const { items, subtotal, coupon } = useCart();
   const hasPhysicalItem = useMemo(() => items.some((i) => i.type === "fisico"), [items]);
 
   const [step, setStep] = useState<Step>("identificacao");
@@ -69,7 +69,7 @@ export default function CheckoutFlow() {
       </div>
 
       <div className="lg:sticky lg:top-24 lg:self-start">
-        <CartSummary subtotal={subtotal} shipping={hasPhysicalItem ? shippingPrice : 0} />
+        <CartSummary subtotal={subtotal} shipping={hasPhysicalItem ? shippingPrice : 0} discount={coupon?.discountAmount ?? 0} />
       </div>
     </div>
   );
