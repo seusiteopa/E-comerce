@@ -55,6 +55,11 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  /* Trava de segurança: nenhum elemento (imagem, botão, tabela etc.)
+     deveria conseguir empurrar a página inteira pra rolar na horizontal.
+     Isso já resolveu um caso real de estouro de layout na página de
+     produto. */
+  overflow-x: hidden;
 }
 
 h1, h2, h3, h4 {

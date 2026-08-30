@@ -113,7 +113,7 @@ export default function ProductActions({ product }: { product: Product }) {
         </div>
       )}
 
-      <div className="flex flex-col gap-3 sm:flex-row">
+      <div className="grid w-full grid-cols-1 gap-3 sm:flex sm:flex-row">
         <Button onClick={handleAction} disabled={isOutOfStock} variant={isPhysical ? "secondary" : "primary"} className="w-full sm:w-auto">
           {justAdded ? (
             <>
