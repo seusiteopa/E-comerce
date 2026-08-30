@@ -32,6 +32,8 @@ export default function ProductForm({
   const [media, setMedia] = useState(existingMedia);
   const [isPending, startTransition] = useTransition();
   const [uploadStatus, setUploadStatus] = useState<string | null>(null);
+  const [hiddenChecked, setHiddenChecked] = useState(product?.hidden ?? false);
+  const [linkCopied, setLinkCopied] = useState(false);
   const isEdit = Boolean(product);
 
   function handleSubmit(formData: FormData) {
@@ -207,10 +209,46 @@ export default function ProductForm({
           Produto em destaque
         </label>
         <label className="flex items-center gap-2 text-sm text-ink">
-          <input type="checkbox" name="hidden" defaultChecked={product?.hidden} className="h-4 w-4 accent-[#173F82]" />
+          <input
+            type="checkbox"
+            name="hidden"
+            checked={hiddenChecked}
+            onChange={(e) => setHiddenChecked(e.target.checked)}
+            className="h-4 w-4 accent-[#173F82]"
+          />
           Produto exclusivo (link único, não aparece na loja)
         </label>
       </div>
+
+      {!isEdit && hiddenChecked && (
+        <p className="text-xs text-ink-soft">O link da oferta aparece aqui pra copiar depois que você salvar o produto.</p>
+      )}
+
+      {isEdit && hiddenChecked && (
+        <div className="rounded-xl border border-line bg-paper p-4">
+          <p className="text-sm font-medium text-ink">Link da oferta</p>
+          <div className="mt-2 flex items-center gap-2">
+            <input
+              readOnly
+              value={`${process.env.NEXT_PUBLIC_SITE_URL}/oferta/${product!.slug}`}
+              onFocus={(e) => e.target.select()}
+              className="w-full truncate rounded-lg border border-line bg-surface px-3 py-2 text-xs text-ink-soft outline-none"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_SITE_URL}/oferta/${product!.slug}`);
+                setLinkCopied(true);
+                setTimeout(() => setLinkCopied(false), 2000);
+              }}
+              className="shrink-0 rounded-lg bg-navy px-3 py-2 text-xs font-semibold text-white"
+            >
+              {linkCopied ? "Copiado!" : "Copiar"}
+            </button>
+          </div>
+          <p className="mt-1 text-xs text-ink-soft">Esse é o único lugar onde esse produto aparece — compartilhe esse link direto com quem for comprar.</p>
+        </div>
+      )}
 
       <div>
         <label htmlFor="status" className="text-sm font-medium text-ink">Status</label>

@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { ActionResult, actionSuccess, actionError } from "@/lib/action-result";
 import { logger } from "@/lib/logger";
-import { createPixPayment } from "@/lib/integrations/mercadopago";
+import { createPixPayment, createPaymentPreference } from "@/lib/integrations/mercadopago";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 
 const buyExclusiveSchema = z.object({
@@ -14,14 +14,12 @@ const buyExclusiveSchema = z.object({
     .string()
     .trim()
     .regex(/^\d{11}$/, "CPF inválido — informe apenas os 11 números."),
+  paymentMethod: z.enum(["pix", "cartao"]),
 });
 
-export interface BuyExclusiveResult {
-  orderId: string;
-  paymentId: string;
-  qrCodeBase64: string;
-  qrCode: string;
-}
+export type BuyExclusiveResult =
+  | { paymentMethod: "pix"; orderId: string; paymentId: string; qrCodeBase64: string; qrCode: string }
+  | { paymentMethod: "redirect"; orderId: string; checkoutUrl: string };
 
 export async function buyExclusiveProductAction(input: unknown): Promise<ActionResult<BuyExclusiveResult>> {
   const parsed = buyExclusiveSchema.safeParse(input);
@@ -80,6 +78,28 @@ export async function buyExclusiveProductAction(input: unknown): Promise<ActionR
 
   await service.from("payments").insert({ order_id: order.id, amount: total, status: "pendente" });
 
+  if (parsed.data.paymentMethod === "cartao") {
+    try {
+      const preference = await createPaymentPreference({
+        orderId: order.id,
+        totalAmount: total,
+        description: `${product.name} — Vecorion`,
+        payerEmail: parsed.data.payerEmail,
+        payerDocument: parsed.data.payerDocument,
+      });
+
+      logger.info("Preferência de cartão criada para oferta exclusiva", { orderId: order.id, slug: parsed.data.productSlug });
+
+      return actionSuccess({ paymentMethod: "redirect", orderId: order.id, checkoutUrl: preference.checkoutUrl });
+    } catch (error) {
+      logger.error("Falha ao gerar checkout de cartão para oferta exclusiva", {
+        orderId: order.id,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return actionError("Pedido registrado, mas não foi possível iniciar o pagamento com cartão. Tente novamente.");
+    }
+  }
+
   try {
     const pix = await createPixPayment({
       orderId: order.id,
@@ -92,6 +112,7 @@ export async function buyExclusiveProductAction(input: unknown): Promise<ActionR
     logger.info("Pagamento Pix criado para oferta exclusiva", { orderId: order.id, slug: parsed.data.productSlug });
 
     return actionSuccess({
+      paymentMethod: "pix",
       orderId: order.id,
       paymentId: pix.paymentId,
       qrCodeBase64: pix.qrCodeBase64,
@@ -104,4 +125,4 @@ export async function buyExclusiveProductAction(input: unknown): Promise<ActionR
     });
     return actionError("Pedido registrado, mas não foi possível gerar o Pix. Tente novamente.");
   }
-                       }
+}

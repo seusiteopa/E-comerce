@@ -27,6 +27,7 @@ interface PixState {
 const priceFormatter = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 
 export default function OfertaCheckout({ slug, name, description, price, media, isDigital }: OfertaCheckoutProps) {
+  const [paymentMethod, setPaymentMethod] = useState<"pix" | "cartao">("pix");
   const [payerName, setPayerName] = useState("");
   const [payerEmail, setPayerEmail] = useState("");
   const [cpf, setCpf] = useState("");
@@ -57,11 +58,18 @@ export default function OfertaCheckout({ slug, name, description, price, media, 
       payerName,
       payerEmail,
       payerDocument: digitsOnly,
+      paymentMethod,
     });
 
     if (!result.success) {
       setError(result.error);
       setSubmitting(false);
+      return;
+    }
+
+    if (result.data.paymentMethod === "redirect") {
+      // Cartão: Mercado Pago cuida da tela de pagamento — sai daqui.
+      window.location.href = result.data.checkoutUrl;
       return;
     }
 
@@ -106,6 +114,7 @@ export default function OfertaCheckout({ slug, name, description, price, media, 
         <h1 className="text-lg font-semibold text-ink">Pague com Pix</h1>
         <p className="mt-1 text-sm text-ink-soft">Escaneie o QR Code ou copie o código abaixo.</p>
 
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={`data:image/png;base64,${pix.qrCodeBase64}`}
           alt="QR Code Pix"
@@ -134,83 +143,119 @@ export default function OfertaCheckout({ slug, name, description, price, media, 
 
   return (
     <div className="mx-auto min-h-screen max-w-md px-6 py-10">
+      {/* Seção 1: mídia do produto */}
       {media.length > 0 && (
-        <div className="mb-5">
+        <div className="mb-6">
           <ProductGallery media={media} productName={name} />
         </div>
       )}
-      <h1 className="text-xl font-bold text-ink">{name}</h1>
-      {description && <p className="mt-2 text-sm text-ink-soft">{description}</p>}
-      <p className="mt-4 text-2xl font-bold text-navy">{priceFormatter.format(price)}</p>
 
-      <p className="mt-2 flex items-center gap-2 text-xs text-ink-soft">
-        {isDigital ? (
-          <>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="shrink-0"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" /></svg>
-            Produto digital — entrega imediata por link após o pagamento, sem frete.
-          </>
-        ) : (
-          <>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="shrink-0"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h11v10H3zM14 10h4l3 3v4h-7z" /><circle cx="7" cy="19" r="1.5" /><circle cx="18" cy="19" r="1.5" /></svg>
-            Frete calculado e combinado à parte após a confirmação do pagamento.
-          </>
-        )}
-      </p>
+      {/* Seção 2: informações do produto — com respiro próprio, separada
+          visualmente do formulário de pagamento abaixo. */}
+      <div className="rounded-2xl border border-line bg-surface p-5">
+        <h1 className="text-xl font-bold leading-snug text-ink">{name}</h1>
+        {description && <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-ink-soft">{description}</p>}
+        <p className="mt-4 text-3xl font-bold text-navy">{priceFormatter.format(price)}</p>
 
-      <div className="mt-6 flex flex-col gap-3">
-        <div>
-          <label htmlFor="payerName" className="text-sm font-medium text-ink">
-            Nome completo
-          </label>
-          <input
-            id="payerName"
-            value={payerName}
-            onChange={(e) => setPayerName(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-line px-4 py-3 text-sm outline-none focus:border-navy"
-          />
-        </div>
-        <div>
-          <label htmlFor="payerEmail" className="text-sm font-medium text-ink">
-            E-mail
-          </label>
-          <input
-            id="payerEmail"
-            type="email"
-            value={payerEmail}
-            onChange={(e) => setPayerEmail(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-line px-4 py-3 text-sm outline-none focus:border-navy"
-          />
-        </div>
-        <div>
-          <label htmlFor="cpf" className="text-sm font-medium text-ink">
-            CPF
-          </label>
-          <input
-            id="cpf"
-            inputMode="numeric"
-            placeholder="Somente números"
-            maxLength={14}
-            value={cpf}
-            onChange={(e) => setCpf(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-line px-4 py-3 text-sm outline-none focus:border-navy"
-          />
-        </div>
+        <p className="mt-3 flex items-center gap-2 text-xs text-ink-soft">
+          {isDigital ? (
+            <>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="shrink-0"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" /></svg>
+              Produto digital — entrega imediata por link após o pagamento, sem frete.
+            </>
+          ) : (
+            <>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="shrink-0"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h11v10H3zM14 10h4l3 3v4h-7z" /><circle cx="7" cy="19" r="1.5" /><circle cx="18" cy="19" r="1.5" /></svg>
+              Frete calculado e combinado à parte após a confirmação do pagamento.
+            </>
+          )}
+        </p>
       </div>
 
-      {error && (
-        <p role="alert" className="mt-4 text-sm text-status-danger">
-          {error}
-        </p>
-      )}
+      {/* Seção 3: pagamento — claramente separada, com título próprio. */}
+      <div className="mt-8">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-soft">Finalizar compra</h2>
 
-      <button
-        type="button"
-        onClick={handleSubmit}
-        disabled={submitting}
-        className="mt-6 w-full rounded-xl bg-[#173F82] px-4 py-3 text-sm font-semibold text-white disabled:opacity-60"
-      >
-        {submitting ? "Processando..." : `Pagar ${priceFormatter.format(price)} com Pix`}
-      </button>
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={() => setPaymentMethod("pix")}
+            className={`rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-colors ${
+              paymentMethod === "pix" ? "border-navy bg-navy/5 text-navy" : "border-line text-ink-soft"
+            }`}
+          >
+            Pix
+          </button>
+          <button
+            type="button"
+            onClick={() => setPaymentMethod("cartao")}
+            className={`rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-colors ${
+              paymentMethod === "cartao" ? "border-navy bg-navy/5 text-navy" : "border-line text-ink-soft"
+            }`}
+          >
+            Cartão
+          </button>
+        </div>
+
+        <div className="mt-5 flex flex-col gap-3">
+          <div>
+            <label htmlFor="payerName" className="text-sm font-medium text-ink">
+              Nome completo
+            </label>
+            <input
+              id="payerName"
+              value={payerName}
+              onChange={(e) => setPayerName(e.target.value)}
+              className="mt-1 w-full rounded-xl border border-line px-4 py-3 text-sm outline-none focus:border-navy"
+            />
+          </div>
+          <div>
+            <label htmlFor="payerEmail" className="text-sm font-medium text-ink">
+              E-mail
+            </label>
+            <input
+              id="payerEmail"
+              type="email"
+              value={payerEmail}
+              onChange={(e) => setPayerEmail(e.target.value)}
+              className="mt-1 w-full rounded-xl border border-line px-4 py-3 text-sm outline-none focus:border-navy"
+            />
+          </div>
+          <div>
+            <label htmlFor="cpf" className="text-sm font-medium text-ink">
+              CPF
+            </label>
+            <input
+              id="cpf"
+              inputMode="numeric"
+              placeholder="Somente números"
+              maxLength={14}
+              value={cpf}
+              onChange={(e) => setCpf(e.target.value)}
+              className="mt-1 w-full rounded-xl border border-line px-4 py-3 text-sm outline-none focus:border-navy"
+            />
+          </div>
+        </div>
+
+        {error && (
+          <p role="alert" className="mt-4 text-sm text-status-danger">
+            {error}
+          </p>
+        )}
+
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={submitting}
+          className="mt-6 w-full rounded-xl bg-[#173F82] px-4 py-3 text-sm font-semibold text-white disabled:opacity-60"
+        >
+          {submitting
+            ? "Processando..."
+            : paymentMethod === "pix"
+              ? `Pagar ${priceFormatter.format(price)} com Pix`
+              : `Pagar ${priceFormatter.format(price)} com cartão`}
+        </button>
+      </div>
     </div>
   );
-          }
+}
