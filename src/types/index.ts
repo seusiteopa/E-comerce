@@ -1,4 +1,4 @@
-export type ProductType = "fisico" | "digital" | "curso" | "servico";
+export type ProductType = "fisico" | "digital";
 
 export type ProductStatus = "ativo" | "inativo" | "rascunho";
 
@@ -17,7 +17,6 @@ export interface ProductVariation {
   sku: string;
 }
 
-export type CourseLevel = "iniciante" | "intermediario" | "avancado";
 
 export interface Product {
   id: string;
@@ -35,10 +34,7 @@ export interface Product {
   // Campos específicos por tipo (Etapa 3: só o bloco relevante é preenchido)
   variations?: ProductVariation[]; // físico
   digitalFormat?: string; // digital
-  courseLevel?: CourseLevel; // curso
-  courseModules?: number; // curso
   serviceIncludes?: string[]; // serviço
-  isQuoteOnly?: boolean; // serviço sob orçamento
 }
 
 export type OrderStatus =

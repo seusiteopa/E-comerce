@@ -7,7 +7,7 @@
  */
 
 export type UserRole = "cliente" | "administrador";
-export type ProductType = "fisico" | "digital" | "curso" | "servico";
+export type ProductType = "fisico" | "digital";
 export type ProductStatus = "ativo" | "inativo" | "rascunho";
 export type OrderStatus = "aguardando_pagamento" | "pago" | "em_separacao" | "enviado" | "entregue" | "cancelado";
 export type PaymentStatus = "pendente" | "aprovado" | "recusado" | "cancelado" | "reembolsado";

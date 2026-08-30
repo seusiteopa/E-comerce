@@ -27,7 +27,7 @@ export default function ProductForm({
 }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const [type, setType] = useState<"fisico" | "digital" | "curso" | "servico">(product?.type ?? "fisico");
+  const [type, setType] = useState<"fisico" | "digital">(product?.type ?? "fisico");
   const [creatingCategory, setCreatingCategory] = useState(false);
   const [media, setMedia] = useState(existingMedia);
   const [isPending, startTransition] = useTransition();
@@ -110,7 +110,7 @@ export default function ProductForm({
             id="type"
             name="type"
             value={type}
-            onChange={(e) => setType(e.target.value as "fisico" | "digital" | "curso" | "servico")}
+            onChange={(e) => setType(e.target.value as "fisico" | "digital")}
             className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy"
           >
             <option value="fisico">Físico</option>
@@ -298,7 +298,7 @@ export default function ProductForm({
 
       {!isEdit && (
         <p className="text-xs text-ink-soft">
-          Variações e vínculo de curso são adicionados depois de criar o produto (edição).
+          Variações são adicionadas depois de criar o produto (edição).
         </p>
       )}
     </form>

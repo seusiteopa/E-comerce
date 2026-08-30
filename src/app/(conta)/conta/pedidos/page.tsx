@@ -53,7 +53,7 @@ export default async function PedidosPage() {
         ))}
       </ul>
       <Link href="/conta/downloads" className="mt-6 inline-block text-sm text-navy hover:underline">
-        Ver meus downloads e cursos →
+        Ver meus downloads →
       </Link>
     </div>
   );

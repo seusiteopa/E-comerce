@@ -31,7 +31,7 @@ export default function ProductCard({ product }: { product: Product }) {
       <div className="flex flex-1 flex-col gap-2 p-4">
         <h3 className="text-sm font-semibold leading-snug text-ink">{product.name}</h3>
         <p className="line-clamp-2 flex-1 text-xs text-ink-soft">{product.shortDescription}</p>
-        <PriceTag price={product.price} promoPrice={product.promoPrice} isQuoteOnly={product.isQuoteOnly} size="sm" />
+        <PriceTag price={product.price} promoPrice={product.promoPrice} size="sm" />
       </div>
     </Link>
   );

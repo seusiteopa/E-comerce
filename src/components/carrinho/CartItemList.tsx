@@ -17,7 +17,7 @@ export default function CartItemList() {
     return (
       <EmptyState
         title="Seu carrinho está vazio"
-        description="Explore o catálogo e adicione produtos, cursos ou serviços."
+        description="Explore o catálogo e adicione produtos ao carrinho."
         action={<LinkButton href="/produtos">Ver produtos</LinkButton>}
       />
     );

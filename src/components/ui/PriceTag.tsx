@@ -3,19 +3,13 @@ import { formatCurrency } from "@/lib/format";
 export default function PriceTag({
   price,
   promoPrice,
-  isQuoteOnly,
   size = "md",
 }: {
   price: number;
   promoPrice?: number;
-  isQuoteOnly?: boolean;
   size?: "sm" | "md" | "lg";
 }) {
   const sizeClass = size === "lg" ? "text-3xl" : size === "sm" ? "text-base" : "text-xl";
-
-  if (isQuoteOnly) {
-    return <p className={`${sizeClass} font-semibold text-ink`}>Sob orçamento</p>;
-  }
 
   if (promoPrice) {
     return (

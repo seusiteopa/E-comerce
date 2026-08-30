@@ -33,8 +33,8 @@ const policies: Record<string, { title: string; sections: { heading: string; tex
         text: "Ao utilizar a Loja Vecorion, você concorda com estes termos de uso.",
       },
       {
-        heading: "2. Produtos e serviços",
-        text: "A Vecorion comercializa produtos físicos, digitais, cursos e serviços, cada um com condições específicas descritas em sua respectiva página.",
+        heading: "2. Produtos",
+        text: "A Vecorion comercializa produtos físicos e digitais, cada um com condições específicas descritas em sua respectiva página.",
       },
     ],
   },
@@ -46,8 +46,8 @@ const policies: Record<string, { title: string; sections: { heading: string; tex
         text: "Produtos físicos podem ser devolvidos em até 7 dias corridos após o recebimento, conforme o Código de Defesa do Consumidor, desde que estejam em sua embalagem original.",
       },
       {
-        heading: "2. Produtos digitais e cursos",
-        text: "Por sua natureza, produtos digitais e acesso a cursos não são passíveis de devolução após o acesso/download ser disponibilizado, exceto em caso de defeito comprovado.",
+        heading: "2. Produtos digitais",
+        text: "Por sua natureza, produtos digitais não são passíveis de devolução após o download ser disponibilizado, exceto em caso de defeito comprovado.",
       },
     ],
   },

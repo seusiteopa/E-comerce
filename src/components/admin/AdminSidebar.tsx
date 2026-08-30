@@ -7,7 +7,6 @@ import {
   Users,
   Ticket,
   Image as ImageIcon,
-  MessageSquareText,
   Settings,
   LogOut,
 } from "lucide-react";
@@ -20,7 +19,6 @@ const navItems = [
   { href: "/admin/clientes", label: "Clientes", icon: Users },
   { href: "/admin/cupons", label: "Cupons", icon: Ticket },
   { href: "/admin/banners", label: "Banners", icon: ImageIcon },
-  { href: "/admin/orcamentos", label: "Orçamentos", icon: MessageSquareText },
   { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ];
 

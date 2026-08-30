@@ -7,7 +7,7 @@ import { getActiveProducts, mapToProduct } from "@/lib/data/catalog";
 
 export const metadata: Metadata = {
   title: "Produtos",
-  description: "Explore o catálogo completo da Vecorion: produtos físicos, digitais, cursos e serviços.",
+  description: "Explore o catálogo completo da Vecorion: produtos físicos e digitais.",
 };
 
 // Catálogo muda com o cadastro do admin — revalida no máximo a cada 60s
@@ -25,7 +25,7 @@ export default async function ProdutosPage() {
         <SectionEyebrow>Catálogo</SectionEyebrow>
         <h1 className="mt-3 text-4xl font-semibold text-ink sm:text-5xl">Todos os produtos</h1>
         <p className="mt-4 max-w-xl text-base leading-relaxed text-ink-soft">
-          Produtos físicos, digitais, cursos e serviços — filtre por tipo ou ordene por preço.
+          Produtos físicos e digitais — filtre por tipo ou ordene por preço.
         </p>
 
         <div className="mt-12">

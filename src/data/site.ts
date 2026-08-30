@@ -8,7 +8,7 @@ export const siteConfig = {
   storeName: "Loja Vecorion",
   tagline: "Tecnologia, produtos e soluções em um só lugar.",
   description:
-    "E-commerce da Vecorion: produtos físicos, produtos digitais, cursos e serviços com tecnologia, inteligência artificial e atendimento próximo às pessoas.",
+    "E-commerce da Vecorion: produtos físicos e produtos digitais com tecnologia, inteligência artificial e atendimento próximo às pessoas.",
   url: "https://loja.vecorion.com.br",
 };
 
@@ -24,8 +24,6 @@ export const mainNav = [
   { label: "Início", href: "/" },
   { label: "Produtos Físicos", href: "/categorias/produtos-fisicos" },
   { label: "Produtos Digitais", href: "/categorias/produtos-digitais" },
-  { label: "Cursos", href: "/categorias/cursos" },
-  { label: "Serviços", href: "/servicos" },
 ];
 
 export function whatsappHref(message?: string) {

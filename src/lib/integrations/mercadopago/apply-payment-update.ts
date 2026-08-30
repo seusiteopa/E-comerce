@@ -14,10 +14,7 @@ import { PaymentStatus } from "@/types";
  *  2. Decrementa estoque de itens físicos (só agora — decisão confirmada:
  *     sem reserva prévia, sem expiração de pedido)
  *  3. Gera link de download para itens digitais
- *  4. Deixa itens de curso visíveis na fila "Cursos Pendentes" do admin
- *     (não precisa de ação aqui além do status do pedido — a fila já
- *     consulta order_items com course_access_released = false)
- *  5. Dispara e-mail de confirmação via Brevo
+ *  4. Dispara e-mail de confirmação via Brevo
  *
  * Chamado exclusivamente pelo webhook do Mercado Pago, depois que a
  * assinatura já foi validada e a idempotência já foi checada.
@@ -70,8 +67,7 @@ async function handleApproved(supabase: any, order: any, orderId: string) {
     }
   }
 
-  // Geração de link de download para itens digitais (produto digital,
-  // não curso — curso segue o fluxo manual da Etapa 1/4).
+  // Geração de link de download para itens digitais.
   const digitalItems = order.order_items.filter((i: { product_type_snapshot: string }) => i.product_type_snapshot === "digital");
   for (const item of digitalItems) {
     const link = await generateDigitalDownloadLink(item.product_id);
@@ -107,12 +103,10 @@ async function handleApproved(supabase: any, order: any, orderId: string) {
 
 function buildExtraMessageByItemTypes(items: { product_type_snapshot: string }[]): string {
   const hasDigital = items.some((i) => i.product_type_snapshot === "digital");
-  const hasCourse = items.some((i) => i.product_type_snapshot === "curso");
   const hasPhysical = items.some((i) => i.product_type_snapshot === "fisico");
 
   const parts: string[] = [];
   if (hasDigital) parts.push("Seus downloads já estão disponíveis na sua conta.");
-  if (hasCourse) parts.push("O acesso ao seu curso será liberado em breve na Vecorion Cursos.");
   if (hasPhysical) parts.push("Seu pedido está sendo preparado para envio.");
   return parts.join(" ");
 }

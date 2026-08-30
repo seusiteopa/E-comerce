@@ -3,7 +3,7 @@ import { z } from "zod";
 export const productAdminSchema = z
   .object({
     name: z.string().trim().min(2, "Informe o nome do produto."),
-    type: z.enum(["fisico", "digital", "curso", "servico"]),
+    type: z.enum(["fisico", "digital"]),
     categorySlug: z.string().trim().optional().default(""),
     newCategoryName: z.string().trim().optional().default(""),
     shortDescription: z.string().trim().max(200).optional(),
@@ -12,15 +12,11 @@ export const productAdminSchema = z
     promoPrice: z.number().nonnegative().optional(),
     status: z.enum(["ativo", "inativo", "rascunho"]).default("rascunho"),
     featured: z.boolean().default(false),
-    isQuoteOnly: z.boolean().default(false),hidden: z.boolean().default(false),
+    hidden: z.boolean().default(false),
   })
   .refine((data) => !data.promoPrice || data.promoPrice < data.price, {
     message: "O preço promocional precisa ser menor que o preço normal.",
     path: ["promoPrice"],
-  })
-  .refine((data) => data.type !== "servico" || !data.isQuoteOnly || data.price === 0, {
-    message: "Serviço sob orçamento não deve ter preço fixo diferente de zero.",
-    path: ["price"],
   });
 
 export const categoryAdminSchema = z.object({
@@ -30,7 +26,7 @@ export const categoryAdminSchema = z.object({
     .regex(/^[a-z0-9-]+$/, "Use apenas letras minúsculas, números e hífen."),
   name: z.string().trim().min(2, "Informe o nome da categoria."),
   description: z.string().trim().optional(),
-  productType: z.enum(["fisico", "digital", "curso", "servico"]),
+  productType: z.enum(["fisico", "digital"]),
   parentSlug: z.string().trim().optional(),
 });
 

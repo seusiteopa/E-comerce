@@ -50,36 +50,3 @@ export async function updateOrderStatusAction(input: unknown): Promise<ActionRes
   revalidatePath(`/admin/pedidos/${parsed.data.orderId}`);
   return actionSuccess(undefined);
 }
-
-/**
- * Libera manualmente o acesso a um curso (fila "Cursos Pendentes" —
- * Etapa 4/5). Nesta fase não há chamada de API para a Vecorion Cursos
- * (que ainda não tem backend/autenticação própria — Etapa 1/4); o admin
- * confirma que já liberou o acesso por fora, e este registro marca o
- * item como resolvido na fila.
- *
- * Lacuna da Etapa 9 corrigida na migration 005 (colunas
- * `course_access_released` / `course_access_released_at` em order_items).
- */
-export async function markCourseAccessReleasedAction(orderItemId: string): Promise<ActionResult> {
-  try {
-    await guardAdmin();
-  } catch {
-    return actionError("Acesso restrito ao painel administrativo.");
-  }
-
-  const supabase = await createSupabaseServerClient();
-  const { error } = await supabase
-    .from("order_items")
-    .update({ course_access_released: true, course_access_released_at: new Date().toISOString() })
-    .eq("id", orderItemId);
-
-  if (error) {
-    logger.error("Erro ao marcar liberação de curso", { orderItemId, error: error.message });
-    return actionError("Não foi possível registrar a liberação do curso.");
-  }
-
-  revalidatePath("/admin/cursos-pendentes");
-  logger.info("Acesso a curso marcado como liberado manualmente", { orderItemId });
-  return actionSuccess(undefined);
-}

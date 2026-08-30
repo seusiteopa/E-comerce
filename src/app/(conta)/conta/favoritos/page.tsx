@@ -18,11 +18,9 @@ export default async function FavoritosPage() {
       product_id,
       products (
         *,
-        product_images ( url, alt_text, display_order ),
+        product_images ( url, alt_text, display_order, media_type ),
         product_variations ( * ),
-        digital_assets ( delivery_type ),
-        course_links ( level, modules ),
-        service_details ( includes, is_quote_only )
+        digital_assets ( delivery_type )
       )
     `)
     .eq("profile_id", profile.id);

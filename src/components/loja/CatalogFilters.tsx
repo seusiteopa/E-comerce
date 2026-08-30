@@ -9,8 +9,6 @@ const typeOptions: { value: ProductType | "todos"; label: string }[] = [
   { value: "todos", label: "Todos" },
   { value: "fisico", label: "Físico" },
   { value: "digital", label: "Digital" },
-  { value: "curso", label: "Curso" },
-  { value: "servico", label: "Serviço" },
 ];
 
 const sortOptions = [

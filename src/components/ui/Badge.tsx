@@ -3,29 +3,12 @@ import { ProductType, OrderStatus, PaymentStatus } from "@/types";
 const typeLabels: Record<ProductType, string> = {
   fisico: "Físico",
   digital: "Digital",
-  curso: "Curso",
-  servico: "Serviço",
 };
 
 export function ProductTypeBadge({ type }: { type: ProductType }) {
   return (
     <span className="inline-flex items-center rounded-full border border-navy/20 bg-navy/5 px-3 py-1 text-xs font-semibold text-navy">
       {typeLabels[type]}
-    </span>
-  );
-}
-
-const levelLabels: Record<string, string> = {
-  iniciante: "Iniciante",
-  intermediario: "Intermediário",
-  avancado: "Avançado",
-};
-
-/** Selo de nível de curso — mesmo padrão já validado no projeto Vecorion Cursos. */
-export function LevelBadge({ level }: { level: string }) {
-  return (
-    <span className="inline-flex items-center rounded-full bg-farol/15 px-3 py-1 text-xs font-semibold text-farol-deep">
-      {levelLabels[level] ?? level}
     </span>
   );
 }

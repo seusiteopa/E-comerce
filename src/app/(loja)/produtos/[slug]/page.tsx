@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Metadata } from "next";
 import Container from "@/components/ui/Container";
-import { LevelBadge, CategoryBadge } from "@/components/ui/Badge";
+import { CategoryBadge } from "@/components/ui/Badge";
 import PriceTag from "@/components/ui/PriceTag";
 import ProductActions from "@/components/loja/ProductActions";
 import ProductGallery from "@/components/loja/ProductGallery";
@@ -61,12 +61,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <div>
               <div className="flex flex-wrap items-center gap-3">
                 <CategoryBadge label={category?.name ?? ""} />
-                {product.type === "curso" && product.courseLevel && <LevelBadge level={product.courseLevel} />}
               </div>
 
               <h1 className="mt-4 text-3xl font-semibold leading-tight text-ink sm:text-4xl">{product.name}</h1>
               <div className="mt-3">
-                <PriceTag price={product.price} promoPrice={product.promoPrice} isQuoteOnly={product.isQuoteOnly} size="lg" />
+                <PriceTag price={product.price} promoPrice={product.promoPrice} size="lg" />
               </div>
               <p className="mt-4 text-base leading-relaxed text-ink-soft">{product.description}</p>
 

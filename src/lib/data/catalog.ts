@@ -1,14 +1,12 @@
 import "server-only";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { CategoryRow, ProductRow, ProductVariationRow } from "@/types/database";
-import { Product, CourseLevel } from "@/types";
+import { Product } from "@/types";
 
 export interface ProductWithDetails extends ProductRow {
   product_images: { url: string; alt_text: string; display_order: number; media_type: string }[];
   product_variations: ProductVariationRow[];
   digital_assets: { delivery_type: string }[];
-  course_links: { level: string | null; modules: number | null }[];
-  service_details: { includes: string[]; is_quote_only: boolean }[];
 }
 
 export async function getActiveCategories(): Promise<CategoryRow[]> {
@@ -38,9 +36,7 @@ const PRODUCT_DETAIL_SELECT = `
   *,
   product_images ( url, alt_text, display_order, media_type ),
   product_variations ( * ),
-  digital_assets ( delivery_type ),
-  course_links ( level, modules ),
-  service_details ( includes, is_quote_only )
+  digital_assets ( delivery_type )
 `;
 
 export async function getActiveProducts(): Promise<ProductWithDetails[]> {
@@ -125,8 +121,6 @@ export async function searchProducts(query: string): Promise<ProductWithDetails[
 }
 
 export function mapToProduct(row: ProductWithDetails): Product {
-  const serviceDetail = row.service_details?.[0];
-  const courseLink = row.course_links?.[0];
   const digitalAsset = row.digital_assets?.[0];
 
   const images = [...(row.product_images ?? [])]
@@ -153,9 +147,5 @@ export function mapToProduct(row: ProductWithDetails): Product {
       sku: v.sku,
     })),
     digitalFormat: digitalAsset?.delivery_type,
-    courseLevel: (courseLink?.level as CourseLevel) ?? undefined,
-    courseModules: courseLink?.modules ?? undefined,
-    serviceIncludes: serviceDetail?.includes,
-    isQuoteOnly: serviceDetail?.is_quote_only ?? false,
   };
 }

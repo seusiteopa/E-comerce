@@ -45,7 +45,6 @@ export async function createProductAction(formData: FormData): Promise<ActionRes
     promoPrice: formData.get("promoPrice") ? Number(formData.get("promoPrice")) : undefined,
     status: (formData.get("status") as string) || "rascunho",
     featured: formData.get("featured") === "on",
-    isQuoteOnly: formData.get("isQuoteOnly") === "on",
     hidden: formData.get("hidden") === "on",
   };
 
@@ -107,13 +106,6 @@ export async function createProductAction(formData: FormData): Promise<ActionRes
   if (error || !product) {
     logger.error("Erro ao criar produto", { error: error?.message });
     return actionError("Não foi possível salvar o produto. O nome/slug já pode estar em uso.");
-  }
-
-  // Cadastro manual, um tipo complementar por vez (Etapa 1: sem fornecedor
-  // definido, cadastro manual pelo admin) — variações/arquivo/curso são
-  // adicionados em uma etapa seguinte do formulário (fora do escopo desta action).
-  if (parsed.data.type === "servico" && parsed.data.isQuoteOnly) {
-    await supabase.from("service_details").insert({ product_id: product.id, is_quote_only: true, includes: [] });
   }
 
   // Arquivo digital (ebook, PDF, ZIP...) já foi enviado direto pro
@@ -192,7 +184,6 @@ export async function updateProductAction(productId: string, formData: FormData)
     promoPrice: formData.get("promoPrice") ? Number(formData.get("promoPrice")) : undefined,
     status: (formData.get("status") as string) || "rascunho",
     featured: formData.get("featured") === "on",
-    isQuoteOnly: formData.get("isQuoteOnly") === "on",
     hidden: formData.get("hidden") === "on",
   };
 
