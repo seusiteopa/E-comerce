@@ -3,6 +3,7 @@ import Footer from "@/components/layout/Footer";
 import AnnouncementBar from "@/components/layout/AnnouncementBar";
 import CartAddedToast from "@/components/loja/CartAddedToast";
 import WelcomeCouponPopup from "@/components/loja/WelcomeCouponPopup";
+import ThemeOverride from "@/components/layout/ThemeOverride";
 import { getSiteSettings } from "@/lib/data/site-settings";
 
 // As configurações do site (logo, nome, faixa institucional) não mudam a
@@ -20,6 +21,7 @@ export default async function LojaLayout({ children }: { children: React.ReactNo
 
   return (
     <>
+      <ThemeOverride primaryColor={settings.theme_primary_color} accentColor={settings.theme_accent_color} />
       <AnnouncementBar phrases={phrases} />
       <Header logoUrl={settings.logo_url} siteName={settings.site_name} />
       <main id="conteudo-principal">{children}</main>

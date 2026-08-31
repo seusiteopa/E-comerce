@@ -9,6 +9,8 @@ export interface SiteSettingsMap {
   announcement_phrase_3?: string;
   popup_coupon_code?: string;
   popup_coupon_message?: string;
+  theme_primary_color?: string;
+  theme_accent_color?: string;
   [key: string]: string | undefined;
 }
 

@@ -35,6 +35,8 @@ export default function SiteSettingsForm({ settings }: { settings: SiteSettingsM
           announcement_phrase_3: (formData.get("announcement_phrase_3") as string)?.trim() ?? "",
           popup_coupon_code: (formData.get("popup_coupon_code") as string)?.trim().toUpperCase() ?? "",
           popup_coupon_message: (formData.get("popup_coupon_message") as string)?.trim() ?? "",
+          theme_primary_color: (formData.get("theme_primary_color") as string) ?? "",
+          theme_accent_color: (formData.get("theme_accent_color") as string) ?? "",
         });
 
         if (result.success) {
@@ -146,6 +148,41 @@ export default function SiteSettingsForm({ settings }: { settings: SiteSettingsM
               maxLength={80}
               className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy"
             />
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-semibold text-ink">Cores da loja</h3>
+        <p className="mt-1 text-xs text-ink-soft">
+          Já vem com o azul/laranja padrão da Vecorion — só muda se quiser personalizar pra outra marca.
+        </p>
+        <div className="mt-4 grid grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="theme_primary_color" className="text-sm font-medium text-ink">Cor principal (links, contornos)</label>
+            <div className="mt-2 flex items-center gap-2">
+              <input
+                id="theme_primary_color"
+                name="theme_primary_color"
+                type="color"
+                defaultValue={settings.theme_primary_color || "#173f82"}
+                className="h-11 w-14 shrink-0 cursor-pointer rounded-lg border border-line bg-surface p-1"
+              />
+              <span className="text-xs text-ink-soft">{settings.theme_primary_color || "Padrão (azul)"}</span>
+            </div>
+          </div>
+          <div>
+            <label htmlFor="theme_accent_color" className="text-sm font-medium text-ink">Cor de destaque (botão de compra)</label>
+            <div className="mt-2 flex items-center gap-2">
+              <input
+                id="theme_accent_color"
+                name="theme_accent_color"
+                type="color"
+                defaultValue={settings.theme_accent_color || "#e8a33e"}
+                className="h-11 w-14 shrink-0 cursor-pointer rounded-lg border border-line bg-surface p-1"
+              />
+              <span className="text-xs text-ink-soft">{settings.theme_accent_color || "Padrão (laranja)"}</span>
+            </div>
           </div>
         </div>
       </div>
