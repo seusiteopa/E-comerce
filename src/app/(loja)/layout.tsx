@@ -2,6 +2,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import AnnouncementBar from "@/components/layout/AnnouncementBar";
 import CartAddedToast from "@/components/loja/CartAddedToast";
+import WelcomeCouponPopup from "@/components/loja/WelcomeCouponPopup";
 import { getSiteSettings } from "@/lib/data/site-settings";
 
 // As configurações do site (logo, nome, faixa institucional) não mudam a
@@ -24,6 +25,7 @@ export default async function LojaLayout({ children }: { children: React.ReactNo
       <main id="conteudo-principal">{children}</main>
       <Footer />
       <CartAddedToast />
+      <WelcomeCouponPopup couponCode={settings.popup_coupon_code} message={settings.popup_coupon_message} />
     </>
   );
 }

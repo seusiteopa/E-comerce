@@ -7,6 +7,8 @@ export interface SiteSettingsMap {
   announcement_phrase_1?: string;
   announcement_phrase_2?: string;
   announcement_phrase_3?: string;
+  popup_coupon_code?: string;
+  popup_coupon_message?: string;
   [key: string]: string | undefined;
 }
 

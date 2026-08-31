@@ -33,6 +33,8 @@ export default function SiteSettingsForm({ settings }: { settings: SiteSettingsM
           announcement_phrase_1: (formData.get("announcement_phrase_1") as string)?.trim() ?? "",
           announcement_phrase_2: (formData.get("announcement_phrase_2") as string)?.trim() ?? "",
           announcement_phrase_3: (formData.get("announcement_phrase_3") as string)?.trim() ?? "",
+          popup_coupon_code: (formData.get("popup_coupon_code") as string)?.trim().toUpperCase() ?? "",
+          popup_coupon_message: (formData.get("popup_coupon_message") as string)?.trim() ?? "",
         });
 
         if (result.success) {
@@ -110,6 +112,41 @@ export default function SiteSettingsForm({ settings }: { settings: SiteSettingsM
             maxLength={120}
             className="w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy"
           />
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-semibold text-ink">Pop-up de cupom para visitante novo</h3>
+        <p className="mt-1 text-xs text-ink-soft">
+          Aparece uma vez por visitante, alguns segundos depois de entrar na loja. Deixe o código em branco pra desativar.
+        </p>
+        <div className="mt-4 flex flex-col gap-3">
+          <div>
+            <label htmlFor="popup_coupon_code" className="text-sm font-medium text-ink">Código do cupom</label>
+            <input
+              id="popup_coupon_code"
+              name="popup_coupon_code"
+              type="text"
+              defaultValue={settings.popup_coupon_code ?? ""}
+              placeholder="Ex: BEMVINDO10"
+              className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm uppercase outline-none focus:border-navy"
+            />
+            <p className="mt-1 text-xs text-ink-soft">
+              Precisa ser um cupom já criado e ativo na tela de Cupons — o pop-up só mostra o código, quem valida o desconto de verdade é o cupom cadastrado lá.
+            </p>
+          </div>
+          <div>
+            <label htmlFor="popup_coupon_message" className="text-sm font-medium text-ink">Mensagem (opcional)</label>
+            <input
+              id="popup_coupon_message"
+              name="popup_coupon_message"
+              type="text"
+              defaultValue={settings.popup_coupon_message ?? ""}
+              placeholder="Ex: Ganhe 10% na primeira compra"
+              maxLength={80}
+              className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy"
+            />
+          </div>
         </div>
       </div>
 
