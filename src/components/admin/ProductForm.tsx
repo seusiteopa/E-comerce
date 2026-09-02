@@ -105,7 +105,7 @@ export default function ProductForm({
         <input id="name" name="name" type="text" required defaultValue={product?.name} className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy" />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid min-w-0 gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="type" className="text-sm font-medium text-ink">Tipo</label>
           <select
@@ -175,7 +175,7 @@ export default function ProductForm({
         <textarea id="description" name="description" required rows={4} defaultValue={product?.description ?? ""} className="mt-2 w-full resize-none rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy" />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid min-w-0 gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="price" className="text-sm font-medium text-ink">Preço (R$)</label>
           <input id="price" name="price" type="number" step="0.01" min="0" required defaultValue={product?.price} className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy" />
@@ -303,7 +303,7 @@ export default function ProductForm({
         </div>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid min-w-0 gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="photos" className="text-sm font-medium text-ink">{isEdit ? "Adicionar mais fotos" : "Fotos do produto"}</label>
           <input

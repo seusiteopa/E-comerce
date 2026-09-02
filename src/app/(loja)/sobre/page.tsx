@@ -30,7 +30,7 @@ export default function SobrePage() {
 
         <div className="mt-10">
           <h2 className="text-xl font-semibold text-ink">Valores</h2>
-          <ul className="mt-5 grid gap-3 sm:grid-cols-2">
+          <ul className="mt-5 grid min-w-0 gap-3 sm:grid-cols-2">
             {values.map((v) => (
               <li key={v} className="flex items-center gap-3 text-sm text-ink-soft">
                 <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-navy" aria-hidden="true" />

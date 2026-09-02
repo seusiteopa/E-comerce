@@ -30,7 +30,7 @@ export default function AddressStep({
   return (
     <div className="rounded-2xl border border-line bg-surface p-6">
       <h2 className="text-sm font-semibold text-ink">Endereço de entrega</h2>
-      <form action={handleSubmit} className="mt-5 grid gap-4 sm:grid-cols-2">
+      <form action={handleSubmit} className="mt-5 grid min-w-0 gap-4 sm:grid-cols-2">
         <Field id="zipCode" label="CEP" className="sm:col-span-1" />
         <div className="sm:col-span-1" />
         <Field id="street" label="Rua" className="sm:col-span-2" />

@@ -72,7 +72,7 @@ export default function CatalogFilters({ products }: { products: Product[] }) {
   );
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[220px_1fr]">
+    <div className="grid min-w-0 gap-8 lg:grid-cols-[220px_1fr]">
       {/* Filtro desktop: barra lateral fixa */}
       <aside className="hidden lg:block">{filterControls}</aside>
 

@@ -23,7 +23,7 @@ export default function AddressForm() {
   }
 
   return (
-    <form action={handleSubmit} className="mt-5 grid gap-4 sm:grid-cols-2">
+    <form action={handleSubmit} className="mt-5 grid min-w-0 gap-4 sm:grid-cols-2">
       <Field id="label" label="Rótulo (ex: Casa)" required={false} />
       <Field id="zipCode" label="CEP" />
       <Field id="street" label="Rua" className="sm:col-span-2" />

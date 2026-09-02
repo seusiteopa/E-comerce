@@ -24,7 +24,7 @@ export default async function AdminDashboardPage() {
     <>
       <AdminHeader title="Dashboard" />
       <Container className="py-8">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <StatCard label="Produtos cadastrados" value={String(productCount ?? 0)} icon={Package} />
           <StatCard label="Pedidos totais" value={String(orderCount ?? 0)} icon={ShoppingBag} />
           <StatCard label="Clientes" value={String(customerCount ?? 0)} icon={Users} />

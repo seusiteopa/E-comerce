@@ -6,7 +6,7 @@ import { contact } from "@/data/site";
 export default function ContatoPage() {
   return (
     <section className="py-16 sm:py-20">
-      <Container className="grid gap-12 lg:grid-cols-[1fr_1fr]">
+      <Container className="grid min-w-0 gap-12 lg:grid-cols-[1fr_1fr]">
         <div>
           <SectionEyebrow>Contato</SectionEyebrow>
           <h1 className="mt-3 text-4xl font-semibold text-ink sm:text-5xl">Fale com a gente</h1>

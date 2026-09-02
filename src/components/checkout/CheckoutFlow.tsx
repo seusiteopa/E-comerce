@@ -23,7 +23,7 @@ export default function CheckoutFlow() {
   const stepNumber = { identificacao: 1, endereco: 2, frete: 3, pagamento: 4 }[step];
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
+    <div className="grid min-w-0 gap-8 lg:grid-cols-[1fr_360px]">
       <div className="flex flex-col gap-6">
         <CheckoutStepper currentStep={stepNumber} />
 

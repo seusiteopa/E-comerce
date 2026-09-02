@@ -40,7 +40,7 @@ export default function CouponForm() {
         <p className="mt-1 text-xs text-ink-soft">3 a 20 letras/números, sem espaço. É como o cliente vai digitar no checkout.</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid min-w-0 gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="discountType" className="text-sm font-medium text-ink">Tipo de desconto</label>
           <select
@@ -70,7 +70,7 @@ export default function CouponForm() {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid min-w-0 gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="validUntil" className="text-sm font-medium text-ink">Válido até (opcional)</label>
           <input id="validUntil" name="validUntil" type="date" className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy" />

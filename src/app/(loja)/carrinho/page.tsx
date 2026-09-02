@@ -14,7 +14,7 @@ export default function CarrinhoPage() {
         <SectionEyebrow>Carrinho</SectionEyebrow>
         <h1 className="mt-3 text-3xl font-semibold text-ink sm:text-4xl">Seu carrinho</h1>
 
-        <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_360px]">
+        <div className="mt-10 grid min-w-0 gap-8 lg:grid-cols-[1fr_360px]">
           <div className="flex flex-col gap-6">
             <CartItemList />
             <CouponField />

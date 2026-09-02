@@ -55,10 +55,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <span>{category?.name}</span>
           </nav>
 
-          <div className="mt-6 grid gap-10 lg:grid-cols-2 lg:items-start">
-            <ProductGallery media={product.images} productName={product.name} />
+          <div className="mt-6 grid min-w-0 gap-10 lg:grid-cols-2 lg:items-start">
+            <div className="min-w-0">
+              <ProductGallery media={product.images} productName={product.name} />
+            </div>
 
-            <div>
+            <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-3">
                 <CategoryBadge label={category?.name ?? ""} />
               </div>
@@ -97,7 +99,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <section className="bg-surface py-16 sm:py-20">
           <Container>
             <h2 className="text-2xl font-semibold text-ink">Produtos relacionados</h2>
-            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-8 grid min-w-0 gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {relatedProducts.map((related) => (
                 <ProductCard key={related.slug} product={related} />
               ))}

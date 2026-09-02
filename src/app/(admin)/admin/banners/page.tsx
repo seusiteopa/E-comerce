@@ -33,7 +33,7 @@ export default async function AdminBannersPage() {
           visual padrão simples.
         </p>
 
-        <div className="grid gap-8 lg:grid-cols-[1fr_1.2fr]">
+        <div className="grid min-w-0 gap-8 lg:grid-cols-[1fr_1.2fr]">
           <BannerForm />
 
           <div className="flex flex-col gap-3">

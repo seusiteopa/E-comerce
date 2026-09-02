@@ -18,7 +18,7 @@ const policies = [
 export default function Footer() {
   return (
     <footer className="border-t border-line bg-navy-deep text-white">
-      <Container className="grid gap-10 py-14 md:grid-cols-[1.2fr_1fr_1fr_1fr]">
+      <Container className="grid min-w-0 gap-10 py-14 md:grid-cols-[1.2fr_1fr_1fr_1fr]">
         <div>
           <Image src="/brand/vecorion-icone-branco-transparente.png" alt="Vecorion" width={64} height={34} className="h-8 w-auto" />
           <p className="mt-4 max-w-xs text-sm text-white/70">{siteConfig.description}</p>
