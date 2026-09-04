@@ -72,7 +72,7 @@ export default function SiteSettingsForm({ settings }: { settings: SiteSettingsM
             <label htmlFor="logoFile" className="text-sm font-medium text-ink">Logo</label>
             {settings.logo_url && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={settings.logo_url} alt="Logo atual" className="mt-2 h-10 w-auto" />
+              <img src={settings.logo_url} alt="Logo atual" className="mt-2 h-20 w-auto max-w-full object-contain" />
             )}
             <input
               id="logoFile"
@@ -81,7 +81,7 @@ export default function SiteSettingsForm({ settings }: { settings: SiteSettingsM
               accept="image/*"
               className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none file:mr-3 file:rounded-lg file:border-0 file:bg-navy file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white"
             />
-            <p className="mt-1 text-xs text-ink-soft">Envie uma nova imagem pra substituir a logo atual do cabeçalho.</p>
+            <p className="mt-1 text-xs text-ink-soft">Envie uma nova imagem pra substituir a logo atual do cabeçalho. Essa prévia é ampliada pra você conferir os detalhes — no site, ela aparece no tamanho do cabeçalho (menor).</p>
           </div>
         </div>
       </div>

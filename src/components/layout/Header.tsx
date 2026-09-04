@@ -10,13 +10,13 @@ export default function Header({ logoUrl, siteName }: { logoUrl?: string; siteNa
   const resolvedName = siteName?.trim() || siteConfig.storeName;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-line bg-surface">
+    <header className="border-b border-line bg-surface">
       <Container className="relative flex h-16 items-center justify-between gap-4">
         <Link href="/" className="flex shrink-0 items-center gap-3">
           {logoUrl ? (
-            <Image src={logoUrl} alt={resolvedName} width={46} height={25} priority className="h-6 w-auto object-contain" />
+            <Image src={logoUrl} alt={resolvedName} width={64} height={36} priority className="h-9 w-auto object-contain" />
           ) : (
-            <Image src="/brand/vecorion-icone-navy-transparente.png" alt={resolvedName} width={46} height={25} priority className="h-6 w-auto" />
+            <Image src="/brand/vecorion-icone-navy-transparente.png" alt={resolvedName} width={64} height={36} priority className="h-9 w-auto" />
           )}
           <span className="h-4 w-px bg-line" aria-hidden="true" />
           <span className="text-sm font-medium text-ink-soft">{resolvedName}</span>

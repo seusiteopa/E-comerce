@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { getProductBySlug } from "@/lib/data/catalog";
-import OfertaCheckout from "@/components/oferta/OfertaCheckout";
+import OfertaShowcase from "@/components/oferta/OfertaShowcase";
 
 interface OfertaPageProps {
   params: Promise<{ slug: string }>;
@@ -25,7 +25,7 @@ export default async function OfertaPage({ params }: OfertaPageProps) {
     .map((img) => ({ url: img.url, alt: img.alt_text, mediaType: (img.media_type as "imagem" | "video") ?? "imagem" }));
 
   return (
-    <OfertaCheckout
+    <OfertaShowcase
       slug={product.slug}
       name={product.name}
       description={product.short_description ?? product.description ?? ""}
