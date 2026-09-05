@@ -45,10 +45,10 @@ export default function HomeBannerCarousel({ banners, variant }: { banners: Bann
           playsInline
           loop={banners.length <= 1}
           onEnded={banners.length > 1 ? goNext : undefined}
-          className="h-full w-full object-cover"
+          className="h-full w-full object-contain"
         />
       ) : (
-        <Image key={active.id} src={active.image_url} alt={active.title ?? ""} fill className="object-cover" priority={variant === "principal"} />
+        <Image key={active.id} src={active.image_url} alt={active.title ?? ""} fill className="object-contain" priority={variant === "principal"} />
       )}
 
       {banners.length > 1 && (
