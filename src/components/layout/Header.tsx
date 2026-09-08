@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { Search, User } from "lucide-react";
@@ -19,7 +21,7 @@ export default function Header({ logoUrl, siteName }: { logoUrl?: string; siteNa
             <Image src="/brand/vecorion-icone-navy-transparente.png" alt={resolvedName} width={64} height={36} priority className="h-9 w-auto" />
           )}
           <span className="h-4 w-px bg-line" aria-hidden="true" />
-          <span className="text-sm font-medium text-ink-soft">{resolvedName}</span>
+          <span className="truncate text-sm font-medium text-ink-soft">{resolvedName}</span>
         </Link>
 
         <form action="/busca" className="hidden max-w-md flex-1 items-center gap-2 rounded-full border border-line px-4 py-2 lg:flex">
@@ -45,7 +47,7 @@ export default function Header({ logoUrl, siteName }: { logoUrl?: string; siteNa
           </ul>
         </nav>
 
-        <div className="flex items-center gap-1">
+        <div className="flex shrink-0 items-center gap-1">
           <Link href="/conta/pedidos" aria-label="Minha conta" className="hidden h-10 w-10 items-center justify-center rounded-full hover:bg-paper sm:flex">
             <User size={20} className="text-ink" aria-hidden="true" />
           </Link>

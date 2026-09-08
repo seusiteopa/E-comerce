@@ -1,7 +1,5 @@
-import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import AnnouncementBar, { ANNOUNCEMENT_BAR_HEIGHT } from "@/components/layout/AnnouncementBar";
-import StickyHeaderWrapper from "@/components/layout/StickyHeaderWrapper";
+import SiteChrome from "@/components/layout/SiteChrome";
 import CartAddedToast from "@/components/loja/CartAddedToast";
 import WelcomeCouponPopup from "@/components/loja/WelcomeCouponPopup";
 import ThemeOverride from "@/components/layout/ThemeOverride";
@@ -12,8 +10,6 @@ import { getSiteSettings } from "@/lib/data/site-settings";
 // toda requisição de toda página da loja.
 export const revalidate = 300;
 
-const HEADER_HEIGHT = 64;
-
 export default async function LojaLayout({ children }: { children: React.ReactNode }) {
   const settings = await getSiteSettings();
   const phrases = [
@@ -21,17 +17,12 @@ export default async function LojaLayout({ children }: { children: React.ReactNo
     settings.announcement_phrase_2,
     settings.announcement_phrase_3,
   ].filter((p): p is string => Boolean(p && p.trim()));
-  const hasAnnouncementBar = phrases.length > 0;
-  const topPadding = HEADER_HEIGHT + (hasAnnouncementBar ? ANNOUNCEMENT_BAR_HEIGHT : 0);
 
   return (
     <>
       <ThemeOverride primaryColor={settings.theme_primary_color} accentColor={settings.theme_accent_color} />
-      <AnnouncementBar phrases={phrases} />
-      <StickyHeaderWrapper hasAnnouncementBar={hasAnnouncementBar}>
-        <Header logoUrl={settings.logo_url} siteName={settings.site_name} />
-      </StickyHeaderWrapper>
-      <main id="conteudo-principal" style={{ paddingTop: topPadding }}>
+      <SiteChrome phrases={phrases} logoUrl={settings.logo_url} siteName={settings.site_name} />
+      <main id="conteudo-principal" style={{ paddingTop: "var(--site-chrome-height, 96px)" }}>
         {children}
       </main>
       <Footer />
