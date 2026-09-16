@@ -10,7 +10,28 @@ interface OfertaPageProps {
 export async function generateMetadata({ params }: OfertaPageProps): Promise<Metadata> {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
-  return { title: product?.name ?? "Oferta", robots: { index: false, follow: false } };
+  if (!product) return { title: "Oferta", robots: { index: false, follow: false } };
+
+  const firstPhoto = [...(product.product_images ?? [])]
+    .sort((a, b) => a.display_order - b.display_order)
+    .find((img) => img.media_type !== "video");
+
+  return {
+    title: product.name,
+    description: product.short_description ?? undefined,
+    robots: { index: false, follow: false },
+    openGraph: {
+      title: product.name,
+      description: product.short_description ?? undefined,
+      images: firstPhoto ? [{ url: firstPhoto.url, alt: product.name }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.name,
+      description: product.short_description ?? undefined,
+      images: firstPhoto ? [firstPhoto.url] : undefined,
+    },
+  };
 }
 
 export default async function OfertaPage({ params }: OfertaPageProps) {

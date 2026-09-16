@@ -25,12 +25,27 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   const productRow = await getProductBySlug(slug);
   if (!productRow) return { title: "Produto não encontrado" };
 
+  // Primeira mídia do produto, na ordem cadastrada — mas só se for foto:
+  // link de WhatsApp/Instagram/etc. não sabe gerar prévia a partir de um
+  // vídeo, então se a primeira posição for vídeo, usa a próxima que for
+  // imagem (ou nenhuma, se o produto só tiver vídeo).
+  const firstPhoto = [...(productRow.product_images ?? [])]
+    .sort((a, b) => a.display_order - b.display_order)
+    .find((img) => img.media_type !== "video");
+
   return {
     title: productRow.name,
     description: productRow.short_description ?? undefined,
     openGraph: {
       title: productRow.name,
       description: productRow.short_description ?? undefined,
+      images: firstPhoto ? [{ url: firstPhoto.url, alt: productRow.name }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: productRow.name,
+      description: productRow.short_description ?? undefined,
+      images: firstPhoto ? [firstPhoto.url] : undefined,
     },
   };
 }
