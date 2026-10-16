@@ -7,6 +7,7 @@ import { createProductAction, updateProductAction, deleteProductImageAction } fr
 import { uploadFileToCloudinary } from "@/lib/cloudinary-client";
 import { uploadDigitalFileToCloudinary } from "@/lib/cloudinary-client";
 import { CategoryRow, ProductRow } from "@/types/database";
+import IconPicker from "@/components/admin/IconPicker";
 
 interface ExistingMedia {
   id: string;
@@ -36,6 +37,7 @@ export default function ProductForm({
   const [uploadStatus, setUploadStatus] = useState<string | null>(null);
   const [hiddenChecked, setHiddenChecked] = useState(product?.hidden ?? false);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [iconUrl, setIconUrl] = useState<string | null>(null);
   const isEdit = Boolean(product);
 
   function handleSubmit(formData: FormData) {
@@ -56,6 +58,11 @@ export default function ProductForm({
           setUploadStatus(`Enviando foto ${i + 1} de ${photoFiles.length}...`);
           const url = await uploadFileToCloudinary(photoFiles[i], "image", folder);
           formData.append("photoUrls", url);
+        }
+
+        // Ícone pronto escolhido e nenhuma foto enviada: usa o ícone como imagem do produto.
+        if (iconUrl && photoFiles.length === 0) {
+          formData.append("photoUrls", iconUrl);
         }
 
         if (videoFile instanceof File && videoFile.size > 0) {
@@ -315,6 +322,8 @@ export default function ProductForm({
           </div>
         </div>
       )}
+
+      <IconPicker value={iconUrl} onChange={setIconUrl} />
 
       <div className="grid min-w-0 gap-4 sm:grid-cols-2">
         <div>

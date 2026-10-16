@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentStore } from "@/lib/store/current";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import { signUpSchema, loginSchema } from "@/lib/validation/schemas";
 import { ActionResult, actionSuccess, actionError } from "@/lib/action-result";
@@ -55,16 +56,15 @@ export async function loginAction(formData: FormData): Promise<ActionResult<{ is
     return actionError("E-mail ou senha incorretos.");
   }
 
-  // Login único para todo mundo — quem é administrador vai direto pro
-  // painel /admin ao entrar; clientes comuns vão pra área normal da conta.
-  // Evita precisar de dois "apps" instalados para o mesmo domínio.
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", data.user.id)
-    .single();
+  // Login único para todo mundo — quem administra ESTA loja (membro) ou é dono
+  // da plataforma vai direto pro painel /admin; clientes vão pra área normal.
+  const store = await getCurrentStore();
+  const [{ data: member }, { data: platformAdmin }] = await Promise.all([
+    supabase.from("store_members").select("role").eq("store_id", store.id).eq("user_id", data.user.id).maybeSingle(),
+    supabase.from("platform_admins").select("user_id").eq("user_id", data.user.id).maybeSingle(),
+  ]);
 
-  return actionSuccess({ isAdmin: profile?.role === "administrador" });
+  return actionSuccess({ isAdmin: Boolean(member || platformAdmin) });
 }
 
 export async function logoutAction() {

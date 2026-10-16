@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentStore } from "@/lib/store/current";
 import { requireAdminProfile, ForbiddenError, UnauthorizedError } from "@/lib/auth";
 import { ActionResult, actionSuccess, actionError } from "@/lib/action-result";
 import { logger } from "@/lib/logger";
@@ -28,14 +29,16 @@ export async function updateSiteSettingsAction(settings: Record<string, string>)
   }
 
   const supabase = await createSupabaseServerClient();
+  const { id: storeId } = await getCurrentStore();
 
   const rows = Object.entries(settings).map(([key, value]) => ({
+    store_id: storeId,
     key,
     value,
     updated_at: new Date().toISOString(),
   }));
 
-  const { error } = await supabase.from("site_settings").upsert(rows, { onConflict: "key" });
+  const { error } = await supabase.from("site_settings").upsert(rows, { onConflict: "store_id,key" });
 
   if (error) {
     logger.error("Erro ao salvar configurações do site", { error: error.message });

@@ -12,6 +12,8 @@ import { ProductRow, ProductVariationRow } from "@/types/database";
 import { createPaymentPreference, createPixPayment, fetchPaymentStatus } from "@/lib/integrations/mercadopago";
 import { sendTransactionalEmail } from "@/lib/integrations/email";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
+import { getCurrentStore, getRequestOrigin } from "@/lib/store/current";
+import { getStorePaymentContext, PaymentNotConnectedError, type StorePaymentContext } from "@/lib/integrations/mercadopago/oauth";
 
 type CreateOrderResult =
   | {
@@ -45,6 +47,29 @@ export async function createOrderAction(input: unknown): Promise<ActionResult<Cr
     throw error;
   }
 
+  const store = await getCurrentStore();
+  const storeId = store.id;
+
+  // Loja pausada pelo dono da plataforma não aceita pedidos novos.
+  if (store.status === "pausada") {
+    return actionError("Esta loja está temporariamente indisponível.");
+  }
+  // Cada loja cobra com a PRÓPRIA conta Mercado Pago (OAuth). Sem conexão, não há como cobrar:
+  // nunca usar o token de outra conta (o dinheiro cairia no lugar errado).
+  let paymentContext: StorePaymentContext;
+  try {
+    paymentContext = await getStorePaymentContext(store);
+  } catch (error) {
+    if (error instanceof PaymentNotConnectedError) {
+      return actionError("Esta loja ainda não está habilitada para pagamentos online.");
+    }
+    logger.error("Falha ao preparar pagamento da loja", {
+      storeId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return actionError("Não foi possível iniciar o pagamento agora. Tente novamente em instantes.");
+  }
+
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   const payerEmail = user?.email ?? "";
@@ -54,6 +79,7 @@ export async function createOrderAction(input: unknown): Promise<ActionResult<Cr
     .from("products")
     .select("*")
     .in("id", productIds)
+    .eq("store_id", storeId)
     .eq("status", "ativo");
 
   if (productsError || !products || products.length !== productIds.length) {
@@ -86,7 +112,7 @@ export async function createOrderAction(input: unknown): Promise<ActionResult<Cr
     const unitPrice = Number(product.promo_price ?? product.price);
 
     if (product.type === "fisico") {
-      const variation = (variations as ProductVariationRow[]).find((v) => v.id === item.variationId);
+      const variation = (variations as ProductVariationRow[]).find((v) => v.id === item.variationId && v.product_id === product.id);
       if (!variation) {
         return actionError(`Selecione uma variação válida para "${product.name}".`);
       }
@@ -117,6 +143,7 @@ export async function createOrderAction(input: unknown): Promise<ActionResult<Cr
     const { data: coupon } = await supabase
       .from("coupons")
       .select("*")
+      .eq("store_id", storeId)
       .eq("code", parsed.data.couponCode.toUpperCase())
       .maybeSingle();
 
@@ -127,6 +154,7 @@ export async function createOrderAction(input: unknown): Promise<ActionResult<Cr
     const { count: previousUsage } = await supabase
       .from("orders")
       .select("id", { count: "exact", head: true })
+      .eq("store_id", storeId)
       .eq("profile_id", profile.id)
       .eq("coupon_code", coupon.code);
 
@@ -181,6 +209,7 @@ export async function createOrderAction(input: unknown): Promise<ActionResult<Cr
   const { data: order, error: orderError } = await supabase
     .from("orders")
     .insert({
+      store_id: storeId,
       profile_id: profile.id,
       address_id: parsed.data.addressId ?? null,
       subtotal,
@@ -211,6 +240,7 @@ export async function createOrderAction(input: unknown): Promise<ActionResult<Cr
   }
 
   const { error: paymentError } = await serviceClient.from("payments").insert({
+    store_id: storeId,
     order_id: order.id,
     amount: total,
     status: "pendente",
@@ -220,7 +250,7 @@ export async function createOrderAction(input: unknown): Promise<ActionResult<Cr
     logger.error("Erro ao criar registro de pagamento", { orderId: order.id, error: paymentError.message });
   }
 
-  const description = `Pedido ${order.id} — Loja Vecorion`;
+  const description = `Pedido ${order.id} — ${store.name}`;
 
   let result: CreateOrderResult;
   try {
@@ -231,6 +261,9 @@ export async function createOrderAction(input: unknown): Promise<ActionResult<Cr
         description,
         payerEmail,
         payerDocument: parsed.data.payerDocument,
+        accessToken: paymentContext.accessToken,
+        applicationFee: paymentContext.feeFor(total),
+        storeId,
       });
       result = {
         orderId: order.id,
@@ -247,6 +280,10 @@ export async function createOrderAction(input: unknown): Promise<ActionResult<Cr
         description,
         payerEmail,
         payerDocument: parsed.data.payerDocument,
+        accessToken: paymentContext.accessToken,
+        applicationFee: paymentContext.feeFor(total),
+        storeId,
+        storeOrigin: await getRequestOrigin(),
       });
       result = { orderId: order.id, total, paymentMethod: "redirect", checkoutUrl: preference.checkoutUrl };
     }
@@ -277,7 +314,9 @@ export async function getPixPaymentStatusAction(
   paymentId: string
 ): Promise<ActionResult<{ status: string }>> {
   try {
-    const result = await fetchPaymentStatus(paymentId);
+    const store = await getCurrentStore();
+    const paymentContext = await getStorePaymentContext(store);
+    const result = await fetchPaymentStatus(paymentId, paymentContext.accessToken);
     return actionSuccess({ status: result.status });
   } catch (error) {
     logger.error("Erro ao consultar status do pagamento Pix", {

@@ -3,12 +3,18 @@ import { MercadoPagoConfig, Preference, Payment } from "mercadopago";
 import crypto from "crypto";
 import { logger } from "@/lib/logger";
 
-function getClient() {
-  const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
-  if (!accessToken) {
+function getClient(accessToken?: string) {
+  const token = accessToken ?? process.env.MERCADOPAGO_ACCESS_TOKEN;
+  if (!token) {
     throw new Error("MERCADOPAGO_ACCESS_TOKEN não configurado.");
   }
-  return new MercadoPagoConfig({ accessToken });
+  return new MercadoPagoConfig({ accessToken: token });
+}
+
+/** Endereço que o Mercado Pago chama quando o pagamento muda. Leva a loja para o webhook usar o token certo. */
+function notificationUrl(platformSiteUrl: string, storeId?: string) {
+  const base = `${platformSiteUrl}/api/webhooks/mercadopago`;
+  return storeId ? `${base}?store=${storeId}` : base;
 }
 
 export interface CreatePaymentPreferenceInput {
@@ -17,6 +23,14 @@ export interface CreatePaymentPreferenceInput {
   description: string;
   payerEmail: string;
   payerDocument: string;
+  /** Token do vendedor (OAuth). Sem ele usa o token da plataforma. */
+  accessToken?: string;
+  /** Comissão da plataforma em R$ (split). */
+  applicationFee?: number;
+  /** Id da loja — vai na URL do webhook. */
+  storeId?: string;
+  /** Endereço público da loja, para os links de retorno do cliente. */
+  storeOrigin?: string;
 }
 
 export interface CreatePaymentPreferenceResult {
@@ -27,11 +41,12 @@ export interface CreatePaymentPreferenceResult {
 export async function createPaymentPreference(
   input: CreatePaymentPreferenceInput
 ): Promise<CreatePaymentPreferenceResult> {
-  const client = getClient();
+  const client = getClient(input.accessToken);
   const preference = new Preference(client);
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-  if (!siteUrl) throw new Error("NEXT_PUBLIC_SITE_URL não configurado.");
+  const platformUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!platformUrl) throw new Error("NEXT_PUBLIC_SITE_URL não configurado.");
+  const siteUrl = input.storeOrigin ?? platformUrl;
 
   try {
     const result = await preference.create({
@@ -56,7 +71,8 @@ export async function createPaymentPreference(
           failure: `${siteUrl}/checkout?pedido=${input.orderId}&erro=pagamento`,
         },
         auto_return: "approved",
-        notification_url: `${siteUrl}/api/webhooks/mercadopago`,
+        notification_url: notificationUrl(platformUrl, input.storeId),
+        ...(input.applicationFee && input.applicationFee > 0 ? ({ marketplace_fee: input.applicationFee } as object) : {}),
       },
     });
 
@@ -82,7 +98,11 @@ export interface CreatePixPaymentInput {
   totalAmount: number;
   description: string;
   payerEmail: string;
-  payerDocument: string;
+  /** Opcional (no balcão o cliente não informa CPF). */
+  payerDocument?: string;
+  accessToken?: string;
+  applicationFee?: number;
+  storeId?: string;
 }
 
 export interface CreatePixPaymentResult {
@@ -95,11 +115,11 @@ export interface CreatePixPaymentResult {
 export async function createPixPayment(
   input: CreatePixPaymentInput
 ): Promise<CreatePixPaymentResult> {
-  const client = getClient();
+  const client = getClient(input.accessToken);
   const payment = new Payment(client);
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-  if (!siteUrl) throw new Error("NEXT_PUBLIC_SITE_URL não configurado.");
+  const platformUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!platformUrl) throw new Error("NEXT_PUBLIC_SITE_URL não configurado.");
 
   try {
     const result = await payment.create({
@@ -109,10 +129,11 @@ export async function createPixPayment(
         payment_method_id: "pix",
         payer: {
           email: input.payerEmail,
-          identification: { type: "CPF", number: input.payerDocument },
+          ...(input.payerDocument ? { identification: { type: "CPF", number: input.payerDocument } } : {}),
         },
         external_reference: input.orderId,
-        notification_url: `${siteUrl}/api/webhooks/mercadopago`,
+        notification_url: notificationUrl(platformUrl, input.storeId),
+        ...(input.applicationFee && input.applicationFee > 0 ? ({ application_fee: input.applicationFee } as object) : {}),
       },
       requestOptions: { idempotencyKey: input.orderId },
     });
@@ -182,11 +203,14 @@ export function verifyWebhookSignature(params: {
   }
 }
 
-export async function fetchPaymentStatus(paymentId: string): Promise<{
+export async function fetchPaymentStatus(
+  paymentId: string,
+  accessTokenOverride?: string
+): Promise<{
   status: "pending" | "approved" | "rejected" | "cancelled" | "refunded";
   externalReference: string | null;
 }> {
-  const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
+  const accessToken = accessTokenOverride ?? process.env.MERCADOPAGO_ACCESS_TOKEN;
   if (!accessToken) throw new Error("MERCADOPAGO_ACCESS_TOKEN não configurado.");
 
   const response = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {

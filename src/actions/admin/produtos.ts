@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentStore } from "@/lib/store/current";
 import { requireAdminProfile, ForbiddenError, UnauthorizedError } from "@/lib/auth";
 import { productAdminSchema } from "@/lib/validation/admin-schemas";
 import { ActionResult, actionSuccess, actionError } from "@/lib/action-result";
@@ -54,6 +55,7 @@ export async function createProductAction(formData: FormData): Promise<ActionRes
   }
 
   const supabase = await createSupabaseServerClient();
+  const { id: storeId } = await getCurrentStore();
   const slug = slugify(parsed.data.name);
 
   let categorySlug = parsed.data.categorySlug;
@@ -64,10 +66,12 @@ export async function createProductAction(formData: FormData): Promise<ActionRes
       .from("categories")
       .select("slug")
       .eq("slug", newSlug)
+      .eq("store_id", storeId)
       .maybeSingle();
 
     if (!existing) {
       const { error: categoryError } = await supabase.from("categories").insert({
+        store_id: storeId,
         slug: newSlug,
         name: parsed.data.newCategoryName,
         product_type: parsed.data.type,
@@ -88,6 +92,7 @@ export async function createProductAction(formData: FormData): Promise<ActionRes
   const { data: product, error } = await supabase
     .from("products")
     .insert({
+      store_id: storeId,
       slug,
       name: parsed.data.name,
       type: parsed.data.type,
@@ -193,13 +198,25 @@ export async function updateProductAction(productId: string, formData: FormData)
   }
 
   const supabase = await createSupabaseServerClient();
+  const { id: storeId } = await getCurrentStore();
+
+  // O produto precisa pertencer a ESTA loja — nunca confiar só no id vindo do navegador.
+  const { data: ownedProduct } = await supabase
+    .from("products")
+    .select("id")
+    .eq("id", productId)
+    .eq("store_id", storeId)
+    .maybeSingle();
+  if (!ownedProduct) return actionError("Produto não encontrado nesta loja.");
 
   let categorySlug = parsed.data.categorySlug;
   if (parsed.data.newCategoryName) {
     const newSlug = slugify(parsed.data.newCategoryName);
-    const { data: existing } = await supabase.from("categories").select("slug").eq("slug", newSlug).maybeSingle();
+    const { data: existing } = await supabase.from("categories").select("slug").eq("slug", newSlug)
+      .eq("store_id", storeId).maybeSingle();
     if (!existing) {
       const { error: categoryError } = await supabase.from("categories").insert({
+        store_id: storeId,
         slug: newSlug,
         name: parsed.data.newCategoryName,
         product_type: parsed.data.type,
@@ -228,7 +245,7 @@ export async function updateProductAction(productId: string, formData: FormData)
       hidden: parsed.data.hidden,
       updated_at: new Date().toISOString(),
     })
-    .eq("id", productId);
+    .eq("id", productId).eq("store_id", storeId);
 
   if (error) {
     logger.error("Erro ao atualizar produto", { productId, error: error.message });
@@ -331,7 +348,8 @@ export async function updateProductStatusAction(productId: string, status: "ativ
   }
 
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.from("products").update({ status, updated_at: new Date().toISOString() }).eq("id", productId);
+  const { id: storeId } = await getCurrentStore();
+  const { error } = await supabase.from("products").update({ status, updated_at: new Date().toISOString() }).eq("id", productId).eq("store_id", storeId);
 
   if (error) return actionError("Não foi possível atualizar o status do produto.");
 
@@ -347,7 +365,8 @@ export async function deleteProductAction(productId: string): Promise<ActionResu
   }
 
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.from("products").delete().eq("id", productId);
+  const { id: storeId } = await getCurrentStore();
+  const { error } = await supabase.from("products").delete().eq("id", productId).eq("store_id", storeId);
 
   if (error) {
     logger.error("Erro ao excluir produto", { productId, error: error.message });

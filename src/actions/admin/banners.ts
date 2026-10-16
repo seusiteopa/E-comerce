@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentStore } from "@/lib/store/current";
 import { requireAdminProfile, ForbiddenError, UnauthorizedError } from "@/lib/auth";
 import { ActionResult, actionSuccess, actionError } from "@/lib/action-result";
 import { logger } from "@/lib/logger";
@@ -45,23 +46,25 @@ export async function createBannerAction(formData: FormData): Promise<ActionResu
   }
 
   const supabase = await createSupabaseServerClient();
+  const { id: storeId } = await getCurrentStore();
 
   const { data: existing } = await supabase
     .from("banners")
     .select("display_order")
+    .eq("store_id", storeId)
     .eq("position", position)
     .order("display_order", { ascending: false })
     .limit(1);
   let nextOrder = (existing?.[0]?.display_order ?? -1) + 1;
 
-  const rows: { image_url: string; link_url: string | null; title: string | null; position: string; active: boolean; display_order: number; media_type: string }[] = [];
+  const rows: { store_id: string; image_url: string; link_url: string | null; title: string | null; position: string; active: boolean; display_order: number; media_type: string }[] = [];
 
   photoUrls.forEach((url) => {
-    rows.push({ image_url: url, link_url: linkUrl, title, position, active, display_order: nextOrder++, media_type: "imagem" });
+    rows.push({ store_id: storeId, image_url: url, link_url: linkUrl, title, position, active, display_order: nextOrder++, media_type: "imagem" });
   });
 
   if (videoUrl) {
-    rows.push({ image_url: videoUrl, link_url: linkUrl, title, position, active, display_order: nextOrder++, media_type: "video" });
+    rows.push({ store_id: storeId, image_url: videoUrl, link_url: linkUrl, title, position, active, display_order: nextOrder++, media_type: "video" });
   }
 
   const { error } = await supabase.from("banners").insert(rows);
@@ -84,7 +87,8 @@ export async function toggleBannerActiveAction(id: string, active: boolean): Pro
   }
 
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.from("banners").update({ active }).eq("id", id);
+  const { id: storeId } = await getCurrentStore();
+  const { error } = await supabase.from("banners").update({ active }).eq("id", id).eq("store_id", storeId);
 
   if (error) {
     return actionError("Não foi possível atualizar o banner.");
@@ -103,7 +107,8 @@ export async function deleteBannerAction(id: string): Promise<ActionResult<null>
   }
 
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.from("banners").delete().eq("id", id);
+  const { id: storeId } = await getCurrentStore();
+  const { error } = await supabase.from("banners").delete().eq("id", id).eq("store_id", storeId);
 
   if (error) {
     return actionError("Não foi possível excluir o banner.");

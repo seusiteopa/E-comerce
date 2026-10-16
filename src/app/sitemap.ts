@@ -1,6 +1,6 @@
 import { MetadataRoute } from "next";
-import { siteConfig } from "@/data/site";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentStore, getRequestOrigin } from "@/lib/store/current";
 
 export const dynamic = "force-dynamic"; // depende de consulta ao banco, não pode ser force-static
 
@@ -13,8 +13,9 @@ const staticRoutes = ["", "/produtos", "/servicos", "/sobre", "/faq", "/contato"
  * mesmo princípio já usado no projeto Vecorion Cursos.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const origin = await getRequestOrigin();
   const staticEntries: MetadataRoute.Sitemap = staticRoutes.map((route) => ({
-    url: `${siteConfig.url}${route}`,
+    url: `${origin}${route}`,
     lastModified: new Date(),
     changeFrequency: "daily",
     priority: route === "" ? 1 : 0.8,
@@ -22,20 +23,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     const supabase = await createSupabaseServerClient();
+    const { id: storeId } = await getCurrentStore();
     const [{ data: products }, { data: categories }] = await Promise.all([
-      supabase.from("products").select("slug, updated_at").eq("status", "ativo"),
-      supabase.from("categories").select("slug").eq("active", true),
+      supabase.from("products").select("slug, updated_at").eq("store_id", storeId).eq("status", "ativo"),
+      supabase.from("categories").select("slug").eq("store_id", storeId).eq("active", true),
     ]);
 
     const productEntries: MetadataRoute.Sitemap = (products ?? []).map((p) => ({
-      url: `${siteConfig.url}/produtos/${p.slug}`,
+      url: `${origin}/produtos/${p.slug}`,
       lastModified: new Date(p.updated_at),
       changeFrequency: "weekly",
       priority: 0.7,
     }));
 
     const categoryEntries: MetadataRoute.Sitemap = (categories ?? []).map((c) => ({
-      url: `${siteConfig.url}/categorias/${c.slug}`,
+      url: `${origin}/categorias/${c.slug}`,
       changeFrequency: "weekly",
       priority: 0.6,
     }));

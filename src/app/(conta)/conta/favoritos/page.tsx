@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentStore } from "@/lib/store/current";
 import { requireAuthenticatedProfile } from "@/lib/auth";
 import { mapToProduct, type ProductWithDetails } from "@/lib/data/catalog";
 import ProductGrid from "@/components/loja/ProductGrid";
@@ -11,19 +12,21 @@ export const metadata: Metadata = { title: "Favoritos" };
 export default async function FavoritosPage() {
   const profile = await requireAuthenticatedProfile();
   const supabase = await createSupabaseServerClient();
+  const { id: storeId } = await getCurrentStore();
 
   const { data } = await supabase
     .from("favorites")
     .select(`
       product_id,
-      products (
+      products!inner (
         *,
         product_images ( url, alt_text, display_order, media_type ),
         product_variations ( * ),
         digital_assets ( delivery_type )
       )
     `)
-    .eq("profile_id", profile.id);
+    .eq("profile_id", profile.id)
+    .eq("products.store_id", storeId);
 
   const products = (data ?? [])
     .map((row) => row.products)

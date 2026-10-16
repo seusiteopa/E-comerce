@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentStore } from "@/lib/store/current";
 import { requireAdminProfile, ForbiddenError, UnauthorizedError } from "@/lib/auth";
 import { couponAdminSchema } from "@/lib/validation/admin-schemas";
 import { ActionResult, actionSuccess, actionError } from "@/lib/action-result";
@@ -41,8 +42,10 @@ export async function createCouponAction(formData: FormData): Promise<ActionResu
 
   const active = formData.get("active") === "on";
   const supabase = await createSupabaseServerClient();
+  const { id: storeId } = await getCurrentStore();
 
   const { error } = await supabase.from("coupons").insert({
+    store_id: storeId,
     code: parsed.data.code,
     discount_type: parsed.data.discountType,
     discount_value: parsed.data.discountValue,
@@ -73,7 +76,8 @@ export async function toggleCouponActiveAction(code: string, active: boolean): P
   }
 
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.from("coupons").update({ active }).eq("code", code);
+  const { id: storeId } = await getCurrentStore();
+  const { error } = await supabase.from("coupons").update({ active }).eq("code", code).eq("store_id", storeId);
   if (error) return actionError("Não foi possível atualizar o cupom.");
 
   revalidatePath("/admin/cupons");
@@ -88,7 +92,8 @@ export async function deleteCouponAction(code: string): Promise<ActionResult> {
   }
 
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.from("coupons").delete().eq("code", code);
+  const { id: storeId } = await getCurrentStore();
+  const { error } = await supabase.from("coupons").delete().eq("code", code).eq("store_id", storeId);
   if (error) return actionError("Não foi possível excluir o cupom.");
 
   revalidatePath("/admin/cupons");

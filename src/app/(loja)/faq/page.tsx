@@ -4,12 +4,14 @@ import SectionEyebrow from "@/components/ui/SectionEyebrow";
 import Accordion from "@/components/ui/Accordion";
 import WhatsAppButton from "@/components/ui/WhatsAppButton";
 import { faqItems } from "@/data/faq";
+import { getSiteSettings } from "@/lib/data/site-settings";
 
 export const metadata: Metadata = { title: "Perguntas Frequentes" };
 
 const topics = Array.from(new Set(faqItems.map((f) => f.topic)));
 
-export default function FaqPage() {
+export default async function FaqPage() {
+  const settings = await getSiteSettings();
   return (
     <section className="py-16 sm:py-20">
       <Container className="max-w-3xl">
@@ -30,7 +32,7 @@ export default function FaqPage() {
         <div className="mt-12 rounded-2xl border border-line bg-surface p-6 text-center">
           <p className="text-sm text-ink-soft">Não encontrou o que precisava?</p>
           <div className="mt-4">
-            <WhatsAppButton message="Olá! Tenho uma dúvida que não encontrei no FAQ." />
+            <WhatsAppButton message="Olá! Tenho uma dúvida que não encontrei no FAQ." phone={settings.whatsapp_number?.trim()} />
           </div>
         </div>
       </Container>

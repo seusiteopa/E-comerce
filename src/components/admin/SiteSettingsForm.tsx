@@ -37,6 +37,10 @@ export default function SiteSettingsForm({ settings }: { settings: SiteSettingsM
           popup_coupon_message: (formData.get("popup_coupon_message") as string)?.trim() ?? "",
           theme_primary_color: (formData.get("theme_primary_color") as string) ?? "",
           theme_accent_color: (formData.get("theme_accent_color") as string) ?? "",
+          site_description: (formData.get("site_description") as string)?.trim() ?? "",
+          whatsapp_number: ((formData.get("whatsapp_number") as string) ?? "").replace(/\D/g, ""),
+          contact_email: (formData.get("contact_email") as string)?.trim() ?? "",
+          instagram_url: (formData.get("instagram_url") as string)?.trim() ?? "",
         });
 
         if (result.success) {
@@ -82,6 +86,62 @@ export default function SiteSettingsForm({ settings }: { settings: SiteSettingsM
               className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none file:mr-3 file:rounded-lg file:border-0 file:bg-navy file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white"
             />
             <p className="mt-1 text-xs text-ink-soft">Envie uma nova imagem pra substituir a logo atual do cabeçalho. Essa prévia é ampliada pra você conferir os detalhes — no site, ela aparece no tamanho do cabeçalho (menor).</p>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-semibold text-ink">Informações institucionais</h3>
+        <p className="mt-1 text-xs text-ink-soft">
+          Aparecem no rodapé, na página de contato e na prévia do link quando alguém compartilha o site. Em branco = usa o texto padrão.
+        </p>
+        <div className="mt-4 flex flex-col gap-4">
+          <div>
+            <label htmlFor="site_description" className="text-sm font-medium text-ink">Descrição da loja</label>
+            <textarea
+              id="site_description"
+              name="site_description"
+              rows={3}
+              maxLength={200}
+              defaultValue={settings.site_description ?? ""}
+              placeholder="Ex: Moda feminina com entrega para todo o Brasil."
+              className="mt-2 w-full resize-none rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy"
+            />
+          </div>
+          <div>
+            <label htmlFor="whatsapp_number" className="text-sm font-medium text-ink">WhatsApp (com DDD, só números)</label>
+            <input
+              id="whatsapp_number"
+              name="whatsapp_number"
+              type="tel"
+              inputMode="numeric"
+              defaultValue={settings.whatsapp_number ?? ""}
+              placeholder="5519999999999"
+              className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy"
+            />
+            <p className="mt-1 text-xs text-ink-soft">Inclua o código do país: 55 + DDD + número.</p>
+          </div>
+          <div>
+            <label htmlFor="contact_email" className="text-sm font-medium text-ink">E-mail de contato</label>
+            <input
+              id="contact_email"
+              name="contact_email"
+              type="email"
+              defaultValue={settings.contact_email ?? ""}
+              placeholder="contato@sualoja.com.br"
+              className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy"
+            />
+          </div>
+          <div>
+            <label htmlFor="instagram_url" className="text-sm font-medium text-ink">Link do Instagram</label>
+            <input
+              id="instagram_url"
+              name="instagram_url"
+              type="url"
+              defaultValue={settings.instagram_url ?? ""}
+              placeholder="https://instagram.com/sualoja"
+              className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy"
+            />
           </div>
         </div>
       </div>

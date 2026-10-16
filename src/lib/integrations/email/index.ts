@@ -14,7 +14,9 @@ export type TransactionalEmailEvent =
   | "pedido_criado"
   | "pagamento_aprovado"
   | "pedido_enviado"
-  | "orcamento_recebido";
+  | "orcamento_recebido"
+  | "mensalidade_atrasada"
+  | "mensalidade_confirmada";
 
 export interface SendTransactionalEmailInput {
   event: TransactionalEmailEvent;
@@ -27,6 +29,8 @@ const subjectByEvent: Record<TransactionalEmailEvent, string> = {
   pagamento_aprovado: "Pagamento confirmado — Loja Vecorion",
   pedido_enviado: "Seu pedido foi enviado — Loja Vecorion",
   orcamento_recebido: "Recebemos sua solicitação de orçamento — Vecorion",
+  mensalidade_atrasada: "Não conseguimos cobrar a mensalidade da sua loja — Vecorion",
+  mensalidade_confirmada: "Mensalidade da sua loja confirmada — Vecorion",
 };
 
 /**
@@ -64,6 +68,10 @@ function buildEmailHtml(event: TransactionalEmailEvent, data: Record<string, str
       return `<p>Olá, ${safe.customerName}!</p><p>Seu pedido <strong>#${safe.orderId}</strong> foi enviado. ${safe.trackingInfo ?? ""}</p>`;
     case "orcamento_recebido":
       return `<p>Olá, ${safe.customerName}!</p><p>Recebemos sua solicitação de orçamento para <strong>${safe.serviceName}</strong>. Nossa equipe entrará em contato em breve.</p>`;
+    case "mensalidade_atrasada":
+      return `<p>Olá!</p><p>Não conseguimos cobrar a mensalidade da loja <strong>${safe.storeName}</strong> no meio de pagamento autorizado. Sua loja continua funcionando normalmente, mas pedimos que verifique o cartão ou a conta autorizada no Mercado Pago para regularizar.</p>`;
+    case "mensalidade_confirmada":
+      return `<p>Olá!</p><p>A mensalidade da loja <strong>${safe.storeName}</strong> foi cobrada com sucesso. Obrigado por usar a Vecorion.</p>`;
   }
 }
 

@@ -25,7 +25,7 @@ export default async function LojaLayout({ children }: { children: React.ReactNo
       <main id="conteudo-principal" style={{ paddingTop: "var(--site-chrome-height, 96px)" }}>
         {children}
       </main>
-      <Footer />
+      <Footer settings={settings} />
       <CartAddedToast />
       <WelcomeCouponPopup couponCode={settings.popup_coupon_code} message={settings.popup_coupon_message} />
     </>

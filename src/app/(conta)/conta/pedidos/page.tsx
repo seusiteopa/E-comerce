@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentStore } from "@/lib/store/current";
 import { requireAuthenticatedProfile } from "@/lib/auth";
 import { StatusPill } from "@/components/ui/Badge";
 import EmptyState from "@/components/ui/EmptyState";
@@ -12,10 +13,12 @@ export const metadata: Metadata = { title: "Meus Pedidos" };
 export default async function PedidosPage() {
   const profile = await requireAuthenticatedProfile();
   const supabase = await createSupabaseServerClient();
+  const { id: storeId } = await getCurrentStore();
 
   const { data: orders } = await supabase
     .from("orders")
     .select("*, payments(status)")
+    .eq("store_id", storeId)
     .eq("profile_id", profile.id)
     .order("created_at", { ascending: false });
 

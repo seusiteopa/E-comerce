@@ -1,5 +1,6 @@
 import "server-only";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentStore } from "@/lib/store/current";
 import { CategoryRow, ProductRow, ProductVariationRow } from "@/types/database";
 import { Product } from "@/types";
 
@@ -11,9 +12,11 @@ export interface ProductWithDetails extends ProductRow {
 
 export async function getActiveCategories(): Promise<CategoryRow[]> {
   const supabase = await createSupabaseServerClient();
+  const { id: storeId } = await getCurrentStore();
   const { data, error } = await supabase
     .from("categories")
     .select("*")
+    .eq("store_id", storeId)
     .eq("active", true)
     .order("display_order");
 
@@ -28,7 +31,9 @@ export async function getTopLevelCategories(): Promise<CategoryRow[]> {
 
 export async function getCategoryBySlug(slug: string): Promise<CategoryRow | null> {
   const supabase = await createSupabaseServerClient();
-  const { data } = await supabase.from("categories").select("*").eq("slug", slug).eq("active", true).maybeSingle();
+  const { id: storeId } = await getCurrentStore();
+  const { data } = await supabase.from("categories").select("*").eq("slug", slug).eq("store_id", storeId)
+    .eq("active", true).maybeSingle();
   return data;
 }
 
@@ -41,9 +46,11 @@ const PRODUCT_DETAIL_SELECT = `
 
 export async function getActiveProducts(): Promise<ProductWithDetails[]> {
   const supabase = await createSupabaseServerClient();
+  const { id: storeId } = await getCurrentStore();
   const { data, error } = await supabase
     .from("products")
     .select(PRODUCT_DETAIL_SELECT)
+    .eq("store_id", storeId)
     .eq("status", "ativo")
     .eq("hidden", false)
     .order("created_at", { ascending: false });
@@ -54,9 +61,11 @@ export async function getActiveProducts(): Promise<ProductWithDetails[]> {
 
 export async function getFeaturedProducts(): Promise<ProductWithDetails[]> {
   const supabase = await createSupabaseServerClient();
+  const { id: storeId } = await getCurrentStore();
   const { data, error } = await supabase
     .from("products")
     .select(PRODUCT_DETAIL_SELECT)
+    .eq("store_id", storeId)
     .eq("status", "ativo")
     .eq("hidden", false)
     .eq("featured", true)
@@ -68,9 +77,11 @@ export async function getFeaturedProducts(): Promise<ProductWithDetails[]> {
 
 export async function getProductsByCategory(categorySlug: string): Promise<ProductWithDetails[]> {
   const supabase = await createSupabaseServerClient();
+  const { id: storeId } = await getCurrentStore();
   const { data, error } = await supabase
     .from("products")
     .select(PRODUCT_DETAIL_SELECT)
+    .eq("store_id", storeId)
     .eq("status", "ativo")
     .eq("hidden", false)
     .eq("category_slug", categorySlug);
@@ -81,10 +92,12 @@ export async function getProductsByCategory(categorySlug: string): Promise<Produ
 
 export async function getProductBySlug(slug: string): Promise<ProductWithDetails | null> {
   const supabase = await createSupabaseServerClient();
+  const { id: storeId } = await getCurrentStore();
   const { data } = await supabase
     .from("products")
     .select(PRODUCT_DETAIL_SELECT)
     .eq("slug", slug)
+    .eq("store_id", storeId)
     .eq("status", "ativo")
     .maybeSingle();
 
@@ -93,9 +106,11 @@ export async function getProductBySlug(slug: string): Promise<ProductWithDetails
 
 export async function getRelatedProducts(product: ProductRow, limit = 3): Promise<ProductWithDetails[]> {
   const supabase = await createSupabaseServerClient();
+  const { id: storeId } = await getCurrentStore();
   const { data, error } = await supabase
     .from("products")
     .select(PRODUCT_DETAIL_SELECT)
+    .eq("store_id", storeId)
     .eq("status", "ativo")
     .eq("hidden", false)
     .eq("category_slug", product.category_slug)
@@ -108,9 +123,11 @@ export async function getRelatedProducts(product: ProductRow, limit = 3): Promis
 
 export async function searchProducts(query: string): Promise<ProductWithDetails[]> {
   const supabase = await createSupabaseServerClient();
+  const { id: storeId } = await getCurrentStore();
   const { data, error } = await supabase
     .from("products")
     .select(PRODUCT_DETAIL_SELECT)
+    .eq("store_id", storeId)
     .eq("status", "ativo")
     .eq("hidden", false)
     .or(`name.ilike.%${query}%,short_description.ilike.%${query}%`)

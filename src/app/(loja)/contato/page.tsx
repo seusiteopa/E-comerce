@@ -2,8 +2,13 @@ import Container from "@/components/ui/Container";
 import SectionEyebrow from "@/components/ui/SectionEyebrow";
 import WhatsAppButton from "@/components/ui/WhatsAppButton";
 import { contact } from "@/data/site";
+import { getSiteSettings } from "@/lib/data/site-settings";
 
-export default function ContatoPage() {
+export default async function ContatoPage() {
+  const settings = await getSiteSettings();
+  const whatsappNumber = settings.whatsapp_number?.trim();
+  const email = settings.contact_email?.trim() || (settings._platform === "1" ? contact.email : "");
+
   return (
     <section className="py-16 sm:py-20">
       <Container className="grid min-w-0 gap-12 lg:grid-cols-[1fr_1fr]">
@@ -15,10 +20,12 @@ export default function ContatoPage() {
           </p>
 
           <div className="mt-8 flex flex-col gap-4">
-            <WhatsAppButton />
-            <a href={`mailto:${contact.email}`} className="text-sm font-semibold text-navy hover:underline">
-              {contact.email}
-            </a>
+            <WhatsAppButton phone={whatsappNumber} />
+            {email && (
+              <a href={`mailto:${email}`} className="text-sm font-semibold text-navy hover:underline">
+                {email}
+              </a>
+            )}
           </div>
         </div>
 
@@ -28,7 +35,7 @@ export default function ContatoPage() {
             É o canal mais rápido para tirar dúvidas sobre produtos.
           </p>
           <div className="mt-5">
-            <WhatsAppButton />
+            <WhatsAppButton phone={whatsappNumber} />
           </div>
         </div>
       </Container>

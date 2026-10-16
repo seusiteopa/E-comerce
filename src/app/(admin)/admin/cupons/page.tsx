@@ -4,6 +4,7 @@ import AdminDataTable, { AdminColumn } from "@/components/admin/AdminDataTable";
 import CouponForm from "@/components/admin/CouponForm";
 import DeleteCouponButton from "@/components/admin/DeleteCouponButton";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentStore } from "@/lib/store/current";
 import { requireAdminProfile } from "@/lib/auth";
 import { CouponRow } from "@/types/database";
 
@@ -14,7 +15,8 @@ interface CouponRowWithId extends CouponRow {
 export default async function AdminCuponsPage() {
   await requireAdminProfile();
   const supabase = await createSupabaseServerClient();
-  const { data } = await supabase.from("coupons").select("*").order("code");
+  const { id: storeId } = await getCurrentStore();
+  const { data } = await supabase.from("coupons").select("*").eq("store_id", storeId).order("code");
   const rows = (data ?? []).map((c) => ({ ...c, id: c.code })) as CouponRowWithId[];
 
   const columns: AdminColumn<CouponRowWithId>[] = [

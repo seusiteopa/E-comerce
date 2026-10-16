@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { DEFAULT_STORE_SLUG, parseStoreHost } from "@/lib/store/host";
 
 /**
  * Camada 1 de autorização (a camada 2 é o RLS no banco — Etapa 2/9).
@@ -33,6 +34,14 @@ export async function proxy(request: NextRequest) {
 
   const isAccountRoute = pathname.startsWith("/conta");
   const isAdminRoute = pathname.startsWith("/admin");
+  const isPlatformRoute = pathname.startsWith("/plataforma");
+
+  // /plataforma: exige sessão aqui; a checagem de "dono da plataforma" é feita na própria página.
+  if (isPlatformRoute && !user) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("redirecionar", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
 
   if ((isAccountRoute || isAdminRoute) && !user) {
     const loginUrl = new URL("/login", request.url);
@@ -41,12 +50,26 @@ export async function proxy(request: NextRequest) {
   }
 
   if ((isAccountRoute || isAdminRoute) && user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-    const isAdmin = profile?.role === "administrador";
+    // Quem administra: membro da loja deste endereço, ou dono da plataforma.
+    const { slug, domain } = parseStoreHost(request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "");
+    let storeId: string | null = null;
+    if (slug) {
+      storeId = (await supabase.from("stores").select("id").eq("slug", slug).maybeSingle()).data?.id ?? null;
+    }
+    if (!storeId && domain) {
+      storeId = (await supabase.from("stores").select("id").eq("custom_domain", domain).maybeSingle()).data?.id ?? null;
+    }
+    if (!storeId) {
+      storeId = (await supabase.from("stores").select("id").eq("slug", DEFAULT_STORE_SLUG).maybeSingle()).data?.id ?? null;
+    }
+
+    const [{ data: member }, { data: platformAdmin }] = await Promise.all([
+      storeId
+        ? supabase.from("store_members").select("role").eq("store_id", storeId).eq("user_id", user.id).maybeSingle()
+        : Promise.resolve({ data: null }),
+      supabase.from("platform_admins").select("user_id").eq("user_id", user.id).maybeSingle(),
+    ]);
+    const isAdmin = Boolean(member || platformAdmin);
 
     if (isAdminRoute && !isAdmin) {
       return NextResponse.redirect(new URL("/", request.url));
@@ -65,5 +88,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/conta/:path*", "/admin/:path*"],
+  matcher: ["/conta/:path*", "/admin/:path*", "/plataforma/:path*"],
 };

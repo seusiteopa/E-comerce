@@ -4,6 +4,7 @@ import AdminDataTable, { AdminColumn } from "@/components/admin/AdminDataTable";
 import CategoryForm from "@/components/admin/CategoryForm";
 import CategoryRowActions from "@/components/admin/CategoryRowActions";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentStore } from "@/lib/store/current";
 import { requireAdminProfile } from "@/lib/auth";
 
 interface CategoryRow {
@@ -17,7 +18,8 @@ interface CategoryRow {
 export default async function AdminCategoriasPage() {
   await requireAdminProfile();
   const supabase = await createSupabaseServerClient();
-  const { data } = await supabase.from("categories").select("id, slug, name, product_type, active").order("name");
+  const { id: storeId } = await getCurrentStore();
+  const { data } = await supabase.from("categories").select("id, slug, name, product_type, active").eq("store_id", storeId).order("name");
   const rows = (data ?? []) as CategoryRow[];
 
   const columns: AdminColumn<CategoryRow>[] = [

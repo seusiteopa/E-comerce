@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentStore } from "@/lib/store/current";
 import { requireAdminProfile, ForbiddenError, UnauthorizedError } from "@/lib/auth";
 import { categoryAdminSchema } from "@/lib/validation/admin-schemas";
 import { ActionResult, actionSuccess, actionError } from "@/lib/action-result";
@@ -45,7 +46,9 @@ export async function createCategoryAction(formData: FormData): Promise<ActionRe
   }
 
   const supabase = await createSupabaseServerClient();
+  const { id: storeId } = await getCurrentStore();
   const { error } = await supabase.from("categories").insert({
+    store_id: storeId,
     slug: parsed.data.slug,
     name: parsed.data.name,
     description: parsed.data.description ?? null,
@@ -73,7 +76,8 @@ export async function deleteCategoryAction(slug: string): Promise<ActionResult> 
   }
 
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.from("categories").delete().eq("slug", slug);
+  const { id: storeId } = await getCurrentStore();
+  const { error } = await supabase.from("categories").delete().eq("slug", slug).eq("store_id", storeId);
 
   if (error) {
     logger.error("Erro ao excluir categoria", { slug, error: error.message });
@@ -96,7 +100,8 @@ export async function toggleCategoryActiveAction(slug: string, active: boolean):
   }
 
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.from("categories").update({ active }).eq("slug", slug);
+  const { id: storeId } = await getCurrentStore();
+  const { error } = await supabase.from("categories").update({ active }).eq("slug", slug).eq("store_id", storeId);
 
   if (error) return actionError("Não foi possível atualizar a categoria.");
 

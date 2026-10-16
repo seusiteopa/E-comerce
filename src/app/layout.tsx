@@ -12,6 +12,9 @@ import "./globals.css";
 import { CartProvider } from "@/lib/cart-context";
 import { siteConfig, contact } from "@/data/site";
 import PwaManager from "@/components/PwaManager";
+import { getSiteSettings } from "@/lib/data/site-settings";
+import { getActiveBanners } from "@/lib/data/banners";
+import { getCurrentStore, getRequestOrigin, type CurrentStore } from "@/lib/store/current";
 
 // viewport-fit=cover libera a área por baixo do notch/câmera-furo para o
 // CSS usar (env(safe-area-inset-*)), necessário pro app rodar em modo
@@ -23,52 +26,71 @@ export const viewport: Viewport = {
   themeColor: "#173F82",
 };
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteConfig.url),
-  title: {
-    default: `${siteConfig.storeName} | ${siteConfig.tagline}`,
-    template: `%s | ${siteConfig.storeName}`,
-  },
-  description: siteConfig.description,
-  alternates: {
-    canonical: "/",
-  },
-  icons: {
-    icon: [
-      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
-    ],
-    apple: "/apple-touch-icon.png",
-  },
-  // Open Graph — controla como o link aparece ao ser compartilhado no
-  // WhatsApp/Instagram/Facebook (canal de contato confirmado no briefing).
-  openGraph: {
-    type: "website",
-    locale: "pt_BR",
-    siteName: siteConfig.storeName,
-    title: `${siteConfig.storeName} | ${siteConfig.tagline}`,
-    description: siteConfig.description,
-    url: siteConfig.url,
-    images: [{ url: "/social/og-image.png", width: 1200, height: 630, alt: siteConfig.storeName }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: `${siteConfig.storeName} | ${siteConfig.tagline}`,
-    description: siteConfig.description,
-    images: ["/social/og-image.png"],
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-  appleWebApp: {
-    capable: true,
-    title: siteConfig.storeName,
-    statusBarStyle: "black-translucent",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const [settings, store, origin] = await Promise.all([getSiteSettings(), getCurrentStore(), getRequestOrigin()]);
+  const storeName = settings.site_name?.trim() || store.name || siteConfig.storeName;
+  const description = settings.site_description?.trim() || store.og_description || store.description || siteConfig.description;
+  // A loja da própria plataforma mantém o slogan da marca; as demais usam só o nome (ou o título de OG que o lojista definiu).
+  const pageTitle = store.og_title?.trim() || (store.is_platform_owned ? `${storeName} | ${siteConfig.tagline}` : storeName);
+
+  // Primeira foto do banner "principal" vira a imagem de compartilhamento
+  // da home — se não tiver banner (ou só tiver vídeo), cai pro padrão.
+  const banners = await getActiveBanners("principal").catch(() => []);
+  const firstBannerPhoto = banners.find((b) => b.media_type !== "video");
+  // Prioridade da imagem de compartilhamento: imagem OG da loja > 1ª foto do banner > padrão da plataforma.
+  const ogImage = store.og_image_url
+    ? { url: store.og_image_url, alt: storeName }
+    : firstBannerPhoto
+      ? { url: firstBannerPhoto.image_url, alt: storeName }
+      : { url: "/social/og-image.png", width: 1200, height: 630, alt: storeName };
+
+  return {
+    metadataBase: new URL(origin),
+    title: {
+      default: pageTitle,
+      template: `%s | ${storeName}`,
+    },
+    description,
+    alternates: {
+      canonical: "/",
+    },
+    icons: {
+      icon: [
+        { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+        { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+        { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+        { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+      ],
+      apple: "/apple-touch-icon.png",
+    },
+    // Open Graph — controla como o link aparece ao ser compartilhado no
+    // WhatsApp/Instagram/Facebook (canal de contato confirmado no briefing).
+    openGraph: {
+      type: "website",
+      locale: "pt_BR",
+      siteName: storeName,
+      title: pageTitle,
+      description,
+      url: origin,
+      images: [ogImage],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: pageTitle,
+      description,
+      images: [ogImage.url],
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+    appleWebApp: {
+      capable: true,
+      title: storeName,
+      statusBarStyle: "black-translucent",
+    },
+  };
+}
 
 /**
  * Dados estruturados (Schema.org / JSON-LD) — Organization + WebSite.
@@ -78,24 +100,24 @@ export const metadata: Metadata = {
  * páginas de produto existirem de fato (Etapa 8/11) — não faz sentido
  * declarar Schema de produto para uma página que ainda não existe.
  */
-function OrganizationJsonLd() {
+function OrganizationJsonLd({ store, origin }: { store: CurrentStore; origin: string }) {
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
       {
         "@type": "Organization",
-        "@id": `${siteConfig.url}/#organization`,
-        name: siteConfig.name,
-        url: siteConfig.url,
-        logo: `${siteConfig.url}/brand/vecorion-icone-navy-transparente.png`,
-        sameAs: [contact.instagram],
+        "@id": `${origin}/#organization`,
+        name: store.name,
+        url: origin,
+        logo: store.logo_url ?? `${origin}/brand/vecorion-icone-navy-transparente.png`,
+        ...(store.is_platform_owned ? { sameAs: [contact.instagram] } : {}),
       },
       {
         "@type": "WebSite",
-        "@id": `${siteConfig.url}/#website`,
-        url: siteConfig.url,
-        name: siteConfig.storeName,
-        publisher: { "@id": `${siteConfig.url}/#organization` },
+        "@id": `${origin}/#website`,
+        url: origin,
+        name: store.name,
+        publisher: { "@id": `${origin}/#organization` },
         inLanguage: "pt-BR",
       },
     ],
@@ -109,7 +131,8 @@ function OrganizationJsonLd() {
   );
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const [store, origin] = await Promise.all([getCurrentStore(), getRequestOrigin()]);
   return (
     <html lang="pt-BR">
       <body className="antialiased">
@@ -119,7 +142,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Pular para o conteúdo principal
         </a>
-        <OrganizationJsonLd />
+        <OrganizationJsonLd store={store} origin={origin} />
         <PwaManager />
         <CartProvider>{children}</CartProvider>
       </body>

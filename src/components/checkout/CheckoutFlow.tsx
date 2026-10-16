@@ -8,6 +8,7 @@ import AddressStep from "@/components/checkout/AddressStep";
 import ShippingStep from "@/components/checkout/ShippingStep";
 import PaymentStep from "@/components/checkout/PaymentStep";
 import CartSummary from "@/components/carrinho/CartSummary";
+import CouponField from "@/components/carrinho/CouponField";
 
 type Step = "identificacao" | "endereco" | "frete" | "pagamento";
 
@@ -69,7 +70,10 @@ export default function CheckoutFlow() {
       </div>
 
       <div className="lg:sticky lg:top-24 lg:self-start">
-        <CartSummary subtotal={subtotal} shipping={hasPhysicalItem ? shippingPrice : 0} discount={coupon?.discountAmount ?? 0} />
+        <div className="flex flex-col gap-4">
+          <CouponField />
+          <CartSummary subtotal={subtotal} shipping={hasPhysicalItem ? shippingPrice : 0} discount={coupon?.discountAmount ?? 0} />
+        </div>
       </div>
     </div>
   );

@@ -19,7 +19,11 @@ import { PaymentStatus } from "@/types";
  * Chamado exclusivamente pelo webhook do Mercado Pago, depois que a
  * assinatura já foi validada e a idempotência já foi checada.
  */
-export async function applyPaymentStatusUpdate(orderId: string, newStatus: PaymentStatus): Promise<void> {
+export async function applyPaymentStatusUpdate(
+  orderId: string,
+  newStatus: PaymentStatus,
+  options: { skipEmail?: boolean } = {}
+): Promise<void> {
   const supabase = createSupabaseServiceClient();
 
   const { data: order, error: orderFetchError } = await supabase
@@ -36,7 +40,7 @@ export async function applyPaymentStatusUpdate(orderId: string, newStatus: Payme
   await supabase.from("payments").update({ status: newStatus, updated_at: new Date().toISOString() }).eq("order_id", orderId);
 
   if (newStatus === "aprovado") {
-    await handleApproved(supabase, order, orderId);
+    await handleApproved(supabase, order, orderId, options.skipEmail ?? false);
   } else if (newStatus === "recusado" || newStatus === "cancelado") {
     await supabase
       .from("orders")
@@ -47,7 +51,7 @@ export async function applyPaymentStatusUpdate(orderId: string, newStatus: Payme
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function handleApproved(supabase: any, order: any, orderId: string) {
+async function handleApproved(supabase: any, order: any, orderId: string, skipEmail: boolean) {
   await supabase
     .from("orders")
     .update({ status: nextOrderStatusOnPaymentApproved(), updated_at: new Date().toISOString() })
@@ -82,6 +86,7 @@ async function handleApproved(supabase: any, order: any, orderId: string) {
   // E-mail de confirmação (Etapa 4, Seção 5) — falha de e-mail é logada,
   // mas não desfaz a confirmação do pagamento (já processada com sucesso).
   try {
+    if (skipEmail || !order.payer_email) throw new SkipEmail();
     await sendTransactionalEmail({
       event: "pagamento_aprovado",
       to: { email: order.payer_email ?? "", name: order.profiles?.full_name ?? "Cliente" },
@@ -92,7 +97,9 @@ async function handleApproved(supabase: any, order: any, orderId: string) {
       },
     });
   } catch (error) {
-    logger.warn("Falha ao enviar e-mail de pagamento aprovado (pedido já processado normalmente)", {
+    if (error instanceof SkipEmail) {
+      // pedido de balcão ou sem e-mail: nada a enviar
+    } else logger.warn("Falha ao enviar e-mail de pagamento aprovado (pedido já processado normalmente)", {
       orderId,
       error: error instanceof Error ? error.message : String(error),
     });
@@ -100,6 +107,8 @@ async function handleApproved(supabase: any, order: any, orderId: string) {
 
   logger.info("Automações de pagamento aprovado concluídas", { orderId, total: formatCurrency(order.total) });
 }
+
+class SkipEmail extends Error {}
 
 function buildExtraMessageByItemTypes(items: { product_type_snapshot: string }[]): string {
   const hasDigital = items.some((i) => i.product_type_snapshot === "digital");

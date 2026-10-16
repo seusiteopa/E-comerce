@@ -4,6 +4,7 @@ import Container from "@/components/ui/Container";
 import { LinkButton } from "@/components/ui/Button";
 import { StatusPill } from "@/components/ui/Badge";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentStore } from "@/lib/store/current";
 
 export const metadata: Metadata = { title: "Confirmação do pedido" };
 
@@ -24,10 +25,12 @@ export default async function ConfirmacaoPage({ searchParams }: ConfirmacaoPageP
   }
 
   const supabase = await createSupabaseServerClient();
+  const { id: storeId } = await getCurrentStore();
   const { data: order } = await supabase
     .from("orders")
     .select("*, payments(status)")
     .eq("id", pedido)
+    .eq("store_id", storeId)
     .maybeSingle();
 
   return (

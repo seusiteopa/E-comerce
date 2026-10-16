@@ -1,12 +1,14 @@
 import type { MetadataRoute } from "next";
 import { siteConfig } from "@/data/site";
+import { getCurrentStore } from "@/lib/store/current";
 
-export default function manifest(): MetadataRoute.Manifest {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const store = await getCurrentStore();
   return {
     id: "/",
-    name: siteConfig.storeName,
-    short_name: siteConfig.storeName,
-    description: siteConfig.description,
+    name: store.name,
+    short_name: store.name.slice(0, 12),
+    description: store.description ?? siteConfig.description,
     start_url: "/",
     scope: "/",
     display: "standalone",

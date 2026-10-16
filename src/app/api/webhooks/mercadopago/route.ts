@@ -4,6 +4,8 @@ import { applyPaymentStatusUpdate } from "@/lib/integrations/mercadopago/apply-p
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import { logger } from "@/lib/logger";
 import { PaymentStatus } from "@/types";
+import { getStorePaymentContext } from "@/lib/integrations/mercadopago/oauth";
+import { syncAuthorizedPayment, syncPreapproval } from "@/lib/integrations/mercadopago/sync-subscription";
 
 /**
  * Endpoint que o Mercado Pago chama de forma assíncrona quando o status
@@ -32,8 +34,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "invalid body" }, { status: 400 });
   }
 
-  const paymentId = payload.data?.id;
-  if (payload.type !== "payment" || !paymentId) {
+  const paymentId = payload.data?.id ? String(payload.data.id) : undefined;
+  const isSubscriptionEvent = payload.type === "subscription_preapproval" || payload.type === "subscription_authorized_payment";
+  if ((payload.type !== "payment" && !isSubscriptionEvent) || !paymentId) {
     // Mercado Pago envia outros tipos de notificação (ex: merchant_order) —
     // respondemos 200 para não gerar reenvio, mas não processamos nada.
     return NextResponse.json({ received: true, ignored: true }, { status: 200 });
@@ -55,6 +58,24 @@ export async function POST(request: NextRequest) {
 
   const supabase = createSupabaseServiceClient();
 
+  // Mensalidade das lojas (assinatura recorrente da plataforma). Não usa a tabela de idempotência:
+  // o mesmo aviso pode chegar várias vezes com estados diferentes, e a sincronização sempre consulta
+  // o estado real na API, então repetir é seguro.
+  if (isSubscriptionEvent) {
+    try {
+      if (payload.type === "subscription_preapproval") await syncPreapproval(paymentId);
+      else await syncAuthorizedPayment(paymentId);
+      return NextResponse.json({ received: true }, { status: 200 });
+    } catch (error) {
+      logger.error("Erro ao processar webhook de assinatura", {
+        integration: "mercadopago",
+        id: paymentId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return NextResponse.json({ error: "processing failed" }, { status: 500 });
+    }
+  }
+
   // Idempotência: registra o evento antes de processar. Se já existir
   // (conflito de unique key), significa que já processamos esta
   // notificação antes — respondemos 200 sem reaplicar a automação.
@@ -72,7 +93,20 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const payment = await fetchPaymentStatus(paymentId);
+    // Qual loja recebeu este pagamento: vem na URL do webhook (?store=). Sem ela (pagamentos antigos),
+    // só vale para a loja da própria plataforma.
+    const storeParam = request.nextUrl.searchParams.get("store");
+    const storeQuery = supabase.from("stores").select("id, is_platform_owned");
+    const { data: store } = storeParam
+      ? await storeQuery.eq("id", storeParam).maybeSingle()
+      : await storeQuery.eq("is_platform_owned", true).limit(1).maybeSingle();
+    if (!store) {
+      logger.warn("Webhook de pagamento para loja desconhecida", { integration: "mercadopago", paymentId });
+      return NextResponse.json({ received: true }, { status: 200 });
+    }
+
+    const paymentContext = await getStorePaymentContext(store);
+    const payment = await fetchPaymentStatus(paymentId, paymentContext.accessToken);
     if (!payment.externalReference) {
       logger.warn("Pagamento sem external_reference — não é possível relacionar a um pedido", { paymentId });
       return NextResponse.json({ received: true }, { status: 200 });
@@ -87,6 +121,13 @@ export async function POST(request: NextRequest) {
       refunded: "reembolsado",
     };
     const mappedStatus = statusMap[payment.status] ?? "pendente";
+
+    // O pedido precisa pertencer à loja do webhook — impede que o aviso de uma loja mexa em pedido de outra.
+    const { data: orderRow } = await supabase.from("orders").select("store_id").eq("id", payment.externalReference).maybeSingle();
+    if (!orderRow || orderRow.store_id !== store.id) {
+      logger.warn("Pedido não pertence à loja do webhook — ignorado", { integration: "mercadopago", paymentId, storeId: store.id });
+      return NextResponse.json({ received: true }, { status: 200 });
+    }
 
     await applyPaymentStatusUpdate(payment.externalReference, mappedStatus);
 

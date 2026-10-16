@@ -6,6 +6,7 @@ import { LinkButton } from "@/components/ui/Button";
 import { ProductTypeBadge } from "@/components/ui/Badge";
 import DeleteProductButton from "@/components/admin/DeleteProductButton";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentStore } from "@/lib/store/current";
 import { requireAdminProfile } from "@/lib/auth";
 import { formatCurrency } from "@/lib/format";
 import { ProductRow } from "@/types/database";
@@ -13,7 +14,8 @@ import { ProductRow } from "@/types/database";
 export default async function AdminProdutosPage() {
   await requireAdminProfile();
   const supabase = await createSupabaseServerClient();
-  const { data } = await supabase.from("products").select("*").order("created_at", { ascending: false });
+  const { id: storeId } = await getCurrentStore();
+  const { data } = await supabase.from("products").select("*").eq("store_id", storeId).order("created_at", { ascending: false });
   const rows = (data ?? []) as ProductRow[];
 
   const columns: AdminColumn<ProductRow>[] = [

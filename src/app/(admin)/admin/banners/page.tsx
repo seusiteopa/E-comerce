@@ -3,6 +3,7 @@ import Container from "@/components/ui/Container";
 import BannerForm from "@/components/admin/BannerForm";
 import BannerListItem from "@/components/admin/BannerListItem";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentStore } from "@/lib/store/current";
 import { requireAdminProfile } from "@/lib/auth";
 
 interface BannerRow {
@@ -18,9 +19,11 @@ interface BannerRow {
 export default async function AdminBannersPage() {
   await requireAdminProfile();
   const supabase = await createSupabaseServerClient();
+  const { id: storeId } = await getCurrentStore();
   const { data } = await supabase
     .from("banners")
     .select("id, title, image_url, link_url, position, active, media_type")
+    .eq("store_id", storeId)
     .order("display_order");
   const rows = (data ?? []) as BannerRow[];
 

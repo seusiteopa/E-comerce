@@ -5,6 +5,7 @@ import { ActionResult, actionSuccess, actionError } from "@/lib/action-result";
 import { logger } from "@/lib/logger";
 import { createPixPayment, createPaymentPreference } from "@/lib/integrations/mercadopago";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
+import { getCurrentStore } from "@/lib/store/current";
 
 const buyExclusiveSchema = z.object({
   productSlug: z.string().trim().min(1),
@@ -27,11 +28,21 @@ export async function buyExclusiveProductAction(input: unknown): Promise<ActionR
     return actionError("Verifique os dados informados e tente novamente.");
   }
 
+  const store = await getCurrentStore();
+  if (store.status === "pausada") {
+    return actionError("Esta loja está temporariamente indisponível.");
+  }
+  // Sem Mercado Pago próprio da loja (OAuth + split), só a loja da plataforma cobra online.
+  if (!store.is_platform_owned) {
+    return actionError("Este restaurante não está habilitado para pagamentos online.");
+  }
+
   const service = createSupabaseServiceClient();
 
   const { data: product } = await service
     .from("products")
     .select("*")
+    .eq("store_id", store.id)
     .eq("slug", parsed.data.productSlug)
     .eq("status", "ativo")
     .eq("hidden", true)
@@ -46,6 +57,7 @@ export async function buyExclusiveProductAction(input: unknown): Promise<ActionR
   const { data: order, error: orderError } = await service
     .from("orders")
     .insert({
+      store_id: store.id,
       profile_id: null,
       subtotal: total,
       shipping: 0,
@@ -76,7 +88,7 @@ export async function buyExclusiveProductAction(input: unknown): Promise<ActionR
     logger.error("Erro ao criar item do pedido de oferta exclusiva", { orderId: order.id, error: itemError.message });
   }
 
-  await service.from("payments").insert({ order_id: order.id, amount: total, status: "pendente" });
+  await service.from("payments").insert({ store_id: store.id, order_id: order.id, amount: total, status: "pendente" });
 
   if (parsed.data.paymentMethod === "cartao") {
     try {

@@ -3,21 +3,25 @@ import AdminHeader from "@/components/admin/AdminHeader";
 import Container from "@/components/ui/Container";
 import StatCard from "@/components/admin/StatCard";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentStore } from "@/lib/store/current";
 import { requireAdminProfile } from "@/lib/auth";
 import { formatCurrency } from "@/lib/format";
 
 export default async function AdminDashboardPage() {
   await requireAdminProfile();
   const supabase = await createSupabaseServerClient();
+  const { id: storeId } = await getCurrentStore();
 
-  const [{ count: productCount }, { count: orderCount }, { count: customerCount }, { data: paidOrders }] =
+  const [{ count: productCount }, { count: orderCount }, { data: buyerRows }, { data: paidOrders }] =
     await Promise.all([
-      supabase.from("products").select("id", { count: "exact", head: true }),
-      supabase.from("orders").select("id", { count: "exact", head: true }),
-      supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "cliente"),
-      supabase.from("orders").select("total").eq("status", "pago"),
+      supabase.from("products").select("id", { count: "exact", head: true }).eq("store_id", storeId),
+      supabase.from("orders").select("id", { count: "exact", head: true }).eq("store_id", storeId),
+      supabase.from("orders").select("profile_id").eq("store_id", storeId),
+      supabase.from("orders").select("total").eq("store_id", storeId).eq("status", "pago"),
     ]);
 
+  // Clientes da loja = pessoas que já fizeram pedido nela.
+  const customerCount = new Set((buyerRows ?? []).map((o) => o.profile_id).filter(Boolean)).size;
   const totalRevenue = (paidOrders ?? []).reduce((sum, o) => sum + Number(o.total), 0);
 
   return (

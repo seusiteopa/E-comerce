@@ -1,9 +1,10 @@
 import { MetadataRoute } from "next";
-import { siteConfig } from "@/data/site";
+import { getRequestOrigin } from "@/lib/store/current";
 
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic"; // o endereço muda por loja
 
-export default function robots(): MetadataRoute.Robots {
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const origin = await getRequestOrigin();
   return {
     rules: [
       { userAgent: "*", allow: "/" },
@@ -13,6 +14,6 @@ export default function robots(): MetadataRoute.Robots {
       // a nível de intenção de indexação, não de segurança).
       { userAgent: "*", disallow: ["/admin", "/conta", "/checkout", "/api"] },
     ],
-    sitemap: `${siteConfig.url}/sitemap.xml`,
+    sitemap: `${origin}/sitemap.xml`,
   };
 }

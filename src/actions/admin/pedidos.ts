@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentStore } from "@/lib/store/current";
 import { requireAdminProfile, ForbiddenError, UnauthorizedError } from "@/lib/auth";
 import { orderStatusUpdateSchema } from "@/lib/validation/admin-schemas";
 import { ActionResult, actionSuccess, actionError } from "@/lib/action-result";
@@ -36,10 +37,12 @@ export async function updateOrderStatusAction(input: unknown): Promise<ActionRes
   }
 
   const supabase = await createSupabaseServerClient();
+  const { id: storeId } = await getCurrentStore();
   const { error } = await supabase
     .from("orders")
     .update({ status: parsed.data.status, updated_at: new Date().toISOString() })
-    .eq("id", parsed.data.orderId);
+    .eq("id", parsed.data.orderId)
+    .eq("store_id", storeId);
 
   if (error) {
     logger.error("Erro ao atualizar status do pedido", { orderId: parsed.data.orderId, error: error.message });

@@ -1,6 +1,7 @@
 "use server";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentStore } from "@/lib/store/current";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import { validateCoupon } from "@/domain/cupom/regras";
 import { ActionResult, actionSuccess, actionError } from "@/lib/action-result";
@@ -29,7 +30,8 @@ export async function previewCouponAction(
   if (!normalized) return actionError("Informe um código de cupom.");
 
   const supabase = await createSupabaseServerClient();
-  const { data: coupon } = await supabase.from("coupons").select("*").eq("code", normalized).maybeSingle();
+  const { id: storeId } = await getCurrentStore();
+  const { data: coupon } = await supabase.from("coupons").select("*").eq("store_id", storeId).eq("code", normalized).maybeSingle();
 
   if (!coupon) {
     return actionError("Cupom inválido.");
@@ -45,6 +47,7 @@ export async function previewCouponAction(
     const { count } = await serviceClient
       .from("orders")
       .select("id", { count: "exact", head: true })
+      .eq("store_id", storeId)
       .eq("profile_id", user.id)
       .eq("coupon_code", coupon.code);
     previousUsageCount = count ?? 0;

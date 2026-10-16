@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentStore } from "@/lib/store/current";
 
 export interface BannerRow {
   id: string;
@@ -13,11 +14,13 @@ export interface BannerRow {
 /** Busca banners ativos de uma posição, respeitando janela de vigência (starts_at/ends_at). */
 export async function getActiveBanners(position: string): Promise<BannerRow[]> {
   const supabase = await createSupabaseServerClient();
+  const { id: storeId } = await getCurrentStore();
   const now = Date.now();
 
   const { data, error } = await supabase
     .from("banners")
     .select("id, image_url, link_url, title, position, display_order, media_type, starts_at, ends_at")
+    .eq("store_id", storeId)
     .eq("position", position)
     .eq("active", true)
     .order("display_order");

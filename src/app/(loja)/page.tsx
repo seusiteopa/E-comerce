@@ -3,7 +3,8 @@ import Container from "@/components/ui/Container";
 import ProductGrid from "@/components/loja/ProductGrid";
 import HomeBanner from "@/components/loja/HomeBanner";
 import HomeBannerCarousel from "@/components/loja/HomeBannerCarousel";
-import { getFeaturedProducts, getActiveProducts, mapToProduct } from "@/lib/data/catalog";
+import { getFeaturedProducts, getActiveProducts, getActiveCategories, mapToProduct } from "@/lib/data/catalog";
+import CategoryFilterableGrid from "@/components/loja/CategoryFilterableGrid";
 import { getActiveBanners } from "@/lib/data/banners";
 
 // Home enxuta: banner + vitrine, sem categorização explícita por tipo de
@@ -11,11 +12,12 @@ import { getActiveBanners } from "@/lib/data/banners";
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const [featuredRows, allRows, banners, secondaryBanners] = await Promise.all([
+  const [featuredRows, allRows, banners, secondaryBanners, categories] = await Promise.all([
     getFeaturedProducts(),
     getActiveProducts(),
     getActiveBanners("principal"),
     getActiveBanners("secundario"),
+    getActiveCategories(),
   ]);
   const featured = featuredRows.map(mapToProduct);
   const all = allRows.map(mapToProduct);
@@ -48,12 +50,7 @@ export default async function HomePage() {
 
       <section className="pb-14 pt-2 sm:pb-20">
         <Container>
-          <div className="flex items-end justify-between">
-            <h2 className="text-xl font-semibold text-ink sm:text-2xl">Todos os produtos</h2>
-          </div>
-          <div className="mt-6">
-            <ProductGrid products={all} />
-          </div>
+          <CategoryFilterableGrid products={all} categories={categories.map((c) => ({ slug: c.slug, name: c.name }))} />
         </Container>
       </section>
     </>

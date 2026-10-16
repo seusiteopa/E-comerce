@@ -26,7 +26,7 @@ export const mainNav = [
   { label: "Produtos Digitais", href: "/categorias/produtos-digitais" },
 ];
 
-export function whatsappHref(message?: string) {
+export function whatsappHref(message?: string, phoneOverride?: string) {
   const text = encodeURIComponent(message ?? contact.whatsappDefaultMessage);
-  return `https://wa.me/${contact.whatsappNumber}?text=${text}`;
+  return `https://wa.me/${phoneOverride || contact.whatsappNumber}?text=${text}`;
 }

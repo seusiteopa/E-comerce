@@ -9,6 +9,9 @@ import {
   Ticket,
   Image as ImageIcon,
   Settings,
+  Store,
+  CreditCard,
+  Receipt,
   LogOut,
 } from "lucide-react";
 import { logoutAction } from "@/actions/auth";
@@ -17,10 +20,13 @@ const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/produtos", label: "Produtos", icon: Package },
   { href: "/admin/categorias", label: "Categorias", icon: FolderTree },
+  { href: "/admin/balcao", label: "Pedido de balcão", icon: Receipt },
   { href: "/admin/pedidos", label: "Pedidos", icon: ShoppingBag },
   { href: "/admin/clientes", label: "Clientes", icon: Users },
   { href: "/admin/cupons", label: "Cupons", icon: Ticket },
   { href: "/admin/banners", label: "Banners", icon: ImageIcon },
+  { href: "/admin/loja", label: "Minha loja", icon: Store },
+  { href: "/admin/pagamentos", label: "Pagamentos e plano", icon: CreditCard },
   { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ];
 

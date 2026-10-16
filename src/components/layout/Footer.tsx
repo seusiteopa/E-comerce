@@ -2,9 +2,10 @@ import Link from "next/link";
 import Image from "next/image";
 import Container from "@/components/ui/Container";
 import { siteConfig, contact, whatsappHref } from "@/data/site";
+import type { SiteSettingsMap } from "@/lib/data/site-settings";
 
 const footerNav = [
-  { label: "Sobre a Vecorion", href: "/sobre" },
+  { label: "Sobre", href: "/sobre" },
   { label: "FAQ", href: "/faq" },
   { label: "Contato", href: "/contato" },
 ];
@@ -15,13 +16,32 @@ const policies = [
   { label: "Trocas e Devolução", href: "/politicas/trocas-e-devolucao" },
 ];
 
-export default function Footer() {
+/**
+ * Todo texto/contato aqui pode vir das configurações do admin (com
+ * fallback pro padrão da Vecorion) — importante pra loja funcionar
+ * como modelo pra outros clientes sem misturar as informações deles
+ * com as da Vecorion.
+ */
+export default function Footer({ settings }: { settings?: SiteSettingsMap }) {
+  const storeName = settings?.site_name?.trim() || siteConfig.storeName;
+  const description = settings?.site_description?.trim() || siteConfig.description;
+  const isPlatform = settings?._platform === "1" || settings === undefined;
+  const whatsappNumber = settings?.whatsapp_number?.trim();
+  const email = settings?.contact_email?.trim() || (isPlatform ? contact.email : "");
+  const instagramUrl = settings?.instagram_url?.trim() || (isPlatform ? contact.instagram : "");
+  const logoUrl = settings?.logo_url;
+
   return (
     <footer className="border-t border-line bg-navy-deep text-white">
       <Container className="grid min-w-0 gap-10 py-14 md:grid-cols-[1.2fr_1fr_1fr_1fr]">
         <div>
-          <Image src="/brand/vecorion-icone-branco-transparente.png" alt="Vecorion" width={64} height={34} className="h-8 w-auto" />
-          <p className="mt-4 max-w-xs text-sm text-white/70">{siteConfig.description}</p>
+          {logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={logoUrl} alt={storeName} className="h-8 w-auto object-contain" />
+          ) : (
+            <Image src="/brand/vecorion-icone-branco-transparente.png" alt={storeName} width={64} height={34} className="h-8 w-auto" />
+          )}
+          <p className="mt-4 max-w-xs text-sm text-white/70">{description}</p>
         </div>
 
         <nav aria-label="Institucional">
@@ -53,28 +73,34 @@ export default function Footer() {
         <div>
           <h2 className="font-mono-label text-xs uppercase text-white/50">Contato</h2>
           <ul className="mt-4 flex flex-col gap-2 text-sm text-white/80">
+            {whatsappNumber !== "" && (
             <li>
-              <a href={whatsappHref()} target="_blank" rel="noopener noreferrer" className="hover:text-white">
+              <a href={whatsappHref(undefined, whatsappNumber)} target="_blank" rel="noopener noreferrer" className="hover:text-white">
                 WhatsApp
               </a>
             </li>
+            )}
+            {email && (
             <li>
-              <a href={`mailto:${contact.email}`} className="hover:text-white">
-                {contact.email}
+              <a href={`mailto:${email}`} className="hover:text-white">
+                {email}
               </a>
             </li>
+            )}
+            {instagramUrl && (
             <li>
-              <a href={contact.instagram} target="_blank" rel="noopener noreferrer" className="hover:text-white">
+              <a href={instagramUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white">
                 Instagram
               </a>
             </li>
+            )}
           </ul>
         </div>
       </Container>
 
       <div className="border-t border-white/10 py-5">
         <Container className="flex flex-col gap-2 text-xs text-white/50 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} {siteConfig.name}. Todos os direitos reservados.</p>
+          <p>© {new Date().getFullYear()} {storeName}. Todos os direitos reservados.</p>
           <p>Atendimento online para todo o Brasil.</p>
         </Container>
       </div>
