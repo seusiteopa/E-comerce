@@ -37,6 +37,7 @@ export default function ProductGallery({ media, productName }: { media: GalleryM
             className="object-contain"
             priority={activeIndex === 0}
             fetchPriority={activeIndex === 0 ? "high" : "auto"}
+            unoptimized
           />
         )}
       </div>
@@ -57,7 +58,7 @@ export default function ProductGallery({ media, productName }: { media: GalleryM
               {item.mediaType === "video" ? (
                 <video src={item.url} className="h-full w-full object-cover" muted />
               ) : (
-                <Image src={optimizeCloudinaryUrl(item.url, { width: 160, height: 160, quality: "auto" })} alt="" fill sizes="64px" className="object-cover" />
+                <Image src={optimizeCloudinaryUrl(item.url, { width: 160, height: 160, quality: "auto" })} alt="" fill sizes="64px" className="object-cover" unoptimized />
               )}
             </button>
           ))}
