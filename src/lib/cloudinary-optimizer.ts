@@ -27,7 +27,7 @@ export function optimizeCloudinaryUrl(url: string, options?: {
 
   // Quality: auto (inteligente), low (40), high (85)
   if (quality === "auto") {
-    transformations.push("q_auto:best");
+    transformations.push("q_auto");
   } else if (quality === "low") {
     transformations.push("q_40");
   } else if (quality === "high") {
