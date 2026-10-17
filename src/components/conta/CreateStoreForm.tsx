@@ -108,6 +108,7 @@ export default function CreateStoreForm({ rootDomain, monthlyFee }: { rootDomain
             <input type="radio" name="plan" checked={plan === "mensalidade"} onChange={() => setPlan("mensalidade")} className="mt-1" />
             <span>
               <strong>Mensalidade de R$ {monthlyFee}</strong>, sem comissão. <strong>Primeiro mês grátis:</strong> você autoriza no seu banco agora e a cobrança automática só começa daqui a 1 mês.
+              <span className="mt-1 block text-xs text-ink-soft">A mensalidade é cobrada no cartão de crédito. O Pix não é aceito nessa cobrança automática.</span>
             </span>
           </label>
         )}
