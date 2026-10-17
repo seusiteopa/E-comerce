@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { headers } from "next/headers";
+import { notFound } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { siteConfig } from "@/data/site";
 import { DEFAULT_STORE_SLUG, cleanHost, parseStoreHost } from "@/lib/store/host";
@@ -24,16 +25,24 @@ export interface CurrentStore {
 const STORE_SELECT =
   "id, slug, name, store_type, description, logo_url, og_title, og_description, og_image_url, whatsapp, custom_domain, status, is_platform_owned";
 
+function routedSlugOrNull(h: Headers): string | null {
+  return h.get("x-store-slug");
+}
+
 export const getCurrentStore = cache(async (): Promise<CurrentStore> => {
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
-  const { slug, domain } = parseStoreHost(host);
+  // Cabeçalho definido só pelo proxy (rotas /lojas/<loja>/...); o proxy remove o que o cliente enviar.
+  const { slug: hostSlug, domain } = parseStoreHost(host);
+  const slug = h.get("x-store-slug") || hostSlug;
 
   const supabase = await createSupabaseServerClient();
 
   if (slug) {
     const { data } = await supabase.from("stores").select(STORE_SELECT).eq("slug", slug).maybeSingle();
     if (data) return data as CurrentStore;
+    // Loja informada pela rota /lojas/<loja> que não existe: 404, sem cair na loja padrão.
+    if (routedSlugOrNull(h)) notFound();
   }
   if (domain) {
     const { data } = await supabase.from("stores").select(STORE_SELECT).eq("custom_domain", domain).maybeSingle();
