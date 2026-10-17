@@ -33,3 +33,16 @@ export function parseStoreHost(host: string): { slug?: string; domain?: string }
   return {};
 }
 
+
+/**
+ * Endereço da plataforma (sem loja): o domínio raiz (PLATFORM_ROOT_DOMAIN)
+ * e os endereços *.netlify.app, que não têm subdomínio de loja.
+ * Quem está nesses endereços vê a home da plataforma, não uma loja.
+ */
+export function isPlatformRootHost(host: string): boolean {
+  const hostname = cleanHost(host);
+  const root = process.env.PLATFORM_ROOT_DOMAIN?.toLowerCase();
+  if (root && hostname === root) return true;
+  if (hostname.endsWith(".netlify.app")) return !parseStoreHost(host).slug;
+  return false;
+}

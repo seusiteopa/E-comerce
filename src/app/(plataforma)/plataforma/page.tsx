@@ -21,7 +21,10 @@ const subscriptionLabel: Record<string, string> = {
 export default async function PlataformaPage() {
   try {
     await requirePlatformAdmin();
-  } catch {
+  } catch (err) {
+    // Sinal interno do Next (renderização dinâmica) não é recusa de acesso: repassa.
+    if (err && typeof err === "object" && "digest" in err && String((err as { digest?: unknown }).digest).includes("DYNAMIC")) throw err;
+    console.error("[plataforma] acesso negado:", err instanceof Error ? err.message : err);
     redirect("/");
   }
 

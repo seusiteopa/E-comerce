@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
-import { DEFAULT_STORE_SLUG, parseStoreHost } from "@/lib/store/host";
+import { DEFAULT_STORE_SLUG, isPlatformRootHost, parseStoreHost } from "@/lib/store/host";
 
 /**
  * Camada 1 de autorização (a camada 2 é o RLS no banco — Etapa 2/9).
@@ -11,6 +11,16 @@ import { DEFAULT_STORE_SLUG, parseStoreHost } from "@/lib/store/host";
  *   para quem não tem permissão).
  */
 export async function proxy(request: NextRequest) {
+  // Home no endereço da plataforma: mostra a página da plataforma, não uma loja.
+  // Outras requisições da home (lojas, subdomínios) seguem sem custo de banco aqui.
+  if (request.nextUrl.pathname === "/") {
+    const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "";
+    if (isPlatformRootHost(host)) {
+      return NextResponse.rewrite(new URL("/inicio-plataforma", request.url));
+    }
+    return NextResponse.next({ request });
+  }
+
   const response = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -88,5 +98,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/conta/:path*", "/admin/:path*", "/plataforma/:path*"],
+  matcher: ["/", "/conta/:path*", "/admin/:path*", "/plataforma/:path*"],
 };
