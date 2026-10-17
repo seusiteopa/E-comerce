@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Product } from "@/types";
 import PriceTag from "@/components/ui/PriceTag";
 
+import { optimizeCloudinaryUrl } from "@/lib/cloudinary-optimizer";
 export default function ProductCard({ product }: { product: Product }) {
   const outOfStock =
     product.type === "fisico" &&
@@ -15,7 +16,7 @@ export default function ProductCard({ product }: { product: Product }) {
     >
       <div className="relative aspect-square w-full overflow-hidden bg-paper">
         <Image
-          src={product.images[0]?.url ?? "/placeholder-product.svg"}
+          src={product.images[0] ? optimizeCloudinaryUrl(product.images[0].url, { width: 400, height: 400, quality: "auto" }) : "/placeholder-product.svg"}
           alt={product.images[0]?.alt ?? product.name}
           fill
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
