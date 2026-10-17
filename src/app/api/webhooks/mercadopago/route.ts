@@ -76,22 +76,6 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // Idempotência: registra o evento antes de processar. Se já existir
-  // (conflito de unique key), significa que já processamos esta
-  // notificação antes — respondemos 200 sem reaplicar a automação.
-  const { error: insertEventError } = await supabase
-    .from("webhook_events")
-    .insert({ provider: "mercadopago", external_event_id: paymentId });
-
-  if (insertEventError) {
-    if (insertEventError.code === "23505") {
-      logger.info("Webhook duplicado ignorado (idempotência)", { integration: "mercadopago", paymentId });
-      return NextResponse.json({ received: true, duplicate: true }, { status: 200 });
-    }
-    logger.error("Erro ao registrar evento de webhook", { integration: "mercadopago", error: insertEventError.message });
-    return NextResponse.json({ error: "internal error" }, { status: 500 });
-  }
-
   try {
     // Qual loja recebeu este pagamento: vem na URL do webhook (?store=). Sem ela (pagamentos antigos),
     // só vale para a loja da própria plataforma.
@@ -127,6 +111,22 @@ export async function POST(request: NextRequest) {
     if (!orderRow || orderRow.store_id !== store.id) {
       logger.warn("Pedido não pertence à loja do webhook — ignorado", { integration: "mercadopago", paymentId, storeId: store.id });
       return NextResponse.json({ received: true }, { status: 200 });
+    }
+
+    // Idempotência por (pagamento + status): o Mercado Pago reenvia o MESMO id de pagamento
+    // quando o status muda (pendente -> aprovado). Chavear só pelo id descartava a aprovação.
+    const eventKey = `${paymentId}:${mappedStatus}`;
+    const { error: insertEventError } = await supabase
+      .from("webhook_events")
+      .insert({ provider: "mercadopago", external_event_id: eventKey });
+
+    if (insertEventError) {
+      if (insertEventError.code === "23505") {
+        logger.info("Webhook duplicado ignorado (idempotência)", { integration: "mercadopago", paymentId, status: mappedStatus });
+        return NextResponse.json({ received: true, duplicate: true }, { status: 200 });
+      }
+      logger.error("Erro ao registrar evento de webhook", { integration: "mercadopago", error: insertEventError.message });
+      return NextResponse.json({ error: "internal error" }, { status: 500 });
     }
 
     await applyPaymentStatusUpdate(payment.externalReference, mappedStatus);
