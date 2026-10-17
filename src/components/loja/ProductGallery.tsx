@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { optimizeCloudinaryUrl } from "@/lib/cloudinary-optimizer";
 
 interface GalleryMedia {
   url: string;
@@ -29,12 +30,13 @@ export default function ProductGallery({ media, productName }: { media: GalleryM
         ) : (
           <Image
             key={active.url}
-            src={active.url}
+            src={optimizeCloudinaryUrl(active.url, { width: 960, quality: "auto" })}
             alt={active.alt || productName}
             fill
-            sizes="(max-width: 768px) 100vw, 480px"
+            sizes="(max-width: 1024px) 100vw, 560px"
             className="object-contain"
             priority={activeIndex === 0}
+            fetchPriority={activeIndex === 0 ? "high" : "auto"}
           />
         )}
       </div>
@@ -55,7 +57,7 @@ export default function ProductGallery({ media, productName }: { media: GalleryM
               {item.mediaType === "video" ? (
                 <video src={item.url} className="h-full w-full object-cover" muted />
               ) : (
-                <Image src={item.url} alt="" fill sizes="64px" className="object-cover" />
+                <Image src={optimizeCloudinaryUrl(item.url, { width: 160, height: 160, quality: "auto" })} alt="" fill sizes="64px" className="object-cover" />
               )}
             </button>
           ))}

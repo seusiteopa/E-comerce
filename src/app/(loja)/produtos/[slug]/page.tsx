@@ -36,6 +36,12 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   return {
     title: productRow.name,
     description: productRow.short_description ?? undefined,
+    // O layout raiz define canonical "/" para todas as páginas; aqui cada
+    // produto aponta para a própria URL, senão o Google trata o produto
+    // como cópia da home.
+    alternates: {
+      canonical: `/produtos/${slug}`,
+    },
     openGraph: {
       title: productRow.name,
       description: productRow.short_description ?? undefined,
