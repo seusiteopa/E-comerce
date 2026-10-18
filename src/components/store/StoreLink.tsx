@@ -13,6 +13,10 @@ export function StoreBaseProvider({ value, children }: { value: string; children
 /** Áreas que nunca recebem o prefixo da loja (são da plataforma ou de rotas fora da vitrine). */
 const UNPREFIXED = ["/conta", "/admin", "/login", "/cadastro", "/plataforma", "/criar-loja", "/api", "/offline"];
 
+export function useStoreHref(href: string): string {
+  return withStoreBase(useContext(StoreBaseContext), href);
+}
+
 export function withStoreBase(base: string, href: string): string {
   if (!base || !href.startsWith("/") || href.startsWith("//")) return href;
   if (UNPREFIXED.some((p) => href === p || href.startsWith(p + "/") || href.startsWith(p + "?"))) return href;
