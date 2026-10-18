@@ -34,15 +34,15 @@ export default function CardAuthorizationForm({ monthlyFeeLabel }: { monthlyFeeL
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setMessage(null);
-    const w = window as unknown as { MercadoPago?: MPConstructor };
-    if (!sdkReady || !w.MercadoPago) {
+    const MPClass = (window as unknown as { MercadoPago?: MPConstructor }).MercadoPago;
+    if (!sdkReady || !MPClass) {
       setMessage("Carregando o formulário seguro. Tente de novo em alguns segundos.");
       return;
     }
     const [mm, yy] = expiry.split("/").map((v) => v.trim());
     startTransition(async () => {
       try {
-        const mp = new w.MercadoPago(MP_PUBLIC_KEY, { locale: "pt-BR" });
+        const mp = new MPClass(MP_PUBLIC_KEY, { locale: "pt-BR" });
         const token = await mp.createCardToken({
           cardNumber: number.replace(/\s/g, ""),
           cardholderName: name,
