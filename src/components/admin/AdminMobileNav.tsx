@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import StoreLink from "@/components/store/StoreLink";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
@@ -31,9 +31,9 @@ const navItems = [
   { href: "/admin/clientes", label: "Clientes", icon: Users },
   { href: "/admin/cupons", label: "Cupons", icon: Ticket },
   { href: "/admin/banners", label: "Banners", icon: ImageIcon },
-  { href: "/admin/loja", label: "Minha loja", icon: Store },
   { href: "/admin/pagamentos", label: "Pagamentos e plano", icon: CreditCard },
-  { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
+  { href: "/admin/configuracoes", label: "Configurações da loja", icon: Settings },
+  { href: "/conta/lojas", label: "Trocar de loja", icon: Store },
 ];
 
 export default function AdminMobileNav({ storeHome }: { storeHome: string }) {
@@ -70,7 +70,7 @@ export default function AdminMobileNav({ storeHome }: { storeHome: string }) {
             const Icon = item.icon;
             const active = pathname === item.href;
             return (
-              <Link
+              <StoreLink
                 key={item.href}
                 href={item.href}
                 onClick={() => setOpen(false)}
@@ -80,16 +80,16 @@ export default function AdminMobileNav({ storeHome }: { storeHome: string }) {
               >
                 <Icon size={17} aria-hidden="true" />
                 {item.label}
-              </Link>
+              </StoreLink>
             );
           })}
-          <Link
-            href={storeHome}
+          <StoreLink
+            href="/"
             onClick={() => setOpen(false)}
             className="mt-2 flex items-center gap-3 rounded-lg border-t border-line px-3 pt-4 text-sm font-medium text-ink-soft hover:text-ink"
           >
             Ver loja
-          </Link>
+          </StoreLink>
           <form action={logoutAction}>
             <button
               type="submit"

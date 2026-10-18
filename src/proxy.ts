@@ -33,9 +33,10 @@ export async function proxy(request: NextRequest) {
   if (lojaMatch) {
     const slug = lojaMatch[1];
     const rest = lojaMatch[2] ?? "/";
-    if (isProtectedPath(rest)) {
+    if (rest === "/conta" || rest.startsWith("/conta/") || rest === "/plataforma" || rest.startsWith("/plataforma/")) {
       return NextResponse.redirect(new URL(rest, request.url), 308);
     }
+    // /admin dentro da loja: a permissão é conferida no layout do admin (login/home se não puder).
     const url = request.nextUrl.clone();
     url.pathname = rest;
     return NextResponse.rewrite(url, { request: { headers: sanitizedHeaders(request, slug) } });
@@ -117,9 +118,6 @@ export async function proxy(request: NextRequest) {
     const isAdmin = Boolean(member || platformAdmin);
 
     // Administrador que abre "minha conta" vai direto para o painel.
-    if (isAccountRoute && isAdmin) {
-      return NextResponse.redirect(new URL("/admin", request.url));
-    }
   }
 
   return response;

@@ -60,8 +60,11 @@ export default async function MinhasLojasPage() {
                 </div>
                 <p className="break-all text-xs text-ink-soft">{publicUrl}</p>
                 <div className="flex flex-wrap gap-2">
-                  <Link href={publicPath} className="rounded-xl bg-navy px-4 py-2 text-sm font-semibold text-white hover:opacity-90">
-                    Abrir loja
+                  <Link href={`/lojas/${store.slug}/admin`} className="rounded-xl bg-navy px-4 py-2 text-sm font-semibold text-white hover:opacity-90">
+                    Painel
+                  </Link>
+                  <Link href={publicPath} className="rounded-xl border border-line px-4 py-2 text-sm font-semibold text-ink hover:bg-paper">
+                    Ver vitrine
                   </Link>
                   <CopyLinkButton url={publicUrl} />
                   <a

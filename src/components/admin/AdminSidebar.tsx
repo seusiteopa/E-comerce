@@ -1,4 +1,4 @@
-import Link from "next/link";
+import StoreLink from "@/components/store/StoreLink";
 import Image from "next/image";
 import {
   LayoutDashboard,
@@ -25,9 +25,9 @@ const navItems = [
   { href: "/admin/clientes", label: "Clientes", icon: Users },
   { href: "/admin/cupons", label: "Cupons", icon: Ticket },
   { href: "/admin/banners", label: "Banners", icon: ImageIcon },
-  { href: "/admin/loja", label: "Minha loja", icon: Store },
   { href: "/admin/pagamentos", label: "Pagamentos e plano", icon: CreditCard },
-  { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
+  { href: "/admin/configuracoes", label: "Configurações da loja", icon: Settings },
+  { href: "/conta/lojas", label: "Trocar de loja", icon: Store },
 ];
 
 export default function AdminSidebar() {
@@ -41,14 +41,14 @@ export default function AdminSidebar() {
         {navItems.map((item) => {
           const Icon = item.icon;
           return (
-            <Link
+            <StoreLink
               key={item.href}
               href={item.href}
               className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink-soft transition-colors hover:bg-paper hover:text-ink"
             >
               <Icon size={17} aria-hidden="true" />
               {item.label}
-            </Link>
+            </StoreLink>
           );
         })}
       </nav>

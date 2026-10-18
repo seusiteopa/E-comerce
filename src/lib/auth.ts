@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import "server-only";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ProfileRow } from "@/types/database";
@@ -67,7 +69,23 @@ export async function requireStoreAdmin(): Promise<{ profile: ProfileRow; store:
 }
 
 /** Compatível com o código existente: agora significa "administra ESTA loja". */
-export async function requireAdminProfile(): Promise<ProfileRow> {
-  const { profile } = await requireStoreAdmin();
+export async function requireAdminProfile(options?: { allowUnpaid?: boolean }): Promise<ProfileRow> {
+  const { profile, store } = await requireStoreAdmin();
+
+  // Loja de cliente só usa o painel depois de autorizar a mensalidade (o 1º mês é grátis).
+  // A página de pagamentos é a única liberada antes disso.
+  if (!options?.allowUnpaid && !store.is_platform_owned) {
+    const service = createSupabaseServiceClient();
+    const { data: billing } = await service
+      .from("store_billing")
+      .select("subscription_status")
+      .eq("store_id", store.id)
+      .maybeSingle();
+    const authorized = ["em_teste", "ativa"].includes(billing?.subscription_status ?? "");
+    if (!authorized) {
+      const { storeBasePath } = await import("@/lib/store/base-path");
+      redirect(`${await storeBasePath()}/admin/pagamentos`);
+    }
+  }
   return profile;
 }

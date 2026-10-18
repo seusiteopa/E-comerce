@@ -1,4 +1,4 @@
-import Link from "next/link";
+import StoreLink from "@/components/store/StoreLink";
 import AdminHeader from "@/components/admin/AdminHeader";
 import Container from "@/components/ui/Container";
 import { LinkButton } from "@/components/ui/Button";
@@ -16,12 +16,27 @@ export default async function AdminProdutosPage() {
   await requireAdminProfile();
   const supabase = await createSupabaseServerClient();
   const { id: storeId } = await getCurrentStore();
-  const { data } = await supabase
-    .from("products")
-    .select("*, product_images(url, display_order)")
-    .eq("store_id", storeId)
-    .order("created_at", { ascending: false });
-  const rows = (data ?? []) as ProductWithImages[];
+  const { data } = await supabase.from("products").select("*").eq("store_id", storeId).order("created_at", { ascending: false });
+  const rows = (data ?? []) as ProductRow[];
+
+  const columns: AdminColumn<ProductRow>[] = [
+    { header: "Nome", primary: true, cell: (r) => <StoreLink href={`/produtos/${r.slug}`} className="hover:underline">{r.name}</StoreLink> },
+    { header: "Tipo", primary: true, cell: (r) => <ProductTypeBadge type={r.type} /> },
+    { header: "Preço", cell: (r) => formatCurrency(Number(r.price)) },
+    { header: "Status", primary: true, cell: (r) => r.status },
+    {
+      header: "Ações",
+      primary: true,
+      cell: (r) => (
+        <div className="flex items-center gap-3">
+          <StoreLink href={`/admin/produtos/${r.id}/editar`} className="text-xs font-semibold text-navy hover:underline">
+            Editar
+          </StoreLink>
+          <DeleteProductButton productId={r.id} productName={r.name} />
+        </div>
+      ),
+    },
+  ];
 
   return (
     <>

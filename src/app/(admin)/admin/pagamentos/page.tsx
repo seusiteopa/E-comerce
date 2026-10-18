@@ -58,7 +58,7 @@ export default async function AdminPagamentosPage({ searchParams }: { searchPara
               </p>
               <div className="mt-4">{/* <a> comum (não <Link>): evita o pré-carregamento do Next iniciar a conexão sem o clique */}
                 <a
-                  href="/api/mercadopago/oauth/start"
+                  href={`/api/mercadopago/oauth/start?loja=${encodeURIComponent(store.slug)}`}
                   className="inline-flex items-center justify-center gap-2 rounded-full bg-farol px-6 py-3 text-sm font-semibold text-ink shadow-sm transition-colors duration-200 hover:bg-farol-deep"
                 >
                   Conectar Mercado Pago
