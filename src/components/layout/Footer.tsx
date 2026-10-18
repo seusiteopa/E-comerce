@@ -24,8 +24,8 @@ const policies = [
  */
 export default function Footer({ settings }: { settings?: SiteSettingsMap }) {
   const storeName = settings?.site_name?.trim() || siteConfig.storeName;
-  const description = settings?.site_description?.trim() || siteConfig.description;
   const isPlatform = settings?._platform === "1" || settings === undefined;
+  const description = settings?.site_description?.trim() || (isPlatform ? siteConfig.description : "");
   const whatsappNumber = settings?.whatsapp_number?.trim();
   const email = settings?.contact_email?.trim() || (isPlatform ? contact.email : "");
   const instagramUrl = settings?.instagram_url?.trim() || (isPlatform ? contact.instagram : "");
@@ -44,6 +44,7 @@ export default function Footer({ settings }: { settings?: SiteSettingsMap }) {
           <p className="mt-4 max-w-xs text-sm text-white/70">{description}</p>
         </div>
 
+        {isPlatform && (
         <nav aria-label="Institucional">
           <h2 className="font-mono-label text-xs uppercase text-white/50">Institucional</h2>
           <ul className="mt-4 flex flex-col gap-2">
@@ -56,7 +57,9 @@ export default function Footer({ settings }: { settings?: SiteSettingsMap }) {
             ))}
           </ul>
         </nav>
+        )}
 
+        {isPlatform && (
         <nav aria-label="Políticas">
           <h2 className="font-mono-label text-xs uppercase text-white/50">Políticas</h2>
           <ul className="mt-4 flex flex-col gap-2">
@@ -69,6 +72,7 @@ export default function Footer({ settings }: { settings?: SiteSettingsMap }) {
             ))}
           </ul>
         </nav>
+        )}
 
         <div>
           <h2 className="font-mono-label text-xs uppercase text-white/50">Contato</h2>
