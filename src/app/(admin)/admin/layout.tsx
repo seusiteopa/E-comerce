@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   try {
-    await requireAdminProfile();
+    await requireAdminProfile({ allowUnpaid: true });
   } catch (err) {
     if (err instanceof UnauthorizedError) redirect("/login?redirecionar=/admin");
     if (err instanceof ForbiddenError) redirect("/");

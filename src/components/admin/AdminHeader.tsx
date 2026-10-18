@@ -1,4 +1,3 @@
-import StoreLink from "@/components/store/StoreLink";
 import { getCurrentStore } from "@/lib/store/current";
 
 export default async function AdminHeader({ title }: { title: string }) {
@@ -9,9 +8,9 @@ export default async function AdminHeader({ title }: { title: string }) {
         <p className="truncate text-xs text-ink-soft">Painel de {store.name}</p>
         <h1 className="truncate text-lg font-semibold text-ink">{title}</h1>
       </div>
-      <StoreLink href="/" className="shrink-0 text-xs font-medium text-navy hover:underline">
+      <a href={`/lojas/${store.slug}`} className="shrink-0 text-xs font-medium text-navy hover:underline">
         Ver loja
-      </StoreLink>
+      </a>
     </header>
   );
 }
