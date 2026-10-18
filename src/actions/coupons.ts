@@ -2,7 +2,6 @@
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentStore } from "@/lib/store/current";
-import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import { validateCoupon } from "@/domain/cupom/regras";
 import { ActionResult, actionSuccess, actionError } from "@/lib/action-result";
 
@@ -43,8 +42,8 @@ export async function previewCouponAction(
   const { data: { user } } = await supabase.auth.getUser();
   let previousUsageCount = 0;
   if (user) {
-    const serviceClient = createSupabaseServiceClient();
-    const { count } = await serviceClient
+    // Pedidos do próprio cliente: a regra do banco já permite ler os próprios pedidos.
+    const { count } = await supabase
       .from("orders")
       .select("id", { count: "exact", head: true })
       .eq("store_id", storeId)
