@@ -1,5 +1,7 @@
 "use server";
 
+import { z } from "zod";
+import { EMAIL_NOT_CONFIRMED_MSG } from "@/lib/auth-messages";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentStore } from "@/lib/store/current";
@@ -55,7 +57,7 @@ export async function loginAction(formData: FormData): Promise<ActionResult<{ is
   if (error) {
     // Conta criada que ainda não confirmou o e-mail: o Supabase bloqueia o login até a confirmação.
     if (error.code === "email_not_confirmed" || /not confirmed/i.test(error.message)) {
-      return actionError("Confirme seu e-mail antes de entrar. Procure o link de confirmação na sua caixa de entrada (e no spam).");
+      return actionError(EMAIL_NOT_CONFIRMED_MSG);
     }
     return actionError("E-mail ou senha incorretos.");
   }
@@ -119,4 +121,18 @@ function flattenZodErrors(error: { flatten: () => { fieldErrors: Record<string, 
     if (messages && messages[0]) result[key] = messages[0];
   }
   return result;
+}
+
+export async function resendConfirmationAction(email: string): Promise<ActionResult<undefined>> {
+  const parsedEmail = z.string().trim().email().safeParse(email);
+  if (!parsedEmail.success) return actionError("Informe um e-mail válido.");
+
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.auth.resend({ type: "signup", email: parsedEmail.data });
+
+  if (error) {
+    logger.warn("Falha ao reenviar confirmação", { reason: error.message });
+    return actionError("Não foi possível reenviar agora. Aguarde alguns minutos e tente novamente.");
+  }
+  return actionSuccess(undefined);
 }

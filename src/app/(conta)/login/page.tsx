@@ -1,21 +1,27 @@
-import { PasswordField } from "@/components/ui/PasswordField";
 "use client";
+
+import { PasswordField } from "@/components/ui/PasswordField";
 
 import { Suspense, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
-import { loginAction } from "@/actions/auth";
+import { loginAction, resendConfirmationAction } from "@/actions/auth";
+import { EMAIL_NOT_CONFIRMED_MSG } from "@/lib/auth-messages";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
+  const [pendingEmail, setPendingEmail] = useState("");
+  const [resendStatus, setResendStatus] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   function handleSubmit(formData: FormData) {
     setError(null);
+    setResendStatus(null);
+    setPendingEmail(String(formData.get("email") ?? ""));
     startTransition(async () => {
       const result = await loginAction(formData);
       if (result.success) {
@@ -44,6 +50,21 @@ function LoginForm() {
         <PasswordField id="password" name="password" autoComplete="current-password" required />
       </div>
       {error && <p role="alert" className="text-sm text-status-danger">{error}</p>}
+      {error === EMAIL_NOT_CONFIRMED_MSG && (
+        <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={async () => {
+              const result = await resendConfirmationAction(pendingEmail);
+              setResendStatus(result.success ? "Enviamos um novo e-mail de confirmação." : result.error);
+            }}
+            className="text-left text-sm font-semibold text-navy hover:underline"
+          >
+            Reenviar e-mail de confirmação
+          </button>
+          {resendStatus && <p className="text-sm text-ink-soft">{resendStatus}</p>}
+        </div>
+      )}
       <Button type="submit" disabled={isPending} className="mt-2 w-full">
         {isPending ? "Entrando..." : "Entrar"}
       </Button>
