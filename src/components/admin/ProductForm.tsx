@@ -1,3 +1,4 @@
+import { useStoreBase, withStoreBase } from "@/components/store/StoreLink";
 "use client";
 
 import { useState, useTransition } from "react";
@@ -29,6 +30,7 @@ export default function ProductForm({
   currentDigitalFileUrl?: string;
 }) {
   const router = useRouter();
+  const storeBase = useStoreBase();
   const [error, setError] = useState<string | null>(null);
   const [type, setType] = useState<"fisico" | "digital">(product?.type ?? "fisico");
   const [creatingCategory, setCreatingCategory] = useState(false);
@@ -89,7 +91,7 @@ export default function ProductForm({
         ? await updateProductAction(product!.id, formData)
         : await createProductAction(formData);
       if (result.success) {
-        router.push("/admin/produtos");
+        router.push(withStoreBase(storeBase, "/admin/produtos"));
       } else {
         setError(result.error);
       }

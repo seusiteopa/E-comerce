@@ -1,4 +1,4 @@
-import Link from "next/link";
+import StoreLink from "@/components/store/StoreLink";
 import Image from "next/image";
 import {
   LayoutDashboard,
@@ -41,14 +41,14 @@ export default function AdminSidebar() {
         {navItems.map((item) => {
           const Icon = item.icon;
           return (
-            <Link
+            <StoreLink
               key={item.href}
               href={item.href}
               className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink-soft transition-colors hover:bg-paper hover:text-ink"
             >
               <Icon size={17} aria-hidden="true" />
               {item.label}
-            </Link>
+            </StoreLink>
           );
         })}
       </nav>

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import StoreLink from "@/components/store/StoreLink";
 import AdminHeader from "@/components/admin/AdminHeader";
 import Container from "@/components/ui/Container";
 import AdminDataTable, { AdminColumn } from "@/components/admin/AdminDataTable";
@@ -19,7 +19,7 @@ export default async function AdminProdutosPage() {
   const rows = (data ?? []) as ProductRow[];
 
   const columns: AdminColumn<ProductRow>[] = [
-    { header: "Nome", primary: true, cell: (r) => <Link href={`/produtos/${r.slug}`} className="hover:underline">{r.name}</Link> },
+    { header: "Nome", primary: true, cell: (r) => <StoreLink href={`/produtos/${r.slug}`} className="hover:underline">{r.name}</StoreLink> },
     { header: "Tipo", primary: true, cell: (r) => <ProductTypeBadge type={r.type} /> },
     { header: "Preço", cell: (r) => formatCurrency(Number(r.price)) },
     { header: "Status", primary: true, cell: (r) => r.status },
@@ -28,9 +28,9 @@ export default async function AdminProdutosPage() {
       primary: true,
       cell: (r) => (
         <div className="flex items-center gap-3">
-          <Link href={`/admin/produtos/${r.id}/editar`} className="text-xs font-semibold text-navy hover:underline">
+          <StoreLink href={`/admin/produtos/${r.id}/editar`} className="text-xs font-semibold text-navy hover:underline">
             Editar
-          </Link>
+          </StoreLink>
           <DeleteProductButton productId={r.id} productName={r.name} />
         </div>
       ),

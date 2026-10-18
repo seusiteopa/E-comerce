@@ -11,7 +11,12 @@ export function StoreBaseProvider({ value, children }: { value: string; children
 }
 
 /** Áreas que nunca recebem o prefixo da loja (são da plataforma ou de rotas fora da vitrine). */
-const UNPREFIXED = ["/conta", "/admin", "/login", "/cadastro", "/plataforma", "/criar-loja", "/api", "/offline"];
+const UNPREFIXED = ["/conta", "/login", "/cadastro", "/plataforma", "/criar-loja", "/api", "/offline"];
+
+/** Prefixo da loja atual, para navegação feita por código (router.push). */
+export function useStoreBase(): string {
+  return useContext(StoreBaseContext);
+}
 
 export function withStoreBase(base: string, href: string): string {
   if (!base || !href.startsWith("/") || href.startsWith("//")) return href;
