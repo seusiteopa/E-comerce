@@ -1,4 +1,4 @@
-import Link from "next/link";
+import StoreLink from "@/components/store/StoreLink";
 import Image from "next/image";
 import Container from "@/components/ui/Container";
 import { siteConfig, contact, whatsappHref } from "@/data/site";
@@ -49,9 +49,9 @@ export default function Footer({ settings }: { settings?: SiteSettingsMap }) {
           <ul className="mt-4 flex flex-col gap-2">
             {footerNav.map((item) => (
               <li key={item.href}>
-                <Link href={item.href} className="text-sm text-white/80 hover:text-white">
+                <StoreLink href={item.href} className="text-sm text-white/80 hover:text-white">
                   {item.label}
-                </Link>
+                </StoreLink>
               </li>
             ))}
           </ul>
@@ -62,9 +62,9 @@ export default function Footer({ settings }: { settings?: SiteSettingsMap }) {
           <ul className="mt-4 flex flex-col gap-2">
             {policies.map((item) => (
               <li key={item.href}>
-                <Link href={item.href} className="text-sm text-white/80 hover:text-white">
+                <StoreLink href={item.href} className="text-sm text-white/80 hover:text-white">
                   {item.label}
-                </Link>
+                </StoreLink>
               </li>
             ))}
           </ul>

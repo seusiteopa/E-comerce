@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import StoreLink from "@/components/store/StoreLink";
 import { X } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 import { formatCurrency } from "@/lib/format";
@@ -35,9 +35,9 @@ export default function CartItemList() {
             <div className="flex items-start justify-between gap-2">
               <div>
                 <ProductTypeBadge type={item.type} />
-                <Link href={`/produtos/${item.productSlug}`} className="mt-1 block text-sm font-semibold text-ink hover:underline">
+                <StoreLink href={`/produtos/${item.productSlug}`} className="mt-1 block text-sm font-semibold text-ink hover:underline">
                   {item.name}
-                </Link>
+                </StoreLink>
                 {item.variationLabel && <p className="text-xs text-ink-soft">{item.variationLabel}</p>}
               </div>
               <button

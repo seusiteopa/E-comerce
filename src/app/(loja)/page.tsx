@@ -1,4 +1,4 @@
-import Link from "next/link";
+import StoreLink from "@/components/store/StoreLink";
 import Container from "@/components/ui/Container";
 import ProductGrid from "@/components/loja/ProductGrid";
 import HomeBanner from "@/components/loja/HomeBanner";
@@ -37,9 +37,9 @@ export default async function HomePage() {
           <Container>
             <div className="flex items-end justify-between">
               <h1 className="text-xl font-semibold text-ink sm:text-2xl">Destaques</h1>
-              <Link href="/produtos" className="text-sm font-semibold text-navy hover:underline">
+              <StoreLink href="/produtos" className="text-sm font-semibold text-navy hover:underline">
                 Ver tudo →
-              </Link>
+              </StoreLink>
             </div>
             <div className="mt-6">
               <ProductGrid products={featured} />

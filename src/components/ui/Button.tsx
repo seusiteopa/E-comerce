@@ -1,4 +1,4 @@
-import Link from "next/link";
+import StoreLink from "@/components/store/StoreLink";
 import { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from "react";
 
 type Variant = "primary" | "secondary" | "ghost" | "danger";
@@ -32,9 +32,9 @@ export function LinkButton({ href, variant = "primary", children, className = ""
     );
   }
   return (
-    <Link href={href} className={styles}>
+    <StoreLink href={href} className={styles}>
       {children}
-    </Link>
+    </StoreLink>
   );
 }
 

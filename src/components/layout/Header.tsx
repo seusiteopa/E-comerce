@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import StoreLink from "@/components/store/StoreLink";
 import Image from "next/image";
 import { Search, User } from "lucide-react";
 import Container from "@/components/ui/Container";
@@ -14,7 +14,7 @@ export default function Header({ logoUrl, siteName }: { logoUrl?: string; siteNa
   return (
     <header className="border-b border-line bg-surface">
       <Container className="relative flex h-16 items-center justify-between gap-4">
-        <Link href="/" className="flex shrink-0 items-center gap-3">
+        <StoreLink href="/" className="flex shrink-0 items-center gap-3">
           {logoUrl ? (
             <Image src={logoUrl} alt={resolvedName} width={64} height={36} priority className="h-9 w-auto object-contain" />
           ) : (
@@ -22,7 +22,7 @@ export default function Header({ logoUrl, siteName }: { logoUrl?: string; siteNa
           )}
           <span className="h-4 w-px bg-line" aria-hidden="true" />
           <span className="truncate text-sm font-medium text-ink-soft">{resolvedName}</span>
-        </Link>
+        </StoreLink>
 
         <form action="/busca" className="hidden max-w-md flex-1 items-center gap-2 rounded-full border border-line px-4 py-2 lg:flex">
           <Search size={16} className="text-ink-soft shrink-0" aria-hidden="true" />
@@ -39,18 +39,18 @@ export default function Header({ logoUrl, siteName }: { logoUrl?: string; siteNa
           <ul className="flex items-center gap-6">
             {mainNav.map((item) => (
               <li key={item.href}>
-                <Link href={item.href} className="text-sm font-medium text-ink-soft transition-colors hover:text-navy">
+                <StoreLink href={item.href} className="text-sm font-medium text-ink-soft transition-colors hover:text-navy">
                   {item.label}
-                </Link>
+                </StoreLink>
               </li>
             ))}
           </ul>
         </nav>
 
         <div className="flex shrink-0 items-center gap-1">
-          <Link href="/conta/pedidos" aria-label="Minha conta" className="hidden h-10 w-10 items-center justify-center rounded-full hover:bg-paper sm:flex">
+          <StoreLink href="/conta/pedidos" aria-label="Minha conta" className="hidden h-10 w-10 items-center justify-center rounded-full hover:bg-paper sm:flex">
             <User size={20} className="text-ink" aria-hidden="true" />
-          </Link>
+          </StoreLink>
           <CartIndicator />
           <MobileMenu />
         </div>

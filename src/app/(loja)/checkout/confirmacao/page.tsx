@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import Link from "next/link";
+import StoreLink from "@/components/store/StoreLink";
 import Container from "@/components/ui/Container";
 import { LinkButton } from "@/components/ui/Button";
 import { StatusPill } from "@/components/ui/Badge";
@@ -50,7 +50,7 @@ export default async function ConfirmacaoPage({ searchParams }: ConfirmacaoPageP
             </div>
             <p className="mt-4 text-xs text-ink-soft">
               A confirmação final do pagamento pode levar alguns instantes (especialmente Pix e boleto).
-              Você pode acompanhar em <Link href="/conta/pedidos" className="text-navy hover:underline">Meus Pedidos</Link>.
+              Você pode acompanhar em <StoreLink href="/conta/pedidos" className="text-navy hover:underline">Meus Pedidos</StoreLink>.
             </p>
           </div>
         ) : (

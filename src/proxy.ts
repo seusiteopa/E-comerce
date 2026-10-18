@@ -4,24 +4,58 @@ import { DEFAULT_STORE_SLUG, isPlatformRootHost, parseStoreHost } from "@/lib/st
 
 /**
  * Camada 1 de autorização (a camada 2 é o RLS no banco — Etapa 2/9).
- * - Renova o cookie de sessão do Supabase a cada requisição.
- * - Bloqueia acesso a /conta/* sem sessão válida (redireciona para /login).
- * - Bloqueia acesso a /admin/* sem sessão de administrador (redireciona
- *   para a home da loja — não revela nem a existência da rota admin
- *   para quem não tem permissão).
+ * - Rotas /lojas/<loja>/... são reescritas para a rota da loja, informando a loja por cabeçalho.
+ * - Qualquer cabeçalho x-store-slug enviado pelo cliente é removido: só o proxy define a loja.
+ * - Renova o cookie de sessão do Supabase nas áreas protegidas.
+ * - Bloqueia /conta/* sem sessão (redireciona para /login).
+ * - Bloqueia /admin/* sem sessão de administrador (redireciona para a home).
  */
+
+const STORE_HEADER = "x-store-slug";
+const PROTECTED_PREFIXES = ["/conta", "/admin", "/plataforma"];
+
+function sanitizedHeaders(request: NextRequest, slug?: string): Headers {
+  const headers = new Headers(request.headers);
+  headers.delete(STORE_HEADER);
+  if (slug) headers.set(STORE_HEADER, slug);
+  return headers;
+}
+
+function isProtectedPath(pathname: string): boolean {
+  return PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"));
+}
+
 export async function proxy(request: NextRequest) {
-  // Home no endereço da plataforma: mostra a página da plataforma, não uma loja.
-  // Outras requisições da home (lojas, subdomínios) seguem sem custo de banco aqui.
-  if (request.nextUrl.pathname === "/") {
-    const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "";
-    if (isPlatformRootHost(host)) {
-      return NextResponse.rewrite(new URL("/inicio-plataforma", request.url));
+  const pathname = request.nextUrl.pathname;
+
+  // /lojas/<loja>/...: reescreve para a rota da loja (áreas protegidas seguem o endereço direto).
+  const lojaMatch = pathname.match(/^\/lojas\/([a-z0-9-]+)(\/.*)?$/);
+  if (lojaMatch) {
+    const slug = lojaMatch[1];
+    const rest = lojaMatch[2] ?? "/";
+    if (isProtectedPath(rest)) {
+      return NextResponse.redirect(new URL(rest, request.url), 308);
     }
-    return NextResponse.next({ request });
+    const url = request.nextUrl.clone();
+    url.pathname = rest;
+    return NextResponse.rewrite(url, { request: { headers: sanitizedHeaders(request, slug) } });
   }
 
-  const response = NextResponse.next({ request });
+  // Home no endereço da plataforma: mostra a página da plataforma.
+  if (pathname === "/") {
+    const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "";
+    if (isPlatformRootHost(host)) {
+      return NextResponse.rewrite(new URL("/inicio-plataforma", request.url), { request: { headers: sanitizedHeaders(request) } });
+    }
+    return NextResponse.next({ request: { headers: sanitizedHeaders(request) } });
+  }
+
+  // Demais páginas públicas: só higieniza o cabeçalho de loja, sem custo de banco.
+  if (!isProtectedPath(pathname)) {
+    return NextResponse.next({ request: { headers: sanitizedHeaders(request) } });
+  }
+
+  const response = NextResponse.next({ request: { headers: sanitizedHeaders(request) } });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -40,7 +74,6 @@ export async function proxy(request: NextRequest) {
   );
 
   const { data: { user } } = await supabase.auth.getUser();
-  const pathname = request.nextUrl.pathname;
 
   const isAccountRoute = pathname.startsWith("/conta");
   const isAdminRoute = pathname.startsWith("/admin");
@@ -85,10 +118,7 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL("/", request.url));
     }
 
-    // Quem é administrador e navega para qualquer link de "minha conta"
-    // (ex: ícone no cabeçalho, sempre apontando para /conta/pedidos) é
-    // levado direto para o painel — só existe uma conta cadastrada como
-    // admin, então não faz sentido ela ver a área de cliente comum.
+    // Administrador que abre "minha conta" vai direto para o painel.
     if (isAccountRoute && isAdmin) {
       return NextResponse.redirect(new URL("/admin", request.url));
     }
@@ -98,5 +128,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/conta/:path*", "/admin/:path*", "/plataforma/:path*"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|svg|webp|ico|css|js|txt|xml)$).*)"],
 };
