@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { resolveHomeOrder } from "@/lib/store/home-order";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireStoreAdmin } from "@/lib/auth";
 import { ActionResult, actionSuccess, actionError } from "@/lib/action-result";
@@ -115,6 +116,30 @@ export async function updateStorePagesAction(input: unknown): Promise<ActionResu
   if (error) {
     logger.error("Erro ao salvar páginas da loja", { storeId: store.id, error: error.message });
     return actionError("Não foi possível salvar as páginas agora. Tente novamente.");
+  }
+
+  revalidatePath("/", "layout");
+  return actionSuccess(undefined);
+}
+
+export async function updateHomeOrderAction(order: unknown): Promise<ActionResult> {
+  if (!Array.isArray(order) || order.some((x) => typeof x !== "string")) return actionError("Ordem inválida.");
+  const resolved = resolveHomeOrder(order.join(","));
+
+  let store;
+  try {
+    ({ store } = await requireStoreAdmin());
+  } catch {
+    return actionError("Acesso restrito ao painel administrativo.");
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase
+    .from("site_settings")
+    .upsert({ store_id: store.id, key: "home_order", value: resolved.join(",") }, { onConflict: "store_id,key" });
+  if (error) {
+    logger.error("Erro ao salvar ordem da página inicial", { storeId: store.id, error: error.message });
+    return actionError("Não foi possível salvar a ordem agora. Tente novamente.");
   }
 
   revalidatePath("/", "layout");
