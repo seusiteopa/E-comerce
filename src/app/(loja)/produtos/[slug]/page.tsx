@@ -5,6 +5,8 @@ import Container from "@/components/ui/Container";
 import { CategoryBadge } from "@/components/ui/Badge";
 import PriceTag from "@/components/ui/PriceTag";
 import ProductActions from "@/components/loja/ProductActions";
+import ShareProductButtons from "@/components/loja/ShareProductButtons";
+import { storeBasePath } from "@/lib/store/base-path";
 import ProductGallery from "@/components/loja/ProductGallery";
 import ProductCard from "@/components/loja/ProductCard";
 import {
@@ -21,6 +23,7 @@ interface ProductPageProps {
 export const revalidate = 60;
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
+  const base = await storeBasePath();
   const { slug } = await params;
   const productRow = await getProductBySlug(slug);
   if (!productRow) return { title: "Produto não encontrado" };
@@ -40,7 +43,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     // produto aponta para a própria URL, senão o Google trata o produto
     // como cópia da home.
     alternates: {
-      canonical: `/produtos/${slug}`,
+      canonical: `${base}/produtos/${slug}`,
     },
     openGraph: {
       title: productRow.name,
@@ -94,6 +97,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
               <div className="mt-8">
                 <ProductActions product={product} />
+                <ShareProductButtons name={product.name} slug={product.slug} />
               </div>
             </div>
           </div>
