@@ -22,7 +22,7 @@ export default function CreateStoreForm({ rootDomain, monthlyFee }: { rootDomain
   const [slugTouched, setSlugTouched] = useState(false);
   const [storeType, setStoreType] = useState("loja");
   const [whatsapp, setWhatsapp] = useState("");
-  const [plan, setPlan] = useState<"comissao" | "mensalidade">("comissao");
+  const plan = "mensalidade" as const;
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<{ storeUrl: string; subscriptionFailed: boolean } | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -98,19 +98,12 @@ export default function CreateStoreForm({ rootDomain, monthlyFee }: { rootDomain
       </div>
 
       <fieldset className="flex flex-col gap-3 rounded-xl border border-line p-4">
-        <legend className="px-1 text-sm font-medium text-ink">Como você quer pagar a Vecorion?</legend>
-        <label className="flex items-start gap-2 text-sm text-ink">
-          <input type="radio" name="plan" checked={plan === "comissao"} onChange={() => setPlan("comissao")} className="mt-1" />
-          <span><strong>1% por venda online.</strong> Sem mensalidade. Só paga quando vende.</span>
-        </label>
+        <legend className="px-1 text-sm font-medium text-ink">Plano da loja</legend>
         {monthlyFee && (
-          <label className="flex items-start gap-2 text-sm text-ink">
-            <input type="radio" name="plan" checked={plan === "mensalidade"} onChange={() => setPlan("mensalidade")} className="mt-1" />
-            <span>
-              <strong>Mensalidade de R$ {monthlyFee}</strong>, sem comissão. <strong>Primeiro mês grátis:</strong> você autoriza no seu banco agora e a cobrança automática só começa daqui a 1 mês.
-              <span className="mt-1 block text-xs text-ink-soft">A mensalidade é cobrada no cartão de crédito. O Pix não é aceito nessa cobrança automática.</span>
-            </span>
-          </label>
+          <p className="text-sm text-ink">
+            <strong>Mensalidade de R$ {monthlyFee}</strong>, sem comissão sobre as vendas. <strong>Primeiro mês grátis:</strong> você autoriza no seu cartão agora e a cobrança automática só começa daqui a 1 mês.
+            <span className="mt-1 block text-xs text-ink-soft">A mensalidade é cobrada no cartão de crédito. O Pix não é aceito nessa cobrança automática.</span>
+          </p>
         )}
       </fieldset>
 

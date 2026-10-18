@@ -164,7 +164,7 @@ export interface StorePaymentContext {
 /**
  * Credenciais e regra de comissão para cobrar em nome de uma loja.
  *  - Loja da própria plataforma: token da plataforma, sem comissão (o dinheiro já é dela).
- *  - Demais lojas: token OAuth do lojista; comissão (application_fee) só se o plano for "comissao".
+ *  - Demais lojas: token OAuth do lojista; sem comissão (plano único: mensalidade).
  */
 export async function getStorePaymentContext(store: { id: string; is_platform_owned: boolean }): Promise<StorePaymentContext> {
   if (store.is_platform_owned) {
@@ -174,9 +174,8 @@ export async function getStorePaymentContext(store: { id: string; is_platform_ow
   }
 
   const accessToken = await getSellerAccessToken(store.id);
-  const supabase = createSupabaseServiceClient();
-  const { data: billing } = await supabase.from("store_billing").select("plan, commission_bps").eq("store_id", store.id).maybeSingle();
-  const bps = billing?.plan === "comissao" ? billing.commission_bps ?? 100 : 0;
+  // Sem comissão: as lojas pagam só a mensalidade, então não há taxa sobre a venda.
+  const bps = 0;
 
   return {
     accessToken,
