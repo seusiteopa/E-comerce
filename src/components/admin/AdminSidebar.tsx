@@ -12,8 +12,7 @@ import {
   Store,
   CreditCard,
   Receipt,
-  LogOut,
-} from "lucide-react";
+  LogOut, Megaphone } from "lucide-react";
 import { logoutAction } from "@/actions/auth";
 
 const navItems = [
@@ -25,6 +24,7 @@ const navItems = [
   { href: "/admin/clientes", label: "Clientes", icon: Users },
   { href: "/admin/cupons", label: "Cupons", icon: Ticket },
   { href: "/admin/banners", label: "Banners", icon: ImageIcon },
+  { href: "/admin/divulgacao", label: "Divulgação", icon: Megaphone },
   { href: "/admin/pagamentos", label: "Pagamentos e plano", icon: CreditCard },
   { href: "/admin/configuracoes", label: "Configurações da loja", icon: Settings },
   { href: "/conta/lojas", label: "Trocar de loja", icon: Store },
