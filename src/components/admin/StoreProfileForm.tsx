@@ -7,6 +7,9 @@ import { uploadFileToCloudinary } from "@/lib/cloudinary-client";
 
 interface StoreProfile {
   name: string;
+  footer_text: string;
+  contact_email: string;
+  instagram_url: string;
   description: string;
   whatsapp: string;
   og_title: string;
@@ -64,6 +67,18 @@ export default function StoreProfileForm({ store, folder }: { store: StoreProfil
         <label htmlFor="whatsapp" className="text-sm font-medium text-ink">WhatsApp da loja (com DDD)</label>
         <input id="whatsapp" value={values.whatsapp} onChange={(e) => set("whatsapp", e.target.value)} className={inputClass} placeholder="5519999999999" />
       </div>
+        <div>
+          <label htmlFor="footer_text" className="text-sm font-medium text-ink">Texto de apresentação (rodapé)</label>
+          <textarea id="footer_text" rows={2} value={values.footer_text} onChange={(e) => set("footer_text", e.target.value)} className={inputClass} />
+        </div>
+        <div>
+          <label htmlFor="contact_email" className="text-sm font-medium text-ink">E-mail de contato</label>
+          <input id="contact_email" type="email" value={values.contact_email} onChange={(e) => set("contact_email", e.target.value)} className={inputClass} />
+        </div>
+        <div>
+          <label htmlFor="instagram_url" className="text-sm font-medium text-ink">Instagram (link)</label>
+          <input id="instagram_url" value={values.instagram_url} onChange={(e) => set("instagram_url", e.target.value)} className={inputClass} placeholder="https://instagram.com/sua-loja" />
+        </div>
 
       <div>
         <p className="text-sm font-medium text-ink">Logo</p>

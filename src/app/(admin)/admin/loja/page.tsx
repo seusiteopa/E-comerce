@@ -8,6 +8,12 @@ export default async function AdminLojaPage() {
   const { store } = await requireStoreAdmin();
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase.from("stores").select("printer_app").eq("id", store.id).maybeSingle();
+  const { data: rows } = await supabase
+    .from("site_settings")
+    .select("key, value")
+    .eq("store_id", store.id)
+    .in("key", ["site_description", "contact_email", "instagram_url"]);
+  const cfg = Object.fromEntries((rows ?? []).map((r) => [r.key, r.value ?? ""]));
 
   return (
     <>
@@ -17,6 +23,9 @@ export default async function AdminLojaPage() {
           folder={`vecorion/lojas/${store.slug}`}
           store={{
             name: store.name,
+            footer_text: cfg.site_description ?? "",
+            contact_email: cfg.contact_email ?? "",
+            instagram_url: cfg.instagram_url ?? "",
             description: store.description ?? "",
             whatsapp: store.whatsapp ?? "",
             og_title: store.og_title ?? "",
