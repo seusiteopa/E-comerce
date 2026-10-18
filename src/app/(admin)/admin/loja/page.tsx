@@ -1,6 +1,7 @@
 import AdminHeader from "@/components/admin/AdminHeader";
 import Container from "@/components/ui/Container";
 import StoreProfileForm from "@/components/admin/StoreProfileForm";
+import StorePagesForm from "@/components/admin/StorePagesForm";
 import { requireStoreAdmin } from "@/lib/auth";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -14,6 +15,9 @@ export default async function AdminLojaPage() {
     .eq("store_id", store.id)
     .in("key", ["site_description", "contact_email", "instagram_url"]);
   const cfg = Object.fromEntries((rows ?? []).map((r) => [r.key, r.value ?? ""]));
+  const pageValues = Object.fromEntries(
+    ["page_sobre", "page_faq", "page_contato", "page_politica_privacidade", "page_politica_termos", "page_politica_trocas"].map((k) => [k, cfg[k] ?? ""])
+  );
 
   return (
     <>
@@ -35,6 +39,7 @@ export default async function AdminLojaPage() {
             printer_app: data?.printer_app === "rawbt" ? "rawbt" : "thermer",
           }}
         />
+        <StorePagesForm initial={pageValues} />
       </Container>
     </>
   );

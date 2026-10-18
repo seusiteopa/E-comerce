@@ -88,3 +88,35 @@ export async function disconnectMercadoPagoAction(): Promise<ActionResult> {
   revalidatePath("/admin/pagamentos");
   return actionSuccess(undefined);
 }
+
+export async function updateStorePagesAction(input: unknown): Promise<ActionResult> {
+  const parsed = z
+    .object({
+      page_sobre: z.string().max(4000).optional().default(""),
+      page_faq: z.string().max(4000).optional().default(""),
+      page_contato: z.string().max(4000).optional().default(""),
+      page_politica_privacidade: z.string().max(4000).optional().default(""),
+      page_politica_termos: z.string().max(4000).optional().default(""),
+      page_politica_trocas: z.string().max(4000).optional().default(""),
+    })
+    .safeParse(input);
+  if (!parsed.success) return actionError("Texto muito longo em alguma página (máximo de 4000 caracteres).");
+
+  let store;
+  try {
+    ({ store } = await requireStoreAdmin());
+  } catch {
+    return actionError("Acesso restrito ao painel administrativo.");
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const rows = Object.entries(parsed.data).map(([key, value]) => ({ store_id: store.id, key, value }));
+  const { error } = await supabase.from("site_settings").upsert(rows, { onConflict: "store_id,key" });
+  if (error) {
+    logger.error("Erro ao salvar páginas da loja", { storeId: store.id, error: error.message });
+    return actionError("Não foi possível salvar as páginas agora. Tente novamente.");
+  }
+
+  revalidatePath("/", "layout");
+  return actionSuccess(undefined);
+}
