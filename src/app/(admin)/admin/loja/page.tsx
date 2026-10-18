@@ -2,6 +2,8 @@ import AdminHeader from "@/components/admin/AdminHeader";
 import Container from "@/components/ui/Container";
 import StoreProfileForm from "@/components/admin/StoreProfileForm";
 import StorePagesForm from "@/components/admin/StorePagesForm";
+import HomeOrderForm from "@/components/admin/HomeOrderForm";
+import { resolveHomeOrder } from "@/lib/store/home-order";
 import { requireStoreAdmin } from "@/lib/auth";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -13,7 +15,7 @@ export default async function AdminLojaPage() {
     .from("site_settings")
     .select("key, value")
     .eq("store_id", store.id)
-    .in("key", ["site_description", "contact_email", "instagram_url"]);
+    .in("key", ["site_description", "contact_email", "instagram_url", "home_order", "page_sobre", "page_faq", "page_contato", "page_politica_privacidade", "page_politica_termos", "page_politica_trocas"]);
   const cfg = Object.fromEntries((rows ?? []).map((r) => [r.key, r.value ?? ""]));
   const pageValues = Object.fromEntries(
     ["page_sobre", "page_faq", "page_contato", "page_politica_privacidade", "page_politica_termos", "page_politica_trocas"].map((k) => [k, cfg[k] ?? ""])
@@ -40,6 +42,7 @@ export default async function AdminLojaPage() {
           }}
         />
         <StorePagesForm initial={pageValues} />
+        <HomeOrderForm initial={resolveHomeOrder(cfg.home_order)} />
       </Container>
     </>
   );
