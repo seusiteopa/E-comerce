@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminMobileNav from "@/components/admin/AdminMobileNav";
+import { getCurrentStore } from "@/lib/store/current";
 
 // Um único app instalável para o domínio inteiro (evita o conflito de dois
 // apps/manifests/service workers para a mesma origem no Android). O admin
@@ -10,12 +11,13 @@ export const metadata: Metadata = {
   title: "Vecorion Admin",
 };
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const store = await getCurrentStore();
   return (
     <div className="flex min-h-screen">
       <AdminSidebar />
       <div className="flex-1">
-        <AdminMobileNav />
+        <AdminMobileNav storeHome={`/lojas/${store.slug}`} />
         {children}
       </div>
     </div>
