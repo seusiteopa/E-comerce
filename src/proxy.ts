@@ -8,7 +8,7 @@ import { DEFAULT_STORE_SLUG, isPlatformRootHost, parseStoreHost } from "@/lib/st
  * - Qualquer cabeçalho x-store-slug enviado pelo cliente é removido: só o proxy define a loja.
  * - Renova o cookie de sessão do Supabase nas áreas protegidas.
  * - Bloqueia /conta/* sem sessão (redireciona para /login).
- * - Bloqueia /admin/* sem sessão de administrador (redireciona para a home).
+ * - /admin/*: exige login aqui; a permissão de administrador é conferida em cada página e ação.
  */
 
 const STORE_HEADER = "x-store-slug";
@@ -92,7 +92,9 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  if ((isAccountRoute || isAdminRoute) && user) {
+  // Rotas /admin: a permissão é conferida em cada página e ação (requireAdminProfile / requireStoreAdmin).
+  // Aqui só exigimos login; repetir a consulta de permissão no proxy deixava cada clique lento.
+  if (isAccountRoute && user) {
     // Quem administra: membro da loja deste endereço, ou dono da plataforma.
     const { slug, domain } = parseStoreHost(request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "");
     let storeId: string | null = null;
@@ -113,10 +115,6 @@ export async function proxy(request: NextRequest) {
       supabase.from("platform_admins").select("user_id").eq("user_id", user.id).maybeSingle(),
     ]);
     const isAdmin = Boolean(member || platformAdmin);
-
-    if (isAdminRoute && !isAdmin) {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
 
     // Administrador que abre "minha conta" vai direto para o painel.
     if (isAccountRoute && isAdmin) {

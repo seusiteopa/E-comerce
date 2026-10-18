@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminMobileNav from "@/components/admin/AdminMobileNav";
+import { requireAdminProfile, ForbiddenError, UnauthorizedError } from "@/lib/auth";
 
 // Um único app instalável para o domínio inteiro (evita o conflito de dois
 // apps/manifests/service workers para a mesma origem no Android). O admin
@@ -10,7 +12,17 @@ export const metadata: Metadata = {
   title: "Vecorion Admin",
 };
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  // Quem não administra esta loja é redirecionado. O layout roda no carregamento completo;
+  // cada página e ação continua conferindo a permissão nas navegações seguintes.
+  try {
+    await requireAdminProfile();
+  } catch (err) {
+    if (err instanceof UnauthorizedError) redirect("/login?redirecionar=/admin");
+    if (err instanceof ForbiddenError) redirect("/");
+    throw err;
+  }
+
   return (
     <div className="flex min-h-screen">
       <AdminSidebar />
