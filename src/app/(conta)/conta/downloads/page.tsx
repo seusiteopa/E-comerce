@@ -1,6 +1,5 @@
 import { Metadata } from "next";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getCurrentStore } from "@/lib/store/current";
 import { requireAuthenticatedProfile } from "@/lib/auth";
 import { generateDigitalDownloadLink } from "@/lib/integrations/storage/digital-delivery";
 import EmptyState from "@/components/ui/EmptyState";
@@ -11,7 +10,6 @@ export const metadata: Metadata = { title: "Downloads" };
 export default async function DownloadsPage() {
   const profile = await requireAuthenticatedProfile();
   const supabase = await createSupabaseServerClient();
-  const { id: storeId } = await getCurrentStore();
 
   // Segurança: o filtro por profile_id + status "pago" acontece aqui, na
   // consulta — só depois disso o product_id é passado para gerar o link
@@ -20,7 +18,6 @@ export default async function DownloadsPage() {
   const { data: orders } = await supabase
     .from("orders")
     .select("id, order_items(id, product_id, product_name_snapshot, product_type_snapshot)")
-    .eq("store_id", storeId)
     .eq("profile_id", profile.id)
     .eq("status", "pago");
 

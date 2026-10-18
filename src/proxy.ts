@@ -118,10 +118,6 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL("/", request.url));
     }
 
-    // Administrador que abre "minha conta" vai direto para o painel.
-    if (isAccountRoute && isAdmin) {
-      return NextResponse.redirect(new URL("/admin", request.url));
-    }
   }
 
   return response;
