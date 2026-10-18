@@ -17,6 +17,9 @@ const storeProfileSchema = z.object({
   og_image_url: z.string().trim().max(500).optional().default(""),
   logo_url: z.string().trim().max(500).optional().default(""),
   printer_app: z.enum(["thermer", "rawbt"]),
+  footer_text: z.string().trim().max(300).optional().default(""),
+  contact_email: z.string().trim().max(120).optional().default(""),
+  instagram_url: z.string().trim().max(200).optional().default(""),
 });
 
 function httpsOrEmpty(value: string): string | null {
@@ -58,6 +61,17 @@ export async function updateStoreProfileAction(input: unknown): Promise<ActionRe
     return actionError("Não foi possível salvar agora. Tente novamente.");
   }
 
+  const settingsRows = [
+    { store_id: store.id, key: "site_description", value: d.footer_text },
+    { store_id: store.id, key: "contact_email", value: d.contact_email },
+    { store_id: store.id, key: "instagram_url", value: d.instagram_url },
+  ];
+  const { error: settingsError } = await supabase.from("site_settings").upsert(settingsRows, { onConflict: "store_id,key" });
+  if (settingsError) {
+    logger.error("Erro ao salvar rodapé da loja", { storeId: store.id, error: settingsError.message });
+    return actionError("Não foi possível salvar o rodapé agora. Tente novamente.");
+  }
+
   revalidatePath("/", "layout");
   return actionSuccess(undefined);
 }
@@ -72,5 +86,37 @@ export async function disconnectMercadoPagoAction(): Promise<ActionResult> {
   if (store.is_platform_owned) return actionError("A loja da plataforma usa a conta principal.");
   await disconnectStore(store.id);
   revalidatePath("/admin/pagamentos");
+  return actionSuccess(undefined);
+}
+
+export async function updateStorePagesAction(input: unknown): Promise<ActionResult> {
+  const parsed = z
+    .object({
+      page_sobre: z.string().max(4000).optional().default(""),
+      page_faq: z.string().max(4000).optional().default(""),
+      page_contato: z.string().max(4000).optional().default(""),
+      page_politica_privacidade: z.string().max(4000).optional().default(""),
+      page_politica_termos: z.string().max(4000).optional().default(""),
+      page_politica_trocas: z.string().max(4000).optional().default(""),
+    })
+    .safeParse(input);
+  if (!parsed.success) return actionError("Texto muito longo em alguma página (máximo de 4000 caracteres).");
+
+  let store;
+  try {
+    ({ store } = await requireStoreAdmin());
+  } catch {
+    return actionError("Acesso restrito ao painel administrativo.");
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const rows = Object.entries(parsed.data).map(([key, value]) => ({ store_id: store.id, key, value }));
+  const { error } = await supabase.from("site_settings").upsert(rows, { onConflict: "store_id,key" });
+  if (error) {
+    logger.error("Erro ao salvar páginas da loja", { storeId: store.id, error: error.message });
+    return actionError("Não foi possível salvar as páginas agora. Tente novamente.");
+  }
+
+  revalidatePath("/", "layout");
   return actionSuccess(undefined);
 }

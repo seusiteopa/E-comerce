@@ -1,3 +1,4 @@
+import { customStorePage } from "@/lib/store/store-pages";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import Container from "@/components/ui/Container";
@@ -60,6 +61,9 @@ export async function generateMetadata({ params }: PolicyPageProps): Promise<Met
 }
 
 export default async function PolicyPage({ params }: PolicyPageProps) {
+  const { slug: policySlug } = await params;
+  const custom = await customStorePage(policySlug as "privacidade" | "termos" | "trocas-e-devolucao");
+  if (custom) return custom;
   const { slug } = await params;
   const policy = policies[slug];
   if (!policy) notFound();

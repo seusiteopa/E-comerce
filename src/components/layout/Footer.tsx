@@ -3,6 +3,7 @@ import Image from "next/image";
 import Container from "@/components/ui/Container";
 import { siteConfig, contact, whatsappHref } from "@/data/site";
 import type { SiteSettingsMap } from "@/lib/data/site-settings";
+import { STORE_PAGES, storePageText, type StorePageSlug } from "@/lib/store/store-pages-config";
 
 const footerNav = [
   { label: "Sobre", href: "/sobre" },
@@ -24,12 +25,20 @@ const policies = [
  */
 export default function Footer({ settings }: { settings?: SiteSettingsMap }) {
   const storeName = settings?.site_name?.trim() || siteConfig.storeName;
-  const description = settings?.site_description?.trim() || siteConfig.description;
   const isPlatform = settings?._platform === "1" || settings === undefined;
+  const description = settings?.site_description?.trim() || (isPlatform ? siteConfig.description : "");
   const whatsappNumber = settings?.whatsapp_number?.trim();
   const email = settings?.contact_email?.trim() || (isPlatform ? contact.email : "");
   const instagramUrl = settings?.instagram_url?.trim() || (isPlatform ? contact.instagram : "");
   const logoUrl = settings?.logo_url;
+
+  const pageSlugOf = (href: string) => (Object.keys(STORE_PAGES) as StorePageSlug[]).find((k) => STORE_PAGES[k].href === href);
+  const hasPage = (href: string) => {
+    const slug = pageSlugOf(href);
+    return isPlatform || (slug !== undefined && storePageText(settings, slug) !== "");
+  };
+  const visibleFooterNav = footerNav.filter((i) => hasPage(i.href));
+  const visiblePolicies = policies.filter((i) => hasPage(i.href));
 
   return (
     <footer className="border-t border-line bg-navy-deep text-white">
@@ -44,10 +53,11 @@ export default function Footer({ settings }: { settings?: SiteSettingsMap }) {
           <p className="mt-4 max-w-xs text-sm text-white/70">{description}</p>
         </div>
 
+        {visibleFooterNav.length > 0 && (
         <nav aria-label="Institucional">
           <h2 className="font-mono-label text-xs uppercase text-white/50">Institucional</h2>
           <ul className="mt-4 flex flex-col gap-2">
-            {footerNav.map((item) => (
+            {visibleFooterNav.map((item) => (
               <li key={item.href}>
                 <StoreLink href={item.href} className="text-sm text-white/80 hover:text-white">
                   {item.label}
@@ -56,11 +66,13 @@ export default function Footer({ settings }: { settings?: SiteSettingsMap }) {
             ))}
           </ul>
         </nav>
+        )}
 
+        {visiblePolicies.length > 0 && (
         <nav aria-label="Políticas">
           <h2 className="font-mono-label text-xs uppercase text-white/50">Políticas</h2>
           <ul className="mt-4 flex flex-col gap-2">
-            {policies.map((item) => (
+            {visiblePolicies.map((item) => (
               <li key={item.href}>
                 <StoreLink href={item.href} className="text-sm text-white/80 hover:text-white">
                   {item.label}
@@ -69,6 +81,7 @@ export default function Footer({ settings }: { settings?: SiteSettingsMap }) {
             ))}
           </ul>
         </nav>
+        )}
 
         <div>
           <h2 className="font-mono-label text-xs uppercase text-white/50">Contato</h2>
