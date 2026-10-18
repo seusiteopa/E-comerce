@@ -58,7 +58,7 @@ export async function createCounterOrderAction(input: unknown): Promise<ActionRe
   }
 
   const service = createSupabaseServiceClient();
-  const { data: variations } = await service.from("product_variations").select("id, product_id, stock").in("product_id", productIds);
+  const { data: variations } = await supabase.from("product_variations").select("id, product_id, stock").in("product_id", productIds);
 
   const orderItems: {
     product_id: string;
@@ -121,7 +121,7 @@ export async function createCounterOrderAction(input: unknown): Promise<ActionRe
   const { error: itemsError } = await supabase.from("order_items").insert(orderItems.map((i) => ({ ...i, order_id: order.id })));
   if (itemsError) {
     logger.error("Erro ao criar itens do pedido de balcão", { orderId: order.id, error: itemsError.message });
-    await service.from("orders").delete().eq("id", order.id);
+    await supabase.from("orders").update({ status: "cancelado" }).eq("id", order.id);
     return actionError("Não foi possível registrar os itens do pedido.");
   }
 
@@ -168,7 +168,7 @@ export async function createCounterOrderAction(input: unknown): Promise<ActionRe
     });
   } catch (error) {
     // pedido sem pagamento não deve ficar pendurado no painel
-    await service.from("orders").update({ status: "cancelado" }).eq("id", order.id);
+    await supabase.from("orders").update({ status: "cancelado" }).eq("id", order.id);
     if (error instanceof PaymentNotConnectedError) {
       return actionError("Conecte o Mercado Pago em “Pagamentos e plano” para receber por Pix.");
     }
@@ -187,7 +187,7 @@ export async function getCounterOrderPaidAction(orderId: string): Promise<Action
   } catch {
     return actionError("Acesso restrito.");
   }
-  const service = createSupabaseServiceClient();
-  const { data } = await service.from("payments").select("status").eq("order_id", orderId).eq("store_id", store.id).maybeSingle();
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase.from("payments").select("status").eq("order_id", orderId).eq("store_id", store.id).maybeSingle();
   return actionSuccess({ paid: data?.status === "aprovado" });
 }
