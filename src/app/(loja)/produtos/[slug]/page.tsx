@@ -6,6 +6,7 @@ import { CategoryBadge } from "@/components/ui/Badge";
 import PriceTag from "@/components/ui/PriceTag";
 import ProductActions from "@/components/loja/ProductActions";
 import ProductGallery from "@/components/loja/ProductGallery";
+import BuyNowButton from "@/components/loja/BuyNowButton";
 import ProductCard from "@/components/loja/ProductCard";
 import {
   getProductBySlug,
@@ -79,6 +80,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <div className="mt-6 grid min-w-0 gap-10 lg:grid-cols-2 lg:items-start">
             <div className="min-w-0">
               <ProductGallery media={product.images} productName={product.name} />
+              {product.type === "digital" && <BuyNowButton product={product} />}
             </div>
 
             <div className="min-w-0">

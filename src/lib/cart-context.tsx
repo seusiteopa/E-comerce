@@ -72,16 +72,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [items, coupon, restored]);
 
   function addItem(newItem: CartItem) {
+    // Produto digital é sempre 1 unidade (ex.: e-book): não soma quantidade ao adicionar de novo.
+    const isDigital = newItem.type === "digital";
     setItems((prev) => {
       const existing = prev.find(
         (i) => i.productSlug === newItem.productSlug && i.variationId === newItem.variationId
       );
       if (existing) {
         return prev.map((i) =>
-          i === existing ? { ...i, quantity: i.quantity + newItem.quantity } : i
+          i === existing
+            ? { ...i, quantity: isDigital ? 1 : i.quantity + newItem.quantity }
+            : i
         );
       }
-      return [...prev, newItem];
+      return [...prev, isDigital ? { ...newItem, quantity: 1 } : newItem];
     });
     setLastAddedItem({ name: newItem.name, at: Date.now() });
   }
