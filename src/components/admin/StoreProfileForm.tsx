@@ -1,5 +1,7 @@
 "use client";
 
+import type { ActionResult } from "@/lib/action-result";
+
 import { useState, useTransition } from "react";
 import Button from "@/components/ui/Button";
 import { updateStoreProfileAction } from "@/actions/admin/loja";
@@ -21,7 +23,15 @@ interface StoreProfile {
 
 const inputClass = "mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy";
 
-export default function StoreProfileForm({ store, folder }: { store: StoreProfile; folder: string }) {
+export default function StoreProfileForm({
+  store,
+  folder,
+  saveAction,
+}: {
+  store: StoreProfile;
+  folder: string;
+  saveAction?: (values: StoreProfile) => Promise<ActionResult>;
+}) {
   const [values, setValues] = useState(store);
   const [message, setMessage] = useState<{ type: "ok" | "erro"; text: string } | null>(null);
   const [uploading, setUploading] = useState<string | null>(null);
@@ -48,7 +58,7 @@ export default function StoreProfileForm({ store, folder }: { store: StoreProfil
   function handleSave() {
     setMessage(null);
     startTransition(async () => {
-      const result = await updateStoreProfileAction(values);
+      const result = await (saveAction ?? updateStoreProfileAction)(values);
       setMessage(result.success ? { type: "ok", text: "Dados da loja salvos." } : { type: "erro", text: result.error });
     });
   }
