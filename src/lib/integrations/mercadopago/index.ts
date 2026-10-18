@@ -239,7 +239,9 @@ export interface CreateCardPaymentInput {
 }
 
 /** Cobrança no cartão com token gerado no navegador, na conta Mercado Pago do lojista (accessToken). */
-export async function createCardPayment(input: CreateCardPaymentInput): Promise<{ paymentId: string; status: string }> {
+export async function createCardPayment(
+  input: CreateCardPaymentInput
+): Promise<{ paymentId: string; status: string; statusDetail: string | null }> {
   const client = getClient(input.accessToken);
   const payment = new Payment(client);
   const platformUrl = process.env.NEXT_PUBLIC_SITE_URL;
@@ -265,7 +267,7 @@ export async function createCardPayment(input: CreateCardPaymentInput): Promise<
     });
     if (!result.id) throw new Error("Resposta inesperada do Mercado Pago ao cobrar o cartão.");
     logger.info("Pagamento com cartão criado", { orderId: input.orderId, status: result.status, integration: "mercadopago" });
-    return { paymentId: String(result.id), status: result.status ?? "pending" };
+    return { paymentId: String(result.id), status: result.status ?? "pending", statusDetail: result.status_detail ?? null };
   } catch (error) {
     logger.error("Erro ao cobrar cartão", {
       orderId: input.orderId,

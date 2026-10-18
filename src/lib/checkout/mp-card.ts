@@ -63,8 +63,8 @@ export async function tokenizeCard(card: CardFormValues): Promise<{ token: strin
   });
 
   const methods = await mp.getPaymentMethods({ bin: number.slice(0, 6) });
-  const method = methods.results?.find((m) => m.payment_type_id === "credit_card") ?? methods.results?.[0];
-  if (!method) throw new Error("Bandeira do cartão não reconhecida.");
+  const method = methods.results?.find((m) => m.payment_type_id === "credit_card");
+  if (!method) throw new Error("Este cartão não é de crédito. Use um cartão de crédito ou pague com Pix.");
   return { token: token.id, paymentMethodId: method.id };
 }
 

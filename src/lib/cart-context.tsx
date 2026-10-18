@@ -1,6 +1,8 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, ReactNode } from "react";
+
+const CART_STORAGE_KEY = "vecorion-carrinho-v1";
 import { CartItem } from "@/types";
 
 interface AppliedCoupon {
@@ -39,6 +41,35 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [coupon, setCoupon] = useState<AppliedCoupon | null>(null);
   const [lastAddedItem, setLastAddedItem] = useState<{ name: string; at: number } | null>(null);
+  const [restored, setRestored] = useState(false);
+
+  // Restaura o carrinho salvo no navegador (ex.: quando a pessoa sai e volta para o site).
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      try {
+        const raw = window.localStorage.getItem(CART_STORAGE_KEY);
+        if (raw) {
+          const saved = JSON.parse(raw) as { items?: CartItem[]; coupon?: AppliedCoupon | null };
+          if (Array.isArray(saved.items)) setItems(saved.items);
+          if (saved.coupon) setCoupon(saved.coupon);
+        }
+      } catch {
+        // Dados corrompidos: começa com carrinho vazio.
+      }
+      setRestored(true);
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, []);
+
+  // Salva a cada mudança (só depois de restaurar, para não apagar o carrinho salvo).
+  useEffect(() => {
+    if (!restored) return;
+    try {
+      window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify({ items, coupon }));
+    } catch {
+      // Armazenamento indisponível (modo privado): o carrinho continua na sessão.
+    }
+  }, [items, coupon, restored]);
 
   function addItem(newItem: CartItem) {
     setItems((prev) => {
@@ -72,6 +103,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
 
   function clearCart() {
+    try {
+      window.localStorage.removeItem(CART_STORAGE_KEY);
+    } catch {
+      // ignora
+    }
     setItems([]);
     setCoupon(null);
   }

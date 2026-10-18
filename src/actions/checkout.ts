@@ -38,6 +38,29 @@ type CreateOrderResult =
       checkoutUrl: string;
     };
 
+/** Traduz o motivo da recusa do Mercado Pago para algo que a pessoa consiga resolver. */
+function cardRejectionMessage(detail: string | null): string {
+  switch (detail) {
+    case "cc_rejected_insufficient_amount":
+      return "Cartão sem saldo ou limite suficiente para este pagamento.";
+    case "cc_rejected_bad_filled_card_number":
+    case "cc_rejected_bad_filled_date":
+    case "cc_rejected_bad_filled_security_code":
+    case "cc_rejected_bad_filled_other":
+      return "Algum dado do cartão está incorreto. Confira número, validade e código de segurança.";
+    case "cc_rejected_call_for_authorize":
+      return "O banco pediu autorização para este pagamento. Ligue para o banco ou use outro cartão.";
+    case "cc_rejected_card_disabled":
+      return "Este cartão está desabilitado. Fale com o banco ou use outro cartão.";
+    case "cc_rejected_high_risk":
+      return "O pagamento não foi aprovado por segurança. Tente outro cartão ou pague com Pix.";
+    case "cc_rejected_duplicated_payment":
+      return "Já existe um pagamento igual em análise. Aguarde alguns minutos.";
+    default:
+      return "Este cartão não aprovou o pagamento. Tente outro cartão ou pague com Pix.";
+  }
+}
+
 export async function createOrderAction(input: unknown): Promise<ActionResult<CreateOrderResult>> {
   const parsed = createOrderSchema.safeParse(input);
   if (!parsed.success) {
@@ -297,7 +320,7 @@ export async function createOrderAction(input: unknown): Promise<ActionResult<Cr
         storeId,
       });
       if (card.status === "rejected") {
-        return actionError("Cartão recusado. Tente outro cartão ou pague com Pix.");
+        return actionError(cardRejectionMessage(card.statusDetail));
       }
       result = { orderId: order.id, total, paymentMethod: "card", paymentId: card.paymentId, status: card.status };
     } else {
