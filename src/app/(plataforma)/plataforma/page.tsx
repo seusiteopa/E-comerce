@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import type { Metadata } from "next";
 import Container from "@/components/ui/Container";
 import PlatformStoreActions from "@/components/admin/PlatformStoreActions";
@@ -75,7 +76,7 @@ export default async function PlataformaPage() {
               return (
                 <tr key={r.id} className="border-b border-line last:border-0 align-top">
                   <td className="p-4">
-                    <a href={r.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-navy hover:underline">{r.name}</a>
+                    <Link href={`/plataforma/lojas/${r.slug}`} className="font-semibold text-navy hover:underline">{r.name}</Link>
                     <p className="text-xs text-ink-soft">{r.slug}{r.is_platform_owned ? " · plataforma" : ""}</p>
                     <p className="text-xs text-ink-soft">{r.status === "pausada" ? "PAUSADA" : "Ativa"} · criada em {formatDate(r.created_at)}</p>
                   </td>
