@@ -4,7 +4,7 @@ import Button from "@/components/ui/Button";
 import DisconnectMercadoPagoButton from "@/components/admin/DisconnectMercadoPagoButton";
 import { requireStoreAdmin } from "@/lib/auth";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
-import { startSubscriptionAction } from "@/actions/admin/assinatura";
+import CardAuthorizationForm from "@/components/billing/CardAuthorizationForm";
 import { formatDate } from "@/lib/format";
 
 const subscriptionLabel: Record<string, string> = {
@@ -85,9 +85,7 @@ export default async function AdminPagamentosPage({ searchParams }: { searchPara
               </div>
             )}
             {needsSubscription && (
-              <form action={startSubscriptionAction} className="mt-4">
-                <Button type="submit">Autorizar mensalidade no banco</Button>
-              </form>
+              <CardAuthorizationForm monthlyFeeLabel={`R$ ${((billing?.monthly_fee_cents ?? 0) / 100).toFixed(2).replace(".", ",")}`} />
             )}
           </section>
         )}
