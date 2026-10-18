@@ -6,6 +6,9 @@ import PlatformStoreActions from "@/components/admin/PlatformStoreActions";
 import { requirePlatformAdmin } from "@/lib/platform";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import { formatDate } from "@/lib/format";
+import StoreProfileForm from "@/components/admin/StoreProfileForm";
+import PlatformSettingsForm from "@/components/admin/PlatformSettingsForm";
+import { updateStoreProfileForStoreAction, updateStorePlatformSettingsAction } from "@/actions/plataforma";
 
 export const metadata: Metadata = { title: "Loja — Painel da plataforma", robots: { index: false, follow: false } };
 
@@ -46,6 +49,18 @@ export default async function PlataformaLojaPage({ params }: { params: Promise<{
     ? `R$ ${((billing.monthly_fee_cents ?? 0) / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
     : "Sem mensalidade";
 
+  const { data: profileRow } = await service
+    .from("stores")
+    .select("name, description, whatsapp, og_title, og_description, og_image_url, logo_url, printer_app, custom_domain")
+    .eq("id", store.id)
+    .maybeSingle();
+  const { data: settingsRows } = await service
+    .from("site_settings")
+    .select("key, value")
+    .eq("store_id", store.id)
+    .in("key", ["site_description", "contact_email", "instagram_url"]);
+  const cfg = Object.fromEntries((settingsRows ?? []).map((r) => [r.key, r.value ?? ""]));
+
   return (
     <Container className="py-10">
       <Link href="/plataforma" className="text-sm font-semibold text-navy hover:underline">← Voltar ao painel</Link>
@@ -77,6 +92,42 @@ export default async function PlataformaLojaPage({ params }: { params: Promise<{
             status={store.status as "ativa" | "pausada"}
             billingStatus={(billing?.billing_status ?? "em_dia") as "em_dia" | "atrasada"}
             isPlatformOwned={store.is_platform_owned}
+          />
+        </div>
+      </section>
+
+      <section className="mt-8 rounded-2xl border border-line bg-surface p-6">
+        <h2 className="text-base font-semibold text-ink">Dados da loja</h2>
+        <p className="mt-1 text-sm text-ink-soft">Os mesmos campos que o dono da loja edita no painel dele.</p>
+        <div className="mt-4">
+          <StoreProfileForm
+            folder={`vecorion/lojas/${store.slug}`}
+            store={{
+              name: profileRow?.name ?? store.name,
+              description: profileRow?.description ?? "",
+              whatsapp: profileRow?.whatsapp ?? "",
+              og_title: profileRow?.og_title ?? "",
+              og_description: profileRow?.og_description ?? "",
+              og_image_url: profileRow?.og_image_url ?? "",
+              logo_url: profileRow?.logo_url ?? "",
+              printer_app: profileRow?.printer_app === "rawbt" ? "rawbt" : "thermer",
+              footer_text: cfg.site_description ?? "",
+              contact_email: cfg.contact_email ?? "",
+              instagram_url: cfg.instagram_url ?? "",
+            }}
+            saveAction={updateStoreProfileForStoreAction.bind(null, store.id)}
+          />
+        </div>
+      </section>
+
+      <section className="mt-8 rounded-2xl border border-line bg-surface p-6">
+        <h2 className="text-base font-semibold text-ink">Configurações da plataforma</h2>
+        <p className="mt-1 text-sm text-ink-soft">Mensalidade e domínio próprio são definidos só pelo dono da plataforma.</p>
+        <div className="mt-4">
+          <PlatformSettingsForm
+            monthlyFeeReais={((billing?.monthly_fee_cents ?? 0) / 100).toFixed(2).replace(".", ",")}
+            customDomain={profileRow?.custom_domain ?? ""}
+            saveAction={updateStorePlatformSettingsAction.bind(null, store.id)}
           />
         </div>
       </section>
