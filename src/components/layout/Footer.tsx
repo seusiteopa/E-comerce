@@ -53,7 +53,7 @@ export default function Footer({ settings }: { settings?: SiteSettingsMap }) {
           <p className="mt-4 max-w-xs text-sm text-white/70">{description}</p>
         </div>
 
-        {isPlatform && (
+        {visibleFooterNav.length > 0 && (
         <nav aria-label="Institucional">
           <h2 className="font-mono-label text-xs uppercase text-white/50">Institucional</h2>
           <ul className="mt-4 flex flex-col gap-2">
@@ -68,7 +68,7 @@ export default function Footer({ settings }: { settings?: SiteSettingsMap }) {
         </nav>
         )}
 
-        {isPlatform && (
+        {visiblePolicies.length > 0 && (
         <nav aria-label="Políticas">
           <h2 className="font-mono-label text-xs uppercase text-white/50">Políticas</h2>
           <ul className="mt-4 flex flex-col gap-2">

@@ -15,6 +15,9 @@ export default async function AdminLojaPage() {
     .eq("store_id", store.id)
     .in("key", ["site_description", "contact_email", "instagram_url"]);
   const cfg = Object.fromEntries((rows ?? []).map((r) => [r.key, r.value ?? ""]));
+  const pageValues = Object.fromEntries(
+    ["page_sobre", "page_faq", "page_contato", "page_politica_privacidade", "page_politica_termos", "page_politica_trocas"].map((k) => [k, cfg[k] ?? ""])
+  );
 
   return (
     <>
