@@ -26,7 +26,7 @@ const createStoreSchema = z.object({
     .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "Use só letras minúsculas, números e hífen."),
   storeType: z.enum(["loja", "restaurante", "digital", "misto"]),
   whatsapp: z.string().trim().max(20).optional().default(""),
-  plan: z.enum(["comissao", "mensalidade"]),
+  plan: z.enum(["mensalidade"]),
 });
 
 export interface CreateStoreResult {
@@ -93,7 +93,7 @@ export async function createStoreAction(input: unknown): Promise<ActionResult<Cr
     service.from("store_billing").insert({
       store_id: store.id,
       plan: d.plan,
-      commission_bps: 100,
+      commission_bps: 0,
       monthly_fee_cents: d.plan === "mensalidade" && fee ? Math.round(fee * 100) : null,
       payer_email: user.email,
     }),
