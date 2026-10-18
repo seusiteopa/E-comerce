@@ -36,7 +36,7 @@ const navItems = [
   { href: "/conta/lojas", label: "Trocar de loja", icon: Store },
 ];
 
-export default function AdminMobileNav({ storeHome }: { storeHome: string }) {
+export default function AdminMobileNav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
