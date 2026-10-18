@@ -1,3 +1,4 @@
+import { customStorePage } from "@/lib/store/store-pages";
 import Container from "@/components/ui/Container";
 import SectionEyebrow from "@/components/ui/SectionEyebrow";
 import WhatsAppButton from "@/components/ui/WhatsAppButton";
@@ -5,6 +6,8 @@ import { contact } from "@/data/site";
 import { getSiteSettings } from "@/lib/data/site-settings";
 
 export default async function ContatoPage() {
+  const custom = await customStorePage("contato");
+  if (custom) return custom;
   const settings = await getSiteSettings();
   const whatsappNumber = settings.whatsapp_number?.trim();
   const email = settings.contact_email?.trim() || (settings._platform === "1" ? contact.email : "");
