@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Button from "@/components/ui/Button";
 import { useCart } from "@/lib/cart-context";
 import { createOrderAction, getPixPaymentStatusAction } from "@/actions/checkout";
-import { tokenizeCard } from "@/lib/checkout/mp-card";
+import { tokenizeCard, formatCardExpiry } from "@/lib/checkout/mp-card";
 
 const cardInputClass = "w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy";
 
@@ -223,7 +223,7 @@ export default function PaymentStep({ onBack, addressId, shippingMethod }: Payme
           <input placeholder="Número do cartão" inputMode="numeric" autoComplete="cc-number" value={cardNumber} onChange={(e) => setCardNumber(e.target.value)} className={cardInputClass} />
           <input placeholder="Nome impresso no cartão" autoComplete="cc-name" value={cardName} onChange={(e) => setCardName(e.target.value)} className={cardInputClass} />
           <div className="grid grid-cols-2 gap-3">
-            <input placeholder="Validade (MM/AA)" inputMode="numeric" autoComplete="cc-exp" value={cardExpiry} onChange={(e) => setCardExpiry(e.target.value)} className={cardInputClass} />
+            <input placeholder="Validade (MM/AA)" inputMode="numeric" autoComplete="cc-exp" value={cardExpiry} onChange={(e) => setCardExpiry(formatCardExpiry(e.target.value))} maxLength={5} className={cardInputClass} />
             <input placeholder="CVV" inputMode="numeric" autoComplete="cc-csc" value={cardCvv} onChange={(e) => setCardCvv(e.target.value)} className={cardInputClass} />
           </div>
         </div>

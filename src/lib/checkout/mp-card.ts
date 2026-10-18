@@ -67,3 +67,9 @@ export async function tokenizeCard(card: CardFormValues): Promise<{ token: strin
   if (!method) throw new Error("Bandeira do cartão não reconhecida.");
   return { token: token.id, paymentMethodId: method.id };
 }
+
+/** Validade digitada só com números: a barra entra sozinha (ex.: "1228" -> "12/28"). */
+export function formatCardExpiry(value: string): string {
+  const digits = value.replace(/\D/g, "").slice(0, 4);
+  return digits.length > 2 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : digits;
+}

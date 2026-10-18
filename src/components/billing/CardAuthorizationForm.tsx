@@ -5,6 +5,7 @@ import Script from "next/script";
 import Button from "@/components/ui/Button";
 import { MP_PUBLIC_KEY } from "@/lib/integrations/mercadopago/public-key";
 import { authorizeCardSubscriptionAction } from "@/actions/admin/assinatura";
+import { formatCardExpiry } from "@/lib/checkout/mp-card";
 
 type MPCardTokenInput = {
   cardNumber: string;
@@ -78,7 +79,7 @@ export default function CardAuthorizationForm({ monthlyFeeLabel }: { monthlyFeeL
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label htmlFor="card_expiry" className="text-sm font-medium text-ink">Validade (MM/AA)</label>
-            <input id="card_expiry" inputMode="numeric" autoComplete="cc-exp" placeholder="MM/AA" value={expiry} onChange={(e) => setExpiry(e.target.value)} className={inputClass} required />
+            <input id="card_expiry" inputMode="numeric" autoComplete="cc-exp" placeholder="MM/AA" value={expiry} onChange={(e) => setExpiry(formatCardExpiry(e.target.value))} maxLength={5} className={inputClass} required />
           </div>
           <div>
             <label htmlFor="card_cvv" className="text-sm font-medium text-ink">Código de segurança</label>
