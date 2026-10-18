@@ -1,3 +1,4 @@
+import { storeBasePath } from "@/lib/store/base-path";
 import type { Metadata, Viewport } from "next";
 import "@fontsource/inter/400.css";
 import "@fontsource/inter/500.css";
@@ -27,7 +28,7 @@ export const viewport: Viewport = {
 };
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [settings, store, origin] = await Promise.all([getSiteSettings(), getCurrentStore(), getRequestOrigin()]);
+  const [settings, store, origin, base] = await Promise.all([getSiteSettings(), getCurrentStore(), getRequestOrigin(), storeBasePath()]);
   const storeName = settings.site_name?.trim() || store.name || siteConfig.storeName;
   const description = settings.site_description?.trim() || store.og_description || store.description || siteConfig.description;
   // A loja da própria plataforma mantém o slogan da marca; as demais usam só o nome (ou o título de OG que o lojista definiu).
@@ -52,7 +53,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description,
     alternates: {
-      canonical: "/",
+      canonical: base || "/",
     },
     icons: {
       icon: [
@@ -71,7 +72,7 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: storeName,
       title: pageTitle,
       description,
-      url: origin,
+      url: `${origin}${base}`,
       images: [ogImage],
     },
     twitter: {
