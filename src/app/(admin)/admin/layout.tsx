@@ -18,7 +18,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   try {
     await requireAdminProfile({ allowUnpaid: true });
   } catch (err) {
-    if (err instanceof UnauthorizedError) redirect("/login?redirecionar=/admin");
+    if (err instanceof UnauthorizedError) redirect(`/login?redirecionar=${encodeURIComponent(`${await storeBasePath()}/admin`)}`);
     if (err instanceof ForbiddenError) redirect("/");
     throw err;
   }

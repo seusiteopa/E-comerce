@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { storeBasePath } from "@/lib/store/base-path";
 import { requireStoreAdmin, ForbiddenError, UnauthorizedError } from "@/lib/auth";
 import { buildAuthorizationUrl } from "@/lib/integrations/mercadopago/oauth";
 import { logger } from "@/lib/logger";
@@ -8,7 +9,7 @@ export async function GET(request: Request) {
   try {
     const { profile, store } = await requireStoreAdmin();
     if (store.is_platform_owned) {
-      return NextResponse.redirect(new URL("/admin/pagamentos", request.url));
+      return NextResponse.redirect(`${await storeBasePath()}/admin/pagamentos`);
     }
     const url = await buildAuthorizationUrl(store.id, profile.id);
     return NextResponse.redirect(url);
@@ -20,6 +21,6 @@ export async function GET(request: Request) {
       integration: "mercadopago",
       error: error instanceof Error ? error.message : String(error),
     });
-    return NextResponse.redirect(new URL("/admin/pagamentos?erro=conexao", request.url));
+    return NextResponse.redirect(`${await storeBasePath()}/admin/pagamentos?erro=conexao`);
   }
 }
