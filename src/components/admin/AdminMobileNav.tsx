@@ -36,7 +36,7 @@ const navItems = [
   { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ];
 
-export default function AdminMobileNav() {
+export default function AdminMobileNav({ storeHome }: { storeHome: string }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -84,7 +84,7 @@ export default function AdminMobileNav() {
             );
           })}
           <Link
-            href="/"
+            href={storeHome}
             onClick={() => setOpen(false)}
             className="mt-2 flex items-center gap-3 rounded-lg border-t border-line px-3 pt-4 text-sm font-medium text-ink-soft hover:text-ink"
           >
