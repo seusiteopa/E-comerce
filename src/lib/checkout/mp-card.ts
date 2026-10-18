@@ -71,13 +71,14 @@ export async function tokenizeCard(
   }
 
   const methods = await mp.getPaymentMethods({ bin: number.slice(0, 6) });
-  const method = methods.results?.find((m) => m.payment_type_id === type);
+  // Cartões pré-pago (ex.: cartões com saldo, como o da Uber) entram como crédito/débito:
+  // o Mercado Pago confere o saldo no momento da cobrança.
+  const accepted = ["credit_card", "debit_card", "prepaid_card"];
+  const method =
+    methods.results?.find((m) => m.payment_type_id === type) ??
+    methods.results?.find((m) => accepted.includes(m.payment_type_id));
   if (!method) {
-    throw new Error(
-      type === "debit_card"
-        ? "Este cartão não é de débito. Escolha crédito ou pague com Pix."
-        : "Este cartão não é de crédito. Escolha débito ou pague com Pix."
-    );
+    throw new Error("Não reconhecemos a bandeira deste cartão. Tente outro cartão ou pague com Pix.");
   }
   return { token: token.id, paymentMethodId: method.id };
 }
