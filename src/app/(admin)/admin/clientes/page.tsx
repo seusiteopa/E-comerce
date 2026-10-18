@@ -4,7 +4,6 @@ import AdminDataTable, { AdminColumn } from "@/components/admin/AdminDataTable";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentStore } from "@/lib/store/current";
 import { requireAdminProfile } from "@/lib/auth";
-import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import { formatDate } from "@/lib/format";
 import { ProfileRow } from "@/types/database";
 
@@ -12,12 +11,12 @@ export default async function AdminClientesPage() {
   await requireAdminProfile();
   const supabase = await createSupabaseServerClient();
   const { id: storeId } = await getCurrentStore();
-  // Clientes da loja = pessoas que já fizeram pedido nela. O perfil dos clientes é lido
-  // com a chave de serviço, mas SÓ para os ids encontrados nos pedidos desta loja.
+  // Clientes da loja = pessoas que já fizeram pedido nela. A regra do banco libera a leitura
+  // desses perfis só para o dono/membro da loja (migração 020).
   const { data: buyers } = await supabase.from("orders").select("profile_id").eq("store_id", storeId);
   const ids = [...new Set((buyers ?? []).map((o) => o.profile_id).filter((v): v is string => Boolean(v)))];
   const { data } = ids.length
-    ? await createSupabaseServiceClient().from("profiles").select("*").in("id", ids).order("created_at", { ascending: false })
+    ? await supabase.from("profiles").select("*").in("id", ids).order("created_at", { ascending: false })
     : { data: [] };
   const rows = (data ?? []) as ProfileRow[];
 
