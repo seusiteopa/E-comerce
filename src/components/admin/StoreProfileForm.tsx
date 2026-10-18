@@ -1,5 +1,6 @@
-import type { ActionResult } from "@/lib/action-result";
 "use client";
+
+import type { ActionResult } from "@/lib/action-result";
 
 import { useState, useTransition } from "react";
 import Button from "@/components/ui/Button";
