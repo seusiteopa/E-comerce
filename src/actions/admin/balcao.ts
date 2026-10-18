@@ -118,14 +118,14 @@ export async function createCounterOrderAction(input: unknown): Promise<ActionRe
     return actionError("Não foi possível registrar o pedido agora.");
   }
 
-  const { error: itemsError } = await service.from("order_items").insert(orderItems.map((i) => ({ ...i, order_id: order.id })));
+  const { error: itemsError } = await supabase.from("order_items").insert(orderItems.map((i) => ({ ...i, order_id: order.id })));
   if (itemsError) {
     logger.error("Erro ao criar itens do pedido de balcão", { orderId: order.id, error: itemsError.message });
     await service.from("orders").delete().eq("id", order.id);
     return actionError("Não foi possível registrar os itens do pedido.");
   }
 
-  await service.from("payments").insert({
+  await supabase.from("payments").insert({
     store_id: store.id,
     order_id: order.id,
     amount: total,
