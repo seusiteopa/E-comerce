@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Package, Download, Heart, MapPin, User } from "lucide-react";
+import { Package, Download, Heart, MapPin, User, Store } from "lucide-react";
 
 const items = [
   { href: "/conta/pedidos", label: "Meus Pedidos", icon: Package },
@@ -7,6 +7,7 @@ const items = [
   { href: "/conta/favoritos", label: "Favoritos", icon: Heart },
   { href: "/conta/enderecos", label: "Endereços", icon: MapPin },
   { href: "/conta/dados", label: "Dados da Conta", icon: User },
+  { href: "/conta/lojas", label: "Minhas lojas", icon: Store },
 ];
 
 export default function AccountNav() {
