@@ -9,7 +9,7 @@ import { ActionResult, actionSuccess, actionError } from "@/lib/action-result";
 import { logger } from "@/lib/logger";
 import { ProductType } from "@/types";
 import { ProductRow, ProductVariationRow } from "@/types/database";
-import { createPaymentPreference, createPixPayment, fetchPaymentStatus } from "@/lib/integrations/mercadopago";
+import { createCardPayment, createPaymentPreference, createPixPayment, fetchPaymentStatus } from "@/lib/integrations/mercadopago";
 import { sendTransactionalEmail } from "@/lib/integrations/email";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import { getCurrentStore, getRequestOrigin } from "@/lib/store/current";
@@ -23,6 +23,13 @@ type CreateOrderResult =
       paymentId: string;
       qrCodeBase64: string;
       qrCode: string;
+    }
+  | {
+      orderId: string;
+      total: number;
+      paymentMethod: "card";
+      paymentId: string;
+      status: string;
     }
   | {
       orderId: string;
@@ -273,6 +280,26 @@ export async function createOrderAction(input: unknown): Promise<ActionResult<Cr
         qrCodeBase64: pix.qrCodeBase64,
         qrCode: pix.qrCode,
       };
+    } else if (parsed.data.paymentMethod === "cartao") {
+      if (!parsed.data.cardToken || !parsed.data.cardPaymentMethodId) {
+        return actionError("Confira os dados do cartão e tente novamente.");
+      }
+      const card = await createCardPayment({
+        orderId: order.id,
+        totalAmount: total,
+        description,
+        payerEmail,
+        payerDocument: parsed.data.payerDocument,
+        cardToken: parsed.data.cardToken,
+        paymentMethodId: parsed.data.cardPaymentMethodId,
+        accessToken: paymentContext.accessToken,
+        applicationFee: paymentContext.feeFor(total),
+        storeId,
+      });
+      if (card.status === "rejected") {
+        return actionError("Cartão recusado. Tente outro cartão ou pague com Pix.");
+      }
+      result = { orderId: order.id, total, paymentMethod: "card", paymentId: card.paymentId, status: card.status };
     } else {
       const preference = await createPaymentPreference({
         orderId: order.id,

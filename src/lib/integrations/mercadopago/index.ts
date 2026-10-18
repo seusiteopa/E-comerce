@@ -224,3 +224,54 @@ export async function fetchPaymentStatus(
   const data = await response.json();
   return { status: data.status, externalReference: data.external_reference ?? null };
 }
+
+export interface CreateCardPaymentInput {
+  orderId: string;
+  totalAmount: number;
+  description: string;
+  payerEmail: string;
+  payerDocument: string;
+  cardToken: string;
+  paymentMethodId: string;
+  accessToken?: string;
+  applicationFee?: number;
+  storeId?: string;
+}
+
+/** Cobrança no cartão com token gerado no navegador, na conta Mercado Pago do lojista (accessToken). */
+export async function createCardPayment(input: CreateCardPaymentInput): Promise<{ paymentId: string; status: string }> {
+  const client = getClient(input.accessToken);
+  const payment = new Payment(client);
+  const platformUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!platformUrl) throw new Error("NEXT_PUBLIC_SITE_URL não configurado.");
+
+  try {
+    const result = await payment.create({
+      body: {
+        transaction_amount: input.totalAmount,
+        description: input.description,
+        token: input.cardToken,
+        payment_method_id: input.paymentMethodId,
+        installments: 1,
+        payer: {
+          email: input.payerEmail,
+          identification: { type: "CPF", number: input.payerDocument },
+        },
+        external_reference: input.orderId,
+        notification_url: notificationUrl(platformUrl, input.storeId),
+        ...(input.applicationFee && input.applicationFee > 0 ? ({ application_fee: input.applicationFee } as object) : {}),
+      },
+      requestOptions: { idempotencyKey: `card-${input.orderId}` },
+    });
+    if (!result.id) throw new Error("Resposta inesperada do Mercado Pago ao cobrar o cartão.");
+    logger.info("Pagamento com cartão criado", { orderId: input.orderId, status: result.status, integration: "mercadopago" });
+    return { paymentId: String(result.id), status: result.status ?? "pending" };
+  } catch (error) {
+    logger.error("Erro ao cobrar cartão", {
+      orderId: input.orderId,
+      integration: "mercadopago",
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw new Error("Não foi possível processar o cartão. Tente outro cartão ou pague com Pix.");
+  }
+}
