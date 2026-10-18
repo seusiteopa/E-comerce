@@ -53,6 +53,10 @@ export async function loginAction(formData: FormData): Promise<ActionResult<{ is
   const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
 
   if (error) {
+    // Conta criada que ainda não confirmou o e-mail: o Supabase bloqueia o login até a confirmação.
+    if (error.code === "email_not_confirmed" || /not confirmed/i.test(error.message)) {
+      return actionError("Confirme seu e-mail antes de entrar. Procure o link de confirmação na sua caixa de entrada (e no spam).");
+    }
     return actionError("E-mail ou senha incorretos.");
   }
 

@@ -1,3 +1,4 @@
+import { PasswordField } from "@/components/ui/PasswordField";
 "use client";
 
 import { Suspense, useState, useTransition } from "react";
@@ -40,7 +41,7 @@ function LoginForm() {
       </div>
       <div>
         <label htmlFor="password" className="text-sm font-medium text-ink">Senha</label>
-        <input id="password" name="password" type="password" required autoComplete="current-password" className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy" />
+        <PasswordField id="password" name="password" autoComplete="current-password" required />
       </div>
       {error && <p role="alert" className="text-sm text-status-danger">{error}</p>}
       <Button type="submit" disabled={isPending} className="mt-2 w-full">
