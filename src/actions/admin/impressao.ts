@@ -1,7 +1,7 @@
 "use server";
 
 import { requireStoreAdmin } from "@/lib/auth";
-import { createSupabaseServiceClient } from "@/lib/supabase/service";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getRequestOrigin } from "@/lib/store/current";
 import { signToken } from "@/lib/crypto";
 import { buildTicketLines, toPlainText } from "@/lib/print/ticket";
@@ -16,9 +16,9 @@ export async function getPrintLinkAction(orderId: string): Promise<ActionResult<
     return actionError("Acesso restrito ao painel administrativo.");
   }
 
-  const service = createSupabaseServiceClient();
-  const { data: storeRow } = await service.from("stores").select("printer_app").eq("id", store.id).maybeSingle();
-  const lines = await buildTicketLines(orderId, store.id);
+  const supabase = await createSupabaseServerClient();
+  const { data: storeRow } = await supabase.from("stores").select("printer_app").eq("id", store.id).maybeSingle();
+  const lines = await buildTicketLines(orderId, store.id, supabase);
   if (!lines) return actionError("Pedido não encontrado.");
 
   if (storeRow?.printer_app === "rawbt") {

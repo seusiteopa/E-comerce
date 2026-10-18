@@ -1,3 +1,4 @@
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import "server-only";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 
@@ -31,8 +32,13 @@ function wrap(text: string, width: number): string[] {
 
 const two = (left: string, right: string): Line => ({ text: plain(left).padEnd(Math.max(1, W - right.length)).slice(0, W - right.length) + right });
 
-export async function buildTicketLines(orderId: string, storeId: string): Promise<Line[] | null> {
-  const supabase = createSupabaseServiceClient();
+export async function buildTicketLines(
+  orderId: string,
+  storeId: string,
+  client?: Awaited<ReturnType<typeof createSupabaseServerClient>>
+): Promise<Line[] | null> {
+  // Com o cliente do próprio lojista, a leitura segue as regras do banco (pedidos e pagamentos da loja).
+  const supabase = client ?? createSupabaseServiceClient();
   const { data: order } = await supabase
     .from("orders")
     .select("id, created_at, total, customer_name, channel, store_id, order_items(product_name_snapshot, unit_price_snapshot, quantity), payments(method, status)")
