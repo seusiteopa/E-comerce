@@ -128,3 +128,53 @@ export async function cancelPreapproval(id: string): Promise<void> {
   });
   if (!response.ok) throw new Error(`Falha ao cancelar assinatura ${id} (HTTP ${response.status}).`);
 }
+
+/**
+ * Assinatura autorizada com o cartão digitado no próprio site (token gerado pelo MercadoPago.js).
+ * Sem redirecionamento: o lojista não sai da Vecorion. Primeiro mês grátis, depois cobra no cartão.
+ */
+export async function createCardSubscription(input: {
+  storeId: string;
+  storeName: string;
+  payerEmail: string;
+  amount: number;
+  cardTokenId: string;
+}): Promise<{ preapprovalId: string; status: string; nextPaymentDate: string | null }> {
+  const response = await fetch("https://api.mercadopago.com/preapproval", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${platformToken()}`,
+      "Content-Type": "application/json",
+      "X-Idempotency-Key": `sub-card-${input.storeId}-${Math.floor(Date.now() / 60000)}`,
+    },
+    body: JSON.stringify({
+      reason: `Mensalidade Vecorion — ${input.storeName}`,
+      external_reference: input.storeId,
+      payer_email: input.payerEmail,
+      card_token_id: input.cardTokenId,
+      status: "authorized",
+      auto_recurring: {
+        frequency: 1,
+        frequency_type: "months",
+        transaction_amount: input.amount,
+        currency_id: "BRL",
+        free_trial: { frequency: 1, frequency_type: "months" },
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    logger.error("Falha ao criar assinatura com cartão", {
+      storeId: input.storeId,
+      integration: "mercadopago",
+      status: response.status,
+      body: text.slice(0, 300),
+    });
+    throw new Error("Não foi possível autorizar o cartão. Confira os dados e tente novamente.");
+  }
+
+  const data = await response.json();
+  if (!data.id) throw new Error("Resposta inesperada do Mercado Pago ao autorizar o cartão.");
+  return { preapprovalId: String(data.id), status: String(data.status ?? "pending"), nextPaymentDate: data.next_payment_date ?? null };
+}
