@@ -1,3 +1,4 @@
+import { customStorePage } from "@/lib/store/store-pages";
 import { Metadata } from "next";
 import Container from "@/components/ui/Container";
 import SectionEyebrow from "@/components/ui/SectionEyebrow";
@@ -11,6 +12,8 @@ export const metadata: Metadata = { title: "Perguntas Frequentes" };
 const topics = Array.from(new Set(faqItems.map((f) => f.topic)));
 
 export default async function FaqPage() {
+  const custom = await customStorePage("faq");
+  if (custom) return custom;
   const settings = await getSiteSettings();
   return (
     <section className="py-16 sm:py-20">

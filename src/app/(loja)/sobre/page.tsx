@@ -1,3 +1,4 @@
+import { customStorePage } from "@/lib/store/store-pages";
 import { Metadata } from "next";
 import Container from "@/components/ui/Container";
 import SectionEyebrow from "@/components/ui/SectionEyebrow";
@@ -9,7 +10,9 @@ export const metadata: Metadata = {
 
 const values = ["Inovação", "Simplicidade", "Ética e transparência", "Foco no cliente", "Qualidade", "Aprendizado contínuo", "Acessibilidade"];
 
-export default function SobrePage() {
+export default async function SobrePage() {
+  const custom = await customStorePage("sobre");
+  if (custom) return custom;
   return (
     <section className="py-16 sm:py-20">
       <Container className="max-w-3xl">

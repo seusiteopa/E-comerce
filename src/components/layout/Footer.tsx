@@ -3,6 +3,7 @@ import Image from "next/image";
 import Container from "@/components/ui/Container";
 import { siteConfig, contact, whatsappHref } from "@/data/site";
 import type { SiteSettingsMap } from "@/lib/data/site-settings";
+import { STORE_PAGES, storePageText, type StorePageSlug } from "@/lib/store/store-pages-config";
 
 const footerNav = [
   { label: "Sobre", href: "/sobre" },
@@ -31,6 +32,14 @@ export default function Footer({ settings }: { settings?: SiteSettingsMap }) {
   const instagramUrl = settings?.instagram_url?.trim() || (isPlatform ? contact.instagram : "");
   const logoUrl = settings?.logo_url;
 
+  const pageSlugOf = (href: string) => (Object.keys(STORE_PAGES) as StorePageSlug[]).find((k) => STORE_PAGES[k].href === href);
+  const hasPage = (href: string) => {
+    const slug = pageSlugOf(href);
+    return isPlatform || (slug !== undefined && storePageText(settings, slug) !== "");
+  };
+  const visibleFooterNav = footerNav.filter((i) => hasPage(i.href));
+  const visiblePolicies = policies.filter((i) => hasPage(i.href));
+
   return (
     <footer className="border-t border-line bg-navy-deep text-white">
       <Container className="grid min-w-0 gap-10 py-14 md:grid-cols-[1.2fr_1fr_1fr_1fr]">
@@ -47,7 +56,7 @@ export default function Footer({ settings }: { settings?: SiteSettingsMap }) {
         <nav aria-label="Institucional">
           <h2 className="font-mono-label text-xs uppercase text-white/50">Institucional</h2>
           <ul className="mt-4 flex flex-col gap-2">
-            {footerNav.map((item) => (
+            {visibleFooterNav.map((item) => (
               <li key={item.href}>
                 <StoreLink href={item.href} className="text-sm text-white/80 hover:text-white">
                   {item.label}
@@ -60,7 +69,7 @@ export default function Footer({ settings }: { settings?: SiteSettingsMap }) {
         <nav aria-label="Políticas">
           <h2 className="font-mono-label text-xs uppercase text-white/50">Políticas</h2>
           <ul className="mt-4 flex flex-col gap-2">
-            {policies.map((item) => (
+            {visiblePolicies.map((item) => (
               <li key={item.href}>
                 <StoreLink href={item.href} className="text-sm text-white/80 hover:text-white">
                   {item.label}

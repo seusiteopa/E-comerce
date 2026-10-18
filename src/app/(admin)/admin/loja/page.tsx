@@ -1,6 +1,7 @@
 import AdminHeader from "@/components/admin/AdminHeader";
 import Container from "@/components/ui/Container";
 import StoreProfileForm from "@/components/admin/StoreProfileForm";
+import StorePagesForm from "@/components/admin/StorePagesForm";
 import { requireStoreAdmin } from "@/lib/auth";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -26,6 +27,7 @@ export default async function AdminLojaPage() {
             printer_app: data?.printer_app === "rawbt" ? "rawbt" : "thermer",
           }}
         />
+        <StorePagesForm initial={pageValues} />
       </Container>
     </>
   );
