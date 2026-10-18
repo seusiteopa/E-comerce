@@ -4,6 +4,8 @@ import CartAddedToast from "@/components/loja/CartAddedToast";
 import WelcomeCouponPopup from "@/components/loja/WelcomeCouponPopup";
 import ThemeOverride from "@/components/layout/ThemeOverride";
 import { getSiteSettings } from "@/lib/data/site-settings";
+import { StoreBaseProvider } from "@/components/store/StoreLink";
+import { storeBasePath } from "@/lib/store/base-path";
 
 // As configurações do site (logo, nome, faixa institucional) não mudam a
 // cada segundo — revalida a cada 5 minutos em vez de buscar do banco em
@@ -12,6 +14,7 @@ export const revalidate = 300;
 
 export default async function LojaLayout({ children }: { children: React.ReactNode }) {
   const settings = await getSiteSettings();
+  const base = await storeBasePath();
   const phrases = [
     settings.announcement_phrase_1,
     settings.announcement_phrase_2,
@@ -19,6 +22,7 @@ export default async function LojaLayout({ children }: { children: React.ReactNo
   ].filter((p): p is string => Boolean(p && p.trim()));
 
   return (
+    <StoreBaseProvider value={base}>
     <>
       <ThemeOverride primaryColor={settings.theme_primary_color} accentColor={settings.theme_accent_color} />
       <SiteChrome phrases={phrases} logoUrl={settings.logo_url} siteName={settings.site_name} />
@@ -29,5 +33,6 @@ export default async function LojaLayout({ children }: { children: React.ReactNo
       <CartAddedToast />
       <WelcomeCouponPopup couponCode={settings.popup_coupon_code} message={settings.popup_coupon_message} />
     </>
+    </StoreBaseProvider>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import StoreLink from "@/components/store/StoreLink";
 import { Menu, X, Search } from "lucide-react";
 import { mainNav } from "@/data/site";
 
@@ -57,19 +57,19 @@ export default function MobileMenu() {
             <ul className="flex flex-col gap-1">
               {mainNav.map((item) => (
                 <li key={item.href}>
-                  <Link
+                  <StoreLink
                     href={item.href}
                     onClick={() => setOpen(false)}
                     className="block rounded-lg px-3 py-3 text-base font-medium text-ink hover:bg-paper"
                   >
                     {item.label}
-                  </Link>
+                  </StoreLink>
                 </li>
               ))}
               <li>
-                <Link href="/conta/pedidos" onClick={() => setOpen(false)} className="block rounded-lg px-3 py-3 text-base font-medium text-ink hover:bg-paper">
+                <StoreLink href="/conta/pedidos" onClick={() => setOpen(false)} className="block rounded-lg px-3 py-3 text-base font-medium text-ink hover:bg-paper">
                   Minha Conta
-                </Link>
+                </StoreLink>
               </li>
             </ul>
           </nav>

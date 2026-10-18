@@ -1,4 +1,4 @@
-import Link from "next/link";
+import StoreLink from "@/components/store/StoreLink";
 import Image from "next/image";
 import { Product } from "@/types";
 import PriceTag from "@/components/ui/PriceTag";
@@ -10,7 +10,7 @@ export default function ProductCard({ product }: { product: Product }) {
     product.variations?.every((v) => v.stock === 0);
 
   return (
-    <Link
+    <StoreLink
       href={`/produtos/${product.slug}`}
       className="group flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-surface transition-colors hover:border-navy/40"
     >
@@ -34,6 +34,6 @@ export default function ProductCard({ product }: { product: Product }) {
         <p className="line-clamp-2 flex-1 text-xs text-ink-soft">{product.shortDescription}</p>
         <PriceTag price={product.price} promoPrice={product.promoPrice} size="sm" />
       </div>
-    </Link>
+    </StoreLink>
   );
 }

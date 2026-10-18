@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
+import StoreLink from "@/components/store/StoreLink";
 import { Metadata } from "next";
 import Container from "@/components/ui/Container";
 import { CategoryBadge } from "@/components/ui/Badge";
@@ -71,7 +71,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <section className="bg-paper py-16 sm:py-20">
         <Container className="max-w-5xl">
           <nav aria-label="Trilha de navegação" className="text-xs text-ink-soft">
-            <Link href="/produtos" className="hover:text-navy">Produtos</Link>
+            <StoreLink href="/produtos" className="hover:text-navy">Produtos</StoreLink>
             <span className="mx-2">/</span>
             <span>{category?.name}</span>
           </nav>
