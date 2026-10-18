@@ -54,7 +54,7 @@ export default async function AdminPagamentosPage({ searchParams }: { searchPara
               <p className="mt-2 text-sm text-ink-soft">
                 {conn?.status === "expirado"
                   ? "A conexão expirou. Conecte de novo para voltar a receber pagamentos online."
-                  : "Conecte a SUA conta Mercado Pago. Você entra no site do Mercado Pago, autoriza, e volta para cá — sem copiar senhas ou códigos. As vendas caem direto na sua conta."}
+                  : "Para receber as vendas da sua loja, você precisa ter uma conta no Mercado Pago. Se ainda não tem, crie uma gratuitamente no site do Mercado Pago. Depois, clique em Conectar Mercado Pago, autorize a conexão e volte para cá. Sem essa conexão, sua loja não consegue receber pagamentos de Pix nem de cartão. O dinheiro das vendas cai direto na sua conta do Mercado Pago."}
               </p>
               <div className="mt-4">{/* <a> comum (não <Link>): evita o pré-carregamento do Next iniciar a conexão sem o clique */}
                 <a
