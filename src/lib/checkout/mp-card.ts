@@ -45,7 +45,10 @@ export interface CardFormValues {
 }
 
 /** Gera o token do cartão no navegador. Os números do cartão nunca passam pelo nosso servidor. */
-export async function tokenizeCard(card: CardFormValues): Promise<{ token: string; paymentMethodId: string }> {
+export async function tokenizeCard(
+  card: CardFormValues,
+  type: "credit_card" | "debit_card" = "credit_card"
+): Promise<{ token: string; paymentMethodId: string }> {
   const MPClass = await loadMercadoPago();
   const mp = new MPClass(MP_PUBLIC_KEY, { locale: "pt-BR" });
   const number = card.number.replace(/\D/g, "");
@@ -63,8 +66,14 @@ export async function tokenizeCard(card: CardFormValues): Promise<{ token: strin
   });
 
   const methods = await mp.getPaymentMethods({ bin: number.slice(0, 6) });
-  const method = methods.results?.find((m) => m.payment_type_id === "credit_card");
-  if (!method) throw new Error("Este cartão não é de crédito. Use um cartão de crédito ou pague com Pix.");
+  const method = methods.results?.find((m) => m.payment_type_id === type);
+  if (!method) {
+    throw new Error(
+      type === "debit_card"
+        ? "Este cartão não é de débito. Escolha crédito ou pague com Pix."
+        : "Este cartão não é de crédito. Escolha débito ou pague com Pix."
+    );
+  }
   return { token: token.id, paymentMethodId: method.id };
 }
 
