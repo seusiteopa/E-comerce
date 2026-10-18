@@ -55,15 +55,20 @@ export async function tokenizeCard(
   const [mm, yy] = card.expiry.split("/").map((v) => v.trim());
   const year = yy && yy.length === 2 ? `20${yy}` : (yy ?? "");
 
-  const token = await mp.createCardToken({
-    cardNumber: number,
-    cardholderName: card.name,
-    cardExpirationMonth: mm ?? "",
-    cardExpirationYear: year,
-    securityCode: card.cvv,
-    identificationType: "CPF",
-    identificationNumber: card.cpf.replace(/\D/g, ""),
-  });
+  let token: { id: string };
+  try {
+    token = await mp.createCardToken({
+      cardNumber: number,
+      cardholderName: card.name,
+      cardExpirationMonth: mm ?? "",
+      cardExpirationYear: year,
+      securityCode: card.cvv,
+      identificationType: "CPF",
+      identificationNumber: card.cpf.replace(/\D/g, ""),
+    });
+  } catch (error) {
+    throw new Error(mpTokenErrorMessage(error));
+  }
 
   const methods = await mp.getPaymentMethods({ bin: number.slice(0, 6) });
   const method = methods.results?.find((m) => m.payment_type_id === type);
@@ -81,4 +86,30 @@ export async function tokenizeCard(
 export function formatCardExpiry(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 4);
   return digits.length > 2 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : digits;
+}
+
+/** Traduz o erro do MercadoPago.js (createCardToken) para uma mensagem que a pessoa consiga corrigir. */
+function mpTokenErrorMessage(error: unknown): string {
+  const causes = (error as { cause?: { code?: string | number }[] })?.cause ?? [];
+  const code = String(causes[0]?.code ?? "");
+  switch (code) {
+    case "E301":
+      return "Número do cartão inválido. Confira os dígitos.";
+    case "E302":
+      return "Código de segurança inválido.";
+    case "E203":
+    case "E205":
+    case "E208":
+    case "E209":
+      return "Data de validade inválida. Confira o mês e o ano.";
+    case "E204":
+      return "Nome do titular inválido. Use o nome impresso no cartão.";
+    case "224":
+    case "E224":
+      return "CPF do titular inválido.";
+    default:
+      return code
+        ? `O cartão não foi validado (código ${code}). Confira os dados ou tente outro cartão.`
+        : "Não foi possível validar o cartão. Confira os dados e tente de novo.";
+  }
 }

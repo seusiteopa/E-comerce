@@ -82,8 +82,8 @@ export default function PaymentStep({ onBack, addressId, shippingMethod }: Payme
           selected === "debito" ? "debit_card" : "credit_card"
         );
         cardData = { cardToken: token.token, cardPaymentMethodId: token.paymentMethodId };
-      } catch {
-        setError("Não foi possível validar o cartão. Confira os dados e tente de novo.");
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Não foi possível validar o cartão. Confira os dados e tente de novo.");
         setSubmitting(false);
         return;
       }
