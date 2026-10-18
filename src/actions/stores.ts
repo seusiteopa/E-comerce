@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { registerReferral } from "@/lib/store/referral";
 import { requireAuthenticatedProfile, UnauthorizedError } from "@/lib/auth";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
@@ -16,6 +17,7 @@ const RESERVED_SLUGS = new Set([
 ]);
 
 const createStoreSchema = z.object({
+  referralCode: z.string().trim().toLowerCase().max(20).optional().default(""),
   name: z.string().trim().min(2, "Informe o nome da loja.").max(80),
   slug: z
     .string()
@@ -131,5 +133,6 @@ export async function createStoreAction(input: unknown): Promise<ActionResult<Cr
   }
 
   logger.info("Loja criada", { storeId: store.id, slug: store.slug, plan: d.plan });
+  if (parsed.data.referralCode) await registerReferral(store.id, parsed.data.referralCode).catch(() => undefined);
   return actionSuccess({ storeUrl: `${origin}/admin/pagamentos`, authorizationUrl, subscriptionFailed });
 }

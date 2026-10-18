@@ -16,7 +16,7 @@ function toSlug(value: string) {
     .slice(0, 40);
 }
 
-export default function CreateStoreForm({ rootDomain, monthlyFee }: { rootDomain: string | null; monthlyFee: string | null }) {
+export default function CreateStoreForm({ rootDomain, monthlyFee, referralCode }: { rootDomain: string | null; monthlyFee: string | null; referralCode?: string }) {
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [slugTouched, setSlugTouched] = useState(false);
@@ -30,7 +30,7 @@ export default function CreateStoreForm({ rootDomain, monthlyFee }: { rootDomain
   function handleSubmit() {
     setError(null);
     startTransition(async () => {
-      const result = await createStoreAction({ name, slug, storeType, whatsapp, plan });
+      const result = await createStoreAction({ name, slug, storeType, whatsapp, plan, referralCode: referralCode ?? "" });
       if (!result.success) {
         setError(result.error);
         return;

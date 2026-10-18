@@ -7,7 +7,9 @@ import { monthlyFeeFromEnv } from "@/lib/integrations/mercadopago/subscription";
 
 export const metadata: Metadata = { title: "Criar minha loja — Vecorion" };
 
-export default async function CriarLojaPage() {
+export default async function CriarLojaPage({ searchParams }: { searchParams: Promise<{ ref?: string }> }) {
+  const { ref } = await searchParams;
+  const referralCode = typeof ref === "string" && /^[a-z0-9]{6,20}$/.test(ref) ? ref : undefined;
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   const fee = monthlyFeeFromEnv();
@@ -19,8 +21,7 @@ export default async function CriarLojaPage() {
         <p className="mt-2 text-sm text-ink-soft">Monte sua loja online em minutos: catálogo, pedidos, Pix, balcão e impressão de cupom.</p>
 
         {user ? (
-          <CreateStoreForm
-            rootDomain={process.env.PLATFORM_ROOT_DOMAIN ?? null}
+          <CreateStoreForm referralCode={referralCode}             rootDomain={process.env.PLATFORM_ROOT_DOMAIN ?? null}
             monthlyFee={fee ? fee.toLocaleString("pt-BR", { minimumFractionDigits: 2 }) : null}
           />
         ) : (

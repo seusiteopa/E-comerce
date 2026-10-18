@@ -6,6 +6,7 @@ import { requireStoreAdmin } from "@/lib/auth";
 import { startSubscriptionForStore } from "@/lib/billing/subscribe";
 import { createCardSubscription, monthlyFeeFromEnv } from "@/lib/integrations/mercadopago/subscription";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
+import { markReferralApplied } from "@/lib/store/referral";
 import { revalidatePath } from "next/cache";
 import { ActionResult, actionSuccess, actionError } from "@/lib/action-result";
 import { storeOrigin } from "@/lib/store/urls";
@@ -87,6 +88,7 @@ export async function authorizeCardSubscriptionAction(input: { cardToken: string
       logger.error("Erro ao salvar assinatura do cartão", { storeId: store.id, error: error.message });
       return actionError("Cartão autorizado, mas não foi possível salvar. Fale com o suporte.");
     }
+    if (authorized) await markReferralApplied(store.id).catch(() => undefined);
     revalidatePath("/admin/pagamentos");
     return actionSuccess(undefined);
   } catch (error) {

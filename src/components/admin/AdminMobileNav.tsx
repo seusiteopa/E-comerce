@@ -31,6 +31,7 @@ const navItems = [
   { href: "/admin/cupons", label: "Cupons", icon: Ticket },
   { href: "/admin/banners", label: "Banners", icon: ImageIcon },
   { href: "/admin/divulgacao", label: "Divulgação", icon: Megaphone },
+  { href: "/admin/indicacoes", label: "Indicações", icon: Users },
   { href: "/admin/pagamentos", label: "Pagamentos e plano", icon: CreditCard },
   { href: "/admin/configuracoes", label: "Configurações da loja", icon: Settings },
   { href: "/conta/lojas", label: "Trocar de loja", icon: Store },
