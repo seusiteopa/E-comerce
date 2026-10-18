@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminMobileNav from "@/components/admin/AdminMobileNav";
 import { requireAdminProfile, ForbiddenError, UnauthorizedError } from "@/lib/auth";
+import { getCurrentStore } from "@/lib/store/current";
 
 // Um único app instalável para o domínio inteiro (evita o conflito de dois
 // apps/manifests/service workers para a mesma origem no Android). O admin
@@ -23,11 +24,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     throw err;
   }
 
+  const store = await getCurrentStore();
+
   return (
     <div className="flex min-h-screen">
       <AdminSidebar />
       <div className="flex-1">
-        <AdminMobileNav />
+        <AdminMobileNav storeHome={`/lojas/${store.slug}`} />
         {children}
       </div>
     </div>
