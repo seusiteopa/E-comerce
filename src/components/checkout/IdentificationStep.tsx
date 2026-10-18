@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Button from "@/components/ui/Button";
+import { PasswordField } from "@/components/ui/PasswordField";
 import { loginAction, signUpAction } from "@/actions/auth";
 
 export default function IdentificationStep({ onContinue }: { onContinue: () => void }) {
@@ -68,6 +69,16 @@ export default function IdentificationStep({ onContinue }: { onContinue: () => v
 }
 
 function Field({ id, label, type, autoComplete }: { id: string; label: string; type: string; autoComplete: string }) {
+  if (type === "password") {
+    return (
+      <div>
+        <label htmlFor={id} className="text-sm font-medium text-ink">
+          {label}
+        </label>
+        <PasswordField id={id} name={id} autoComplete={autoComplete} required />
+      </div>
+    );
+  }
   return (
     <div>
       <label htmlFor={id} className="text-sm font-medium text-ink">

@@ -1,5 +1,7 @@
 "use client";
 
+import { PasswordField } from "@/components/ui/PasswordField";
+
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -47,7 +49,7 @@ export default function CadastroPage() {
             </div>
             <div>
               <label htmlFor="password" className="text-sm font-medium text-ink">Senha</label>
-              <input id="password" name="password" type="password" required minLength={8} autoComplete="new-password" className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy" />
+              <PasswordField id="password" name="password" autoComplete="new-password" required minLength={8} />
             </div>
             {error && <p role="alert" className="text-sm text-status-danger">{error}</p>}
             <Button type="submit" disabled={isPending} className="mt-2 w-full">
