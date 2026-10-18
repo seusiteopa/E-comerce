@@ -49,6 +49,8 @@ export const createOrderSchema = z.object({
     .trim()
     .regex(/^\d{11}$/, "CPF inválido — informe apenas os 11 números."),
   paymentMethod: z.enum(["pix", "cartao", "boleto"]).default("pix"),
+  cardToken: z.string().trim().max(200).optional(),
+  cardPaymentMethodId: z.string().trim().max(40).optional(),
 });
 
 export type SignUpInput = z.infer<typeof signUpSchema>;

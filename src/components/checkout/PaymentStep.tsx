@@ -4,10 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import Button from "@/components/ui/Button";
 import { useCart } from "@/lib/cart-context";
 import { createOrderAction, getPixPaymentStatusAction } from "@/actions/checkout";
+import { tokenizeCard, formatCardExpiry } from "@/lib/checkout/mp-card";
+
+const cardInputClass = "w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy";
 
 const methods = [
   { id: "pix", label: "Pix", description: "Aprovação imediata" },
   { id: "cartao", label: "Cartão de crédito", description: "Em até 12x" },
+  { id: "debito", label: "Cartão de débito", description: "Débito na hora" },
   { id: "boleto", label: "Boleto", description: "Compensação em até 2 dias úteis" },
 ];
 
@@ -28,6 +32,10 @@ export default function PaymentStep({ onBack, addressId, shippingMethod }: Payme
   const { items, clearCart, coupon } = useCart();
   const [selected, setSelected] = useState(methods[0].id);
   const [cpf, setCpf] = useState("");
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardName, setCardName] = useState("");
+  const [cardExpiry, setCardExpiry] = useState("");
+  const [cardCvv, setCardCvv] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pix, setPix] = useState<PixState | null>(null);
@@ -60,6 +68,27 @@ export default function PaymentStep({ onBack, addressId, shippingMethod }: Payme
       return;
     }
 
+    // Cartão: o token é gerado no navegador (os números não passam pelo nosso servidor).
+    let cardData: { cardToken?: string; cardPaymentMethodId?: string } = {};
+    if (selected === "cartao" || selected === "debito") {
+      if (cardNumber.replace(/\D/g, "").length < 13 || !cardName.trim() || !/^\d{2}\/\d{2,4}$/.test(cardExpiry) || cardCvv.length < 3) {
+        setError("Confira os dados do cartão para continuar.");
+        return;
+      }
+      setSubmitting(true);
+      try {
+        const token = await tokenizeCard(
+          { number: cardNumber, name: cardName, expiry: cardExpiry, cvv: cardCvv, cpf: digitsOnly },
+          selected === "debito" ? "debit_card" : "credit_card"
+        );
+        cardData = { cardToken: token.token, cardPaymentMethodId: token.paymentMethodId };
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Não foi possível validar o cartão. Confira os dados e tente de novo.");
+        setSubmitting(false);
+        return;
+      }
+    }
+
     setSubmitting(true);
 
     const result = await createOrderAction({
@@ -71,13 +100,25 @@ export default function PaymentStep({ onBack, addressId, shippingMethod }: Payme
       addressId,
       shippingMethod,
       payerDocument: digitsOnly,
-      paymentMethod: selected,
+      paymentMethod: selected === "debito" ? "cartao" : selected,
       couponCode: coupon?.code,
+      ...cardData,
     });
 
     if (!result.success) {
       setError(result.error);
       setSubmitting(false);
+      return;
+    }
+
+    if (result.data.paymentMethod === "card") {
+      clearCart();
+      if (result.data.status === "approved") {
+        window.location.href = "/conta/pedidos";
+      } else {
+        // Pagamento em análise: o pedido aparece em Meus Pedidos e o status é atualizado pelo Mercado Pago.
+        window.location.href = "/conta/pedidos";
+      }
       return;
     }
 
@@ -180,6 +221,17 @@ export default function PaymentStep({ onBack, addressId, shippingMethod }: Payme
         />
         <p className="mt-1 text-xs text-ink-soft">Exigido pelo Mercado Pago para liberar o pagamento.</p>
       </div>
+
+      {(selected === "cartao" || selected === "debito") && (
+        <div className="mt-4 flex flex-col gap-3">
+          <input placeholder="Número do cartão" inputMode="numeric" autoComplete="cc-number" value={cardNumber} onChange={(e) => setCardNumber(e.target.value)} className={cardInputClass} />
+          <input placeholder="Nome impresso no cartão" autoComplete="cc-name" value={cardName} onChange={(e) => setCardName(e.target.value)} className={cardInputClass} />
+          <div className="grid grid-cols-2 gap-3">
+            <input placeholder="Validade (MM/AA)" inputMode="numeric" autoComplete="cc-exp" value={cardExpiry} onChange={(e) => setCardExpiry(formatCardExpiry(e.target.value))} maxLength={5} className={cardInputClass} />
+            <input placeholder="CVV" inputMode="numeric" autoComplete="cc-csc" value={cardCvv} onChange={(e) => setCardCvv(e.target.value)} className={cardInputClass} />
+          </div>
+        </div>
+      )}
 
       {error && (
         <p role="alert" className="mt-4 text-sm text-status-danger">
