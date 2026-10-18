@@ -320,6 +320,7 @@ export async function createOrderAction(input: unknown): Promise<ActionResult<Cr
         storeId,
       });
       if (card.status === "rejected") {
+        logger.warn("Cartão recusado pelo Mercado Pago", { orderId: order.id, statusDetail: card.statusDetail, integration: "mercadopago" });
         return actionError(cardRejectionMessage(card.statusDetail));
       }
       result = { orderId: order.id, total, paymentMethod: "card", paymentId: card.paymentId, status: card.status };
