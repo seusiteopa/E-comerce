@@ -17,6 +17,9 @@ const storeProfileSchema = z.object({
   og_image_url: z.string().trim().max(500).optional().default(""),
   logo_url: z.string().trim().max(500).optional().default(""),
   printer_app: z.enum(["thermer", "rawbt"]),
+  footer_text: z.string().trim().max(300).optional().default(""),
+  contact_email: z.string().trim().max(120).optional().default(""),
+  instagram_url: z.string().trim().max(200).optional().default(""),
 });
 
 function httpsOrEmpty(value: string): string | null {
@@ -56,6 +59,17 @@ export async function updateStoreProfileAction(input: unknown): Promise<ActionRe
   if (error) {
     logger.error("Erro ao salvar dados da loja", { storeId: store.id, error: error.message });
     return actionError("Não foi possível salvar agora. Tente novamente.");
+  }
+
+  const settingsRows = [
+    { store_id: store.id, key: "site_description", value: d.footer_text },
+    { store_id: store.id, key: "contact_email", value: d.contact_email },
+    { store_id: store.id, key: "instagram_url", value: d.instagram_url },
+  ];
+  const { error: settingsError } = await supabase.from("site_settings").upsert(settingsRows, { onConflict: "store_id,key" });
+  if (settingsError) {
+    logger.error("Erro ao salvar rodapé da loja", { storeId: store.id, error: settingsError.message });
+    return actionError("Não foi possível salvar o rodapé agora. Tente novamente.");
   }
 
   revalidatePath("/", "layout");
