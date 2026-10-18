@@ -25,9 +25,9 @@ const navItems = [
   { href: "/admin/clientes", label: "Clientes", icon: Users },
   { href: "/admin/cupons", label: "Cupons", icon: Ticket },
   { href: "/admin/banners", label: "Banners", icon: ImageIcon },
-  { href: "/admin/loja", label: "Minha loja", icon: Store },
   { href: "/admin/pagamentos", label: "Pagamentos e plano", icon: CreditCard },
-  { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
+  { href: "/admin/configuracoes", label: "Configurações da loja", icon: Settings },
+  { href: "/conta/lojas", label: "Trocar de loja", icon: Store },
 ];
 
 export default function AdminSidebar() {
