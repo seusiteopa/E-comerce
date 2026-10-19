@@ -78,10 +78,12 @@ export async function requireAdminProfile(options?: { allowUnpaid?: boolean }): 
     const service = createSupabaseServiceClient();
     const { data: billing } = await service
       .from("store_billing")
-      .select("subscription_status")
+      .select("subscription_status, painel_liberado")
       .eq("store_id", store.id)
       .maybeSingle();
-    const authorized = ["em_teste", "ativa"].includes(billing?.subscription_status ?? "");
+    // Lojas liberadas pelo dono da plataforma (painel_liberado) seguem sem exigir assinatura.
+    const authorized =
+      Boolean(billing?.painel_liberado) || ["em_teste", "ativa"].includes(billing?.subscription_status ?? "");
     if (!authorized) {
       const { storeBasePath } = await import("@/lib/store/base-path");
       redirect(`${await storeBasePath()}/admin/pagamentos`);

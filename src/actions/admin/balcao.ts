@@ -157,7 +157,7 @@ export async function createCounterOrderAction(input: unknown): Promise<ActionRe
       applicationFee: context.feeFor(total),
       storeId: store.id,
     });
-    await service.from("payments").update({ external_reference: pix.paymentId }).eq("order_id", order.id);
+    await supabase.from("payments").update({ external_reference: pix.paymentId }).eq("order_id", order.id);
     return actionSuccess({
       orderId: order.id,
       total,
