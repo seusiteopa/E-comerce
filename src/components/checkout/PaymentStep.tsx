@@ -220,6 +220,7 @@ export default function PaymentStep({ onBack, addressId, shippingMethod }: Payme
           className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm text-ink outline-none focus:border-navy"
         />
         <p className="mt-1 text-xs text-ink-soft">Exigido pelo Mercado Pago para liberar o pagamento.</p>
+        <p className="mt-2 text-xs text-ink-soft">O pagamento é processado com segurança pelo Mercado Pago. O valor que você vê é o valor final, sem taxas extras cobradas de você.</p>
       </div>
 
       {(selected === "cartao" || selected === "debito") && (
