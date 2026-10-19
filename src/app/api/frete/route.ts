@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { calculateShipping } from "@/lib/integrations/correios";
 import { logger } from "@/lib/logger";
+import { rateLimit, TOO_MANY_MESSAGE } from "@/lib/security/rate-limit";
 
 const requestSchema = z.object({
   zipCode: z.string().regex(/^\d{5}-?\d{3}$/, "CEP inválido."),
@@ -37,6 +38,9 @@ function isRateLimited(ip: string): boolean {
 }
 
 export async function POST(request: NextRequest) {
+  if (!(await rateLimit("frete", 20, 10 * 60))) {
+    return NextResponse.json({ error: TOO_MANY_MESSAGE }, { status: 429 });
+  }
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   if (isRateLimited(ip)) {
     return NextResponse.json({ error: "Muitas solicitações. Tente novamente em instantes." }, { status: 429 });
