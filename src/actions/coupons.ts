@@ -1,5 +1,6 @@
 "use server";
 
+import { rateLimit, TOO_MANY_MESSAGE } from "@/lib/security/rate-limit";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentStore } from "@/lib/store/current";
 import { validateCoupon } from "@/domain/cupom/regras";
@@ -25,6 +26,7 @@ export async function previewCouponAction(
   cartCategorySlug?: string,
   cartProductIds?: string[]
 ): Promise<ActionResult<CouponPreview>> {
+  if (!(await rateLimit("cupom", 20, 10 * 60))) return actionError(TOO_MANY_MESSAGE);
   const normalized = code.trim().toUpperCase();
   if (!normalized) return actionError("Informe um código de cupom.");
 

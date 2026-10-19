@@ -1,5 +1,6 @@
 "use server";
 
+import { rateLimit, TOO_MANY_MESSAGE } from "@/lib/security/rate-limit";
 import { z } from "zod";
 import { EMAIL_NOT_CONFIRMED_MSG } from "@/lib/auth-messages";
 import { redirect } from "next/navigation";
@@ -42,6 +43,7 @@ export async function signUpAction(formData: FormData): Promise<ActionResult> {
 }
 
 export async function loginAction(formData: FormData): Promise<ActionResult<{ isAdmin: boolean }>> {
+  if (!(await rateLimit("login", 5, 15 * 60))) return actionError(TOO_MANY_MESSAGE);
   const parsed = loginSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),

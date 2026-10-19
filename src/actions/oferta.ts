@@ -1,5 +1,6 @@
 "use server";
 
+import { rateLimit, TOO_MANY_MESSAGE } from "@/lib/security/rate-limit";
 import { z } from "zod";
 import { ActionResult, actionSuccess, actionError } from "@/lib/action-result";
 import { logger } from "@/lib/logger";
@@ -23,6 +24,7 @@ export type BuyExclusiveResult =
   | { paymentMethod: "redirect"; orderId: string; checkoutUrl: string };
 
 export async function buyExclusiveProductAction(input: unknown): Promise<ActionResult<BuyExclusiveResult>> {
+  if (!(await rateLimit("oferta", 20, 10 * 60))) return actionError(TOO_MANY_MESSAGE);
   const parsed = buyExclusiveSchema.safeParse(input);
   if (!parsed.success) {
     return actionError("Verifique os dados informados e tente novamente.");
