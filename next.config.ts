@@ -52,6 +52,26 @@ const nextConfig: NextConfig = {
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+          { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
+          // Modo de relatório: registra no console o que seria bloqueado, sem bloquear nada.
+          // Só ativar o bloqueio (Content-Security-Policy) depois de conferir que nada quebra.
+          {
+            key: "Content-Security-Policy-Report-Only",
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://sdk.mercadopago.com",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: blob: https://res.cloudinary.com https://*.supabase.co",
+              "media-src 'self' blob: https://res.cloudinary.com https://*.supabase.co",
+              "font-src 'self' data:",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.mercadopago.com https://api.cloudinary.com https://sdk.mercadopago.com",
+              "frame-src 'self' https://sdk.mercadopago.com https://auth.mercadopago.com.br https://www.mercadopago.com.br",
+              "form-action 'self' https://auth.mercadopago.com.br https://www.mercadopago.com.br",
+              "frame-ancestors 'self'",
+              "base-uri 'self'",
+              "object-src 'none'",
+            ].join("; "),
+          },
         ],
       },
       {
