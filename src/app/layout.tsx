@@ -30,7 +30,12 @@ export const viewport: Viewport = {
 export async function generateMetadata(): Promise<Metadata> {
   const [settings, store, origin, base] = await Promise.all([getSiteSettings(), getCurrentStore(), getRequestOrigin(), storeBasePath()]);
   const storeName = settings.site_name?.trim() || store.name || siteConfig.storeName;
-  const description = settings.site_description?.trim() || store.og_description || store.description || siteConfig.description;
+  // Loja de cliente: nunca cai na descrição da plataforma; usa o que a própria loja escreveu, ou um texto com o nome dela.
+  const description =
+    settings.site_description?.trim() ||
+    store.og_description ||
+    store.description ||
+    (store.is_platform_owned ? siteConfig.description : `Compre na ${storeName}.`);
   // A loja da própria plataforma mantém o slogan da marca; as demais usam só o nome (ou o título de OG que o lojista definiu).
   const pageTitle = store.og_title?.trim() || (store.is_platform_owned ? `${storeName} | ${siteConfig.tagline}` : storeName);
 
@@ -39,11 +44,17 @@ export async function generateMetadata(): Promise<Metadata> {
   const banners = await getActiveBanners("principal").catch(() => []);
   const firstBannerPhoto = banners.find((b) => b.media_type !== "video");
   // Prioridade da imagem de compartilhamento: imagem OG da loja > 1ª foto do banner > padrão da plataforma.
+  // Prioridade: imagem OG da loja > 1ª foto do banner > logo da loja > imagem gerada com o nome da loja.
+  // A loja da plataforma mantém a imagem padrão da marca.
   const ogImage = store.og_image_url
     ? { url: store.og_image_url, alt: storeName }
     : firstBannerPhoto
       ? { url: firstBannerPhoto.image_url, alt: storeName }
-      : { url: "/social/og-image.png", width: 1200, height: 630, alt: storeName };
+      : store.logo_url
+        ? { url: store.logo_url, alt: storeName }
+        : store.is_platform_owned
+          ? { url: "/social/og-image.png", width: 1200, height: 630, alt: storeName }
+          : { url: `${base}/opengraph-image`, width: 1200, height: 630, alt: storeName };
 
   return {
     metadataBase: new URL(origin),
