@@ -29,7 +29,7 @@ function LoginForm() {
         if (explicitRedirect) {
           router.push(explicitRedirect);
         } else if (result.data.isAdmin) {
-          router.push("/admin");
+          router.push("/admin");  // sem destino salvo: painel da loja principal
         } else {
           router.push("/conta/pedidos");
         }

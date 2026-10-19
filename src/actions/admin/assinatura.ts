@@ -10,16 +10,18 @@ import { markReferralApplied } from "@/lib/store/referral";
 import { revalidatePath } from "next/cache";
 import { ActionResult, actionSuccess, actionError } from "@/lib/action-result";
 import { storeOrigin } from "@/lib/store/urls";
+import { storeBasePath } from "@/lib/store/base-path";
 import { logger } from "@/lib/logger";
 
 /** Botão "Autorizar mensalidade" do painel: leva o lojista ao Mercado Pago para autorizar as cobranças mensais. */
 export async function startSubscriptionAction(): Promise<void> {
   const { store } = await requireStoreAdmin();
-  if (store.is_platform_owned) redirect("/admin/pagamentos");
+  const base = await storeBasePath();
+  if (store.is_platform_owned) redirect(`${base}/admin/pagamentos`);
 
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user?.email) redirect("/admin/pagamentos?erro=assinatura");
+  if (!user?.email) redirect(`${base}/admin/pagamentos?erro=assinatura`);
 
   let url: string;
   try {
@@ -36,7 +38,7 @@ export async function startSubscriptionAction(): Promise<void> {
       storeId: store.id,
       error: error instanceof Error ? error.message : String(error),
     });
-    redirect("/admin/pagamentos?erro=assinatura");
+    redirect(`${base}/admin/pagamentos?erro=assinatura`);
   }
   redirect(url);
 }
