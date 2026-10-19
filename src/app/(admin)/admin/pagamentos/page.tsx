@@ -54,7 +54,7 @@ export default async function AdminPagamentosPage({ searchParams }: { searchPara
               <p className="mt-2 text-sm text-ink-soft">
                 {conn?.status === "expirado"
                   ? "A conexão expirou. Conecte de novo para voltar a receber pagamentos online."
-                  : "Para receber as vendas da sua loja, você precisa ter uma conta no Mercado Pago. Se ainda não tem, crie uma gratuitamente no site do Mercado Pago. Depois, clique em Conectar Mercado Pago, autorize a conexão e volte para cá. Sem essa conexão, sua loja não consegue receber pagamentos de Pix nem de cartão. O dinheiro das vendas cai direto na sua conta do Mercado Pago. Sobre as taxas: o Mercado Pago cobra uma taxa sobre cada venda, descontada do valor que cai na sua conta. A Vecorion não fica com nenhuma parte das vendas: só cobra a mensalidade fixa da loja."}
+                  : "Para receber as vendas da sua loja, você precisa ter uma conta no Mercado Pago. Se ainda não tem, crie uma gratuitamente no site do Mercado Pago. Depois, clique em Conectar Mercado Pago, autorize a conexão e volte para cá. Sem essa conexão, sua loja não consegue receber pagamentos de Pix nem de cartão. O dinheiro das vendas cai direto na sua conta do Mercado Pago. Como funcionam as taxas: o cliente paga exatamente o preço que você definiu. Por exemplo, um produto de R$ 100 é pago por R$ 100 pelo cliente. Sobre esse valor, o Mercado Pago desconta a taxa da venda, e o restante cai na sua conta. A Vecorion não fica com nenhuma parte das vendas: só cobra a mensalidade fixa da loja."}
               </p>
               <div className="mt-4">{/* <a> comum (não <Link>): evita o pré-carregamento do Next iniciar a conexão sem o clique */}
                 <a
