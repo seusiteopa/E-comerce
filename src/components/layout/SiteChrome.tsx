@@ -20,10 +20,12 @@ export default function SiteChrome({
   phrases,
   logoUrl,
   siteName,
+  user,
 }: {
   phrases: string[];
   logoUrl?: string;
   siteName?: string;
+  user?: { firstName: string } | null;
 }) {
   const [hidden, setHidden] = useState(false);
   const lastScrollY = useRef(0);
@@ -79,7 +81,7 @@ export default function SiteChrome({
         className="transition-transform duration-300 ease-out"
         style={{ transform: hidden ? "translateY(-100%)" : "translateY(0)" }}
       >
-        <Header logoUrl={logoUrl} siteName={siteName} />
+        <Header logoUrl={logoUrl} siteName={siteName} user={user} />
       </div>
     </div>
   );

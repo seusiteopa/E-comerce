@@ -8,7 +8,7 @@ import MobileMenu from "@/components/layout/MobileMenu";
 import CartIndicator from "@/components/layout/CartIndicator";
 import { mainNav, siteConfig } from "@/data/site";
 
-export default function Header({ logoUrl, siteName }: { logoUrl?: string; siteName?: string }) {
+export default function Header({ logoUrl, siteName, user }: { logoUrl?: string; siteName?: string; user?: { firstName: string } | null }) {
   const resolvedName = siteName?.trim() || siteConfig.storeName;
 
   return (
@@ -48,9 +48,17 @@ export default function Header({ logoUrl, siteName }: { logoUrl?: string; siteNa
         </nav>
 
         <div className="flex shrink-0 items-center gap-1">
-          <StoreLink href="/conta/pedidos" aria-label="Minha conta" className="hidden h-10 w-10 items-center justify-center rounded-full hover:bg-paper sm:flex">
-            <User size={20} className="text-ink" aria-hidden="true" />
-          </StoreLink>
+          {user ? (
+            <StoreLink href="/conta/pedidos" aria-label={`Minha conta, ${user.firstName}`} className="flex h-10 items-center gap-2 rounded-full px-2 hover:bg-paper">
+              <User size={20} className="text-ink" aria-hidden="true" />
+              <span className="hidden max-w-[7rem] truncate text-sm font-medium text-ink sm:inline">{user.firstName}</span>
+            </StoreLink>
+          ) : (
+            <a href="/login" aria-label="Entrar na conta" className="flex h-10 items-center gap-2 rounded-full px-2 hover:bg-paper">
+              <User size={20} className="text-ink" aria-hidden="true" />
+              <span className="hidden text-sm font-medium text-ink sm:inline">Entrar</span>
+            </a>
+          )}
           <CartIndicator />
           <MobileMenu />
         </div>

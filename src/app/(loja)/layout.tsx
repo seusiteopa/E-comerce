@@ -4,6 +4,7 @@ import CartAddedToast from "@/components/loja/CartAddedToast";
 import WelcomeCouponPopup from "@/components/loja/WelcomeCouponPopup";
 import ThemeOverride from "@/components/layout/ThemeOverride";
 import { getSiteSettings } from "@/lib/data/site-settings";
+import { getHeaderUser } from "@/lib/auth/header-user";
 import { StoreBaseProvider } from "@/components/store/StoreLink";
 import { storeBasePath } from "@/lib/store/base-path";
 
@@ -13,6 +14,7 @@ import { storeBasePath } from "@/lib/store/base-path";
 
 export default async function LojaLayout({ children }: { children: React.ReactNode }) {
   const settings = await getSiteSettings();
+  const headerUser = await getHeaderUser();
   const base = await storeBasePath();
   const phrases = [
     settings.announcement_phrase_1,
@@ -24,7 +26,7 @@ export default async function LojaLayout({ children }: { children: React.ReactNo
     <StoreBaseProvider value={base}>
     <>
       <ThemeOverride primaryColor={settings.theme_primary_color} accentColor={settings.theme_accent_color} />
-      <SiteChrome phrases={phrases} logoUrl={settings.logo_url} siteName={settings.site_name} />
+      <SiteChrome user={headerUser} phrases={phrases} logoUrl={settings.logo_url} siteName={settings.site_name} />
       <main id="conteudo-principal" style={{ paddingTop: "var(--site-chrome-height, 96px)" }}>
         {children}
       </main>

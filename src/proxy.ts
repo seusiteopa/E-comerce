@@ -25,6 +25,29 @@ function isProtectedPath(pathname: string): boolean {
   return PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"));
 }
 
+
+/** Renova a sessão do Supabase (token vence em ~1h) e grava os cookies novos na resposta. */
+async function refreshSessionOnResponse(request: NextRequest, response: NextResponse) {
+  const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+      },
+    },
+  });
+  const { data: { user } } = await supabase.auth.getUser();
+  return user;
+}
+
+/** Só renova quando há sessão no navegador (evita uma chamada ao banco em visitas anônimas). */
+function hasSupabaseSession(request: NextRequest): boolean {
+  return request.cookies.getAll().some((c) => c.name.startsWith("sb-") && c.name.includes("auth-token"));
+}
+
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
@@ -39,7 +62,9 @@ export async function proxy(request: NextRequest) {
     // /admin dentro da loja: a permissão é conferida no layout do admin (login/home se não puder).
     const url = request.nextUrl.clone();
     url.pathname = rest;
-    return NextResponse.rewrite(url, { request: { headers: sanitizedHeaders(request, slug) } });
+    const rewritten = NextResponse.rewrite(url, { request: { headers: sanitizedHeaders(request, slug) } });
+    if (hasSupabaseSession(request)) await refreshSessionOnResponse(request, rewritten);
+    return rewritten;
   }
 
   // Home no endereço da plataforma: mostra a página da plataforma.
@@ -53,7 +78,9 @@ export async function proxy(request: NextRequest) {
 
   // Demais páginas públicas: só higieniza o cabeçalho de loja, sem custo de banco.
   if (!isProtectedPath(pathname)) {
-    return NextResponse.next({ request: { headers: sanitizedHeaders(request) } });
+    const publicResponse = NextResponse.next({ request: { headers: sanitizedHeaders(request) } });
+    if (hasSupabaseSession(request)) await refreshSessionOnResponse(request, publicResponse);
+    return publicResponse;
   }
 
   const response = NextResponse.next({ request: { headers: sanitizedHeaders(request) } });
