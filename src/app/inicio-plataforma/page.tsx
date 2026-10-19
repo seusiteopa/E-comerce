@@ -53,7 +53,7 @@ export default function InicioPlataformaPage() {
             href="/criar-loja"
             className="rounded-full bg-navy px-6 py-3 text-sm font-semibold text-white hover:opacity-90"
           >
-            Criar minha loja grátis por 30 dias
+            Criar minha loja com o primeiro mês grátis
           </Link>
           <Link
             href="/login"
@@ -73,16 +73,32 @@ export default function InicioPlataformaPage() {
         </section>
 
         <section className="mt-16 rounded-3xl bg-navy p-8 text-white sm:p-12">
-          <h2 className="text-2xl font-semibold sm:text-3xl">Um custo fixo, sem comissão sobre as suas vendas</h2>
-          <p className="mt-3 max-w-2xl text-sm text-white/85 sm:text-base">
-            Você paga uma mensalidade fixa e vende sem pagar nada a mais por venda. O primeiro mês é grátis: você
-            autoriza o cartão e começa a usar a loja sem custo. Quanto mais você vende, mais sobra para você.
-          </p>
+          <h2 className="text-2xl font-semibold sm:text-3xl">Primeiro mês grátis, depois R$ 90 por mês</h2>
+          <div className="mt-6 grid gap-6 sm:grid-cols-3">
+            <div>
+              <p className="text-sm font-semibold text-white">1º mês: grátis</p>
+              <p className="mt-2 text-sm text-white/85">
+                Sua loja já funciona e vende. Você testa todas as funções, cadastra seus produtos e recebe seus primeiros pedidos sem pagar nada.
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-white">Depois: R$ 90 por mês</p>
+              <p className="mt-2 text-sm text-white/85">
+                A mensalidade mantém a sua loja ativa e vendendo, com painel, pagamentos e link de compartilhamento. Sem comissão sobre as suas vendas.
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-white">Indique e economize</p>
+              <p className="mt-2 text-sm text-white/85">
+                Cada loja que você indicar e que autorizar a mensalidade dá a você desconto de 20% na sua próxima mensalidade.
+              </p>
+            </div>
+          </div>
           <Link
             href="/criar-loja"
             className="mt-6 inline-block rounded-full bg-white px-6 py-3 text-sm font-semibold text-navy hover:opacity-90"
           >
-            Quero começar agora
+            Criar minha loja com o primeiro mês grátis
           </Link>
         </section>
 
