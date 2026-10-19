@@ -11,6 +11,7 @@ const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const SENDER = { name: "Loja Vecorion", email: "loja@vecorion.com.br" }; // TODO: confirmar e-mail remetente verificado no Brevo
 
 export type TransactionalEmailEvent =
+  | "falha_pagamento"
   | "pedido_criado"
   | "pagamento_aprovado"
   | "pedido_enviado"
@@ -25,6 +26,7 @@ export interface SendTransactionalEmailInput {
 }
 
 const subjectByEvent: Record<TransactionalEmailEvent, string> = {
+  falha_pagamento: "Pagamento não concluído em um pedido — Loja Vecorion",
   pedido_criado: "Recebemos seu pedido — Loja Vecorion",
   pagamento_aprovado: "Pagamento confirmado — Loja Vecorion",
   pedido_enviado: "Seu pedido foi enviado — Loja Vecorion",
@@ -60,6 +62,8 @@ function buildEmailHtml(event: TransactionalEmailEvent, data: Record<string, str
   const safe = Object.fromEntries(Object.entries(data).map(([key, value]) => [key, escapeHtml(value)]));
 
   switch (event) {
+    case "falha_pagamento":
+      return `<p>Olá!</p><p>Um pagamento do pedido <strong>#${safe.orderId}</strong> da loja <strong>${safe.storeName}</strong> não foi concluído. Motivo: ${safe.reason}.</p><p>Se o cliente precisar de ajuda, peça para ele tentar outra forma de pagamento.</p>`;
     case "pedido_criado":
       return `<p>Olá, ${safe.customerName}!</p><p>Recebemos seu pedido <strong>#${safe.orderId}</strong>, no valor de ${safe.total}. Assim que o pagamento for confirmado, você recebe um novo aviso por aqui.</p>`;
     case "pagamento_aprovado":

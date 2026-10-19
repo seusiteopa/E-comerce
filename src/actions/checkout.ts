@@ -15,6 +15,29 @@ import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import { getCurrentStore, getRequestOrigin } from "@/lib/store/current";
 import { getStorePaymentContext, PaymentNotConnectedError, type StorePaymentContext } from "@/lib/integrations/mercadopago/oauth";
 
+
+/** Avisa o contato da loja (e-mail cadastrado nas configurações) sobre pagamento que não concluiu. Nunca bloqueia a venda. */
+async function notifyStorePaymentFailure(storeId: string, storeName: string, orderId: string, reason: string): Promise<void> {
+  try {
+    const service = createSupabaseServiceClient();
+    const { data: setting } = await service
+      .from("site_settings")
+      .select("value")
+      .eq("store_id", storeId)
+      .eq("key", "contact_email")
+      .maybeSingle();
+    const email = setting?.value?.trim();
+    if (!email) return;
+    await sendTransactionalEmail({
+      event: "falha_pagamento",
+      to: { email, name: storeName },
+      data: { orderId, storeName, reason },
+    });
+  } catch {
+    logger.warn("Aviso de falha de pagamento não pôde ser enviado", { storeId, orderId });
+  }
+}
+
 type CreateOrderResult =
   | {
       orderId: string;
@@ -321,6 +344,7 @@ export async function createOrderAction(input: unknown): Promise<ActionResult<Cr
       });
       if (card.status === "rejected") {
         logger.warn("Cartão recusado pelo Mercado Pago", { orderId: order.id, statusDetail: card.statusDetail, integration: "mercadopago" });
+        await notifyStorePaymentFailure(store.id, store.name, order.id, cardRejectionMessage(card.statusDetail));
         return actionError(cardRejectionMessage(card.statusDetail));
       }
       result = { orderId: order.id, total, paymentMethod: "card", paymentId: card.paymentId, status: card.status };
@@ -343,6 +367,7 @@ export async function createOrderAction(input: unknown): Promise<ActionResult<Cr
       orderId: order.id,
       error: error instanceof Error ? error.message : String(error),
     });
+    await notifyStorePaymentFailure(store.id, store.name, order.id, "não foi possível iniciar o pagamento");
     return actionError("Seu pedido foi registrado, mas não foi possível iniciar o pagamento. Tente novamente.");
   }
 
