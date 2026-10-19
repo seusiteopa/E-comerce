@@ -13,7 +13,6 @@ export const metadata: Metadata = {
 // Catálogo muda com o cadastro do admin — revalida no máximo a cada 60s
 // em vez de a cada requisição, equilibrando frescor de dado e carga no
 // banco (Etapa 12, princípio de performance já aplicado na Home).
-export const revalidate = 60;
 
 export default async function ProdutosPage() {
   const productRows = await getActiveProducts();

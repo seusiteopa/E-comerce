@@ -9,7 +9,6 @@ interface CategoryPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export const revalidate = 60;
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
   const { slug } = await params;

@@ -10,7 +10,6 @@ import { storeBasePath } from "@/lib/store/base-path";
 // As configurações do site (logo, nome, faixa institucional) não mudam a
 // cada segundo — revalida a cada 5 minutos em vez de buscar do banco em
 // toda requisição de toda página da loja.
-export const revalidate = 300;
 
 export default async function LojaLayout({ children }: { children: React.ReactNode }) {
   const settings = await getSiteSettings();

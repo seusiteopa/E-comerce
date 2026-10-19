@@ -21,7 +21,6 @@ interface ProductPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export const revalidate = 60;
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const base = await storeBasePath();

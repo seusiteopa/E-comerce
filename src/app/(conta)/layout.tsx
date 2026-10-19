@@ -1,8 +1,8 @@
 import Footer from "@/components/layout/Footer";
 import SiteChrome from "@/components/layout/SiteChrome";
 import { getSiteSettings } from "@/lib/data/site-settings";
+import { siteConfig } from "@/data/site";
 
-export const revalidate = 300;
 
 export default async function ContaLayout({ children }: { children: React.ReactNode }) {
   const settings = await getSiteSettings();
@@ -14,7 +14,8 @@ export default async function ContaLayout({ children }: { children: React.ReactN
 
   return (
     <>
-      <SiteChrome phrases={phrases} logoUrl={settings.logo_url} siteName={settings.site_name} />
+      {/* A área da conta pertence à plataforma: mostra a marca da plataforma, não a da loja atual. */}
+      <SiteChrome phrases={phrases} logoUrl={undefined} siteName={siteConfig.storeName} />
       <main id="conteudo-principal" style={{ paddingTop: "var(--site-chrome-height, 96px)" }}>
         {children}
       </main>

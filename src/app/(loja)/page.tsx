@@ -12,7 +12,6 @@ import { getActiveBanners } from "@/lib/data/banners";
 
 // Home enxuta: banner + vitrine, sem categorização explícita por tipo de
 // produto e sem blocos de texto longos — pedido do dono da loja.
-export const revalidate = 60;
 
 export default async function HomePage() {
   const [featuredRows, allRows, banners, secondaryBanners, categories] = await Promise.all([
