@@ -16,7 +16,7 @@ export default function PushToggle() {
 
   useEffect(() => {
     if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) {
-      setState("indisponivel");
+      queueMicrotask(() => setState("indisponivel"));
       return;
     }
     navigator.serviceWorker.ready.then(async (reg) => {
