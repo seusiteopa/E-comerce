@@ -25,7 +25,7 @@ export default function HomeBanner({ banners }: { banners: BannerRow[] }) {
               aria-hidden="true"
             />
           </div>
-          <h1 className="mt-6 text-3xl font-semibold text-ink sm:text-4xl">Loja Vecorion</h1>
+          <h1 className="mt-6 text-3xl font-semibold text-ink sm:text-4xl">Vecorion</h1>
           <LinkButton href="/produtos" variant="primary" className="mt-6">
             Explorar produtos
           </LinkButton>

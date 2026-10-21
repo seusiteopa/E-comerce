@@ -8,7 +8,7 @@ import { logger } from "@/lib/logger";
  */
 
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
-const SENDER = { name: "Loja Vecorion", email: "loja@vecorion.com.br" }; // TODO: confirmar e-mail remetente verificado no Brevo
+const SENDER = { name: "Vecorion", email: "loja@vecorion.com.br" }; // TODO: confirmar e-mail remetente verificado no Brevo
 
 export type TransactionalEmailEvent =
   | "falha_pagamento"
@@ -26,10 +26,10 @@ export interface SendTransactionalEmailInput {
 }
 
 const subjectByEvent: Record<TransactionalEmailEvent, string> = {
-  falha_pagamento: "Pagamento não concluído em um pedido — Loja Vecorion",
-  pedido_criado: "Recebemos seu pedido — Loja Vecorion",
-  pagamento_aprovado: "Pagamento confirmado — Loja Vecorion",
-  pedido_enviado: "Seu pedido foi enviado — Loja Vecorion",
+  falha_pagamento: "Pagamento não concluído em um pedido — Vecorion",
+  pedido_criado: "Recebemos seu pedido — Vecorion",
+  pagamento_aprovado: "Pagamento confirmado — Vecorion",
+  pedido_enviado: "Seu pedido foi enviado — Vecorion",
   orcamento_recebido: "Recebemos sua solicitação de orçamento — Vecorion",
   mensalidade_atrasada: "Não conseguimos cobrar a mensalidade da sua loja — Vecorion",
   mensalidade_confirmada: "Mensalidade da sua loja confirmada — Vecorion",

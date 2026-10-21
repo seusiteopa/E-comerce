@@ -31,7 +31,7 @@ const policies: Record<string, { title: string; sections: { heading: string; tex
     sections: [
       {
         heading: "1. Aceitação",
-        text: "Ao utilizar a Loja Vecorion, você concorda com estes termos de uso.",
+        text: "Ao utilizar a Vecorion, você concorda com estes termos de uso.",
       },
       {
         heading: "2. Produtos",

@@ -91,6 +91,12 @@ export default function AdminMobileNav() {
           >
             Ver loja
           </StoreLink>
+          <a
+            href="/lojas/vecorion"
+            className="mt-2 flex items-center gap-3 rounded-lg border-t border-line px-3 pt-4 text-sm font-medium text-ink-soft hover:text-ink"
+          >
+            Loja da Vecorion
+          </a>
           <form action={logoutAction}>
             <button
               type="submit"

@@ -5,7 +5,7 @@
 
 export const siteConfig = {
   name: "Vecorion",
-  storeName: "Loja Vecorion",
+  storeName: "Vecorion",
   tagline: "Tecnologia, produtos e soluções em um só lugar.",
   description:
     "E-commerce da Vecorion: produtos físicos e produtos digitais com tecnologia, inteligência artificial e atendimento próximo às pessoas.",

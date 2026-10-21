@@ -53,6 +53,10 @@ export default function AdminSidebar() {
           );
         })}
       </nav>
+      <a href="/lojas/vecorion" className="mx-4 mb-2 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink-soft transition-colors hover:bg-paper hover:text-ink">
+        <Store size={17} aria-hidden="true" />
+        Loja da Vecorion
+      </a>
       <form action={logoutAction} className="mt-auto border-t border-line p-4">
         <button
           type="submit"
