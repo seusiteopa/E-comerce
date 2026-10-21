@@ -8,11 +8,9 @@ import { tokenizeCard, formatCardExpiry } from "@/lib/checkout/mp-card";
 
 const cardInputClass = "w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy";
 
+// Por enquanto só Pix: cartões e boleto ficam desligados nas compras dos produtos.
 const methods = [
   { id: "pix", label: "Pix", description: "Aprovação imediata" },
-  { id: "cartao", label: "Cartão de crédito", description: "Em até 12x" },
-  { id: "debito", label: "Cartão de débito", description: "Débito na hora" },
-  { id: "boleto", label: "Boleto", description: "Compensação em até 2 dias úteis" },
 ];
 
 interface PaymentStepProps {
