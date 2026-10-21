@@ -8,7 +8,6 @@ import Link from "next/link";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
 import { loginAction, resendConfirmationAction } from "@/actions/auth";
-import GoogleLoginButton from "@/components/conta/GoogleLoginButton";
 import { EMAIL_NOT_CONFIRMED_MSG } from "@/lib/auth-messages";
 
 function LoginForm() {
@@ -43,8 +42,6 @@ function LoginForm() {
   return (
     <>
       <div className="mt-8 flex flex-col gap-4">
-        <GoogleLoginButton />
-        <p className="text-center text-xs text-ink-soft">ou entre com e-mail e senha</p>
       </div>
     <form action={handleSubmit} className="mt-8 flex flex-col gap-4">
       <div>
