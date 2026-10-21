@@ -12,7 +12,7 @@ export default function Header({ logoUrl, siteName, user }: { logoUrl?: string; 
   const resolvedName = siteName?.trim() || siteConfig.storeName;
 
   return (
-    <header className="border-b border-line bg-surface">
+    <header className="border-b border-line bg-surface/95 shadow-sm backdrop-blur">
       <Container className="relative flex h-16 items-center justify-between gap-4">
         <StoreLink href="/" className="flex shrink-0 items-center gap-3">
           {logoUrl ? (
@@ -39,7 +39,7 @@ export default function Header({ logoUrl, siteName, user }: { logoUrl?: string; 
           <ul className="flex items-center gap-6">
             {mainNav.map((item) => (
               <li key={item.href}>
-                <StoreLink href={item.href} className="text-sm font-medium text-ink-soft transition-colors hover:text-navy">
+                <StoreLink href={item.href} className="relative text-sm font-medium text-ink-soft transition-colors after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-farol after:transition-all after:duration-300 hover:text-navy hover:after:w-full">
                   {item.label}
                 </StoreLink>
               </li>
