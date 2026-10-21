@@ -134,6 +134,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [items]
   );
   const itemCount = useMemo(() => items.reduce((sum, i) => sum + i.quantity, 0), [items]);
+  // Cupom só vale para o subtotal em que foi aplicado; se os produtos mudarem, ele deixa de valer.
+  const activeCoupon = coupon && couponSubtotal === subtotal ? coupon : null;
 
   return (
     <CartContext.Provider
@@ -145,7 +147,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         clearCart,
         subtotal,
         itemCount,
-        coupon: coupon && couponSubtotal === subtotal ? coupon : null,
+        coupon: activeCoupon,
         applyCoupon,
         removeCoupon,
         lastAddedItem,
