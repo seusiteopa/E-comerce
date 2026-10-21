@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState, ReactNode, useRef} from "react";
+import {createContext, useContext, useEffect, useMemo, useState, ReactNode} from "react";
 
 const CART_STORAGE_KEY = "vecorion-carrinho-v1";
 import { CartItem } from "@/types";
