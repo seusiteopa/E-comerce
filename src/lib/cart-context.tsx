@@ -121,7 +121,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
 
   function applyCoupon(newCoupon: AppliedCoupon) {
-    setCouponSubtotal(subtotal);
+    setCouponSubtotal(items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0));
     setCoupon(newCoupon);
   }
 
