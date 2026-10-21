@@ -10,8 +10,9 @@ export default function StatCard({
   icon: LucideIcon;
 }) {
   return (
-    <div className="flex items-center gap-4 rounded-2xl border border-line bg-surface p-5">
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-navy/10 text-navy">
+    <div className="group relative flex items-center gap-4 overflow-hidden rounded-2xl border border-line bg-surface p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
+      <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-navy to-farol" />
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-navy text-white shadow-sm">
         <Icon size={20} aria-hidden="true" />
       </div>
       <div>
