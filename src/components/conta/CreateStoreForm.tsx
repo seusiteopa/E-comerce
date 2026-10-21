@@ -58,6 +58,15 @@ export default function CreateStoreForm({ rootDomain, monthlyFee, referralCode }
 
   return (
     <div className="mt-8 flex flex-col gap-4">
+      <div className="rounded-xl border border-line bg-paper p-4 text-sm text-ink">
+        <p className="font-semibold">Antes de começar: sua conta no Mercado Pago</p>
+        <p className="mt-2 text-ink-soft">
+          Para receber as vendas da sua loja, você precisa de uma conta no Mercado Pago. Se você já tem uma, continue normalmente e conecte a conta depois, na tela de Pagamentos.
+        </p>
+        <p className="mt-2 text-ink-soft">
+          Se ainda não tem, crie a conta gratuitamente no site do Mercado Pago, depois volte aqui e continue. As vendas caem direto na sua conta do Mercado Pago.
+        </p>
+      </div>
       <div>
         <label htmlFor="name" className="text-sm font-medium text-ink">Nome da loja</label>
         <input

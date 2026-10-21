@@ -8,7 +8,7 @@ import { StatusPill } from "@/components/ui/Badge";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentStore } from "@/lib/store/current";
 import { requireAdminProfile } from "@/lib/auth";
-import { formatCurrency, formatDate } from "@/lib/format";
+import { formatCurrency } from "@/lib/format";
 
 interface OrderRowView {
   id: string;
@@ -18,7 +18,13 @@ interface OrderRowView {
   payer_email: string | null;
   channel: string;
   customer_name: string | null;
-  payments: { status: string }[];
+  payments: { status: string; method: string | null }[];
+  profiles: { full_name: string | null; phone: string | null } | null;
+}
+
+function paymentMethodLabel(method: string | null | undefined): string {
+  const labels: Record<string, string> = { pix: "Pix", cartao: "Cartão de crédito", credito: "Cartão de crédito", debito: "Cartão de débito", boleto: "Boleto", dinheiro: "Dinheiro" };
+  return method ? labels[method] ?? method : "Pix ou cartão";
 }
 
 export default async function AdminPedidosPage() {
@@ -27,7 +33,7 @@ export default async function AdminPedidosPage() {
   const { id: storeId } = await getCurrentStore();
   const { data } = await supabase
     .from("orders")
-    .select("id, created_at, status, total, payer_email, channel, customer_name, payments(status)")
+    .select("id, created_at, status, total, payer_email, channel, customer_name, payments(status, method), profiles(full_name, phone)")
     .eq("store_id", storeId)
     .order("created_at", { ascending: false });
 
@@ -35,10 +41,12 @@ export default async function AdminPedidosPage() {
 
   const columns: AdminColumn<OrderRowView>[] = [
     { header: "Pedido", primary: true, cell: (r) => `#${r.id.slice(0, 8)}` },
-    { header: "Cliente", primary: true, cell: (r) => (r.channel === "balcao" ? `Balcão${r.customer_name ? ` · ${r.customer_name}` : ""}` : r.payer_email ?? "—") },
-    { header: "Data", cell: (r) => formatDate(r.created_at) },
+    { header: "Cliente", primary: true, cell: (r) => (r.channel === "balcao" ? `Balcão${r.customer_name ? ` · ${r.customer_name}` : ""}` : r.profiles?.full_name || r.customer_name || "—") },
+    { header: "E-mail", cell: (r) => r.payer_email ?? "—" },
+    { header: "Telefone", cell: (r) => r.profiles?.phone || "—" },
+    { header: "Data e hora", cell: (r) => new Date(r.created_at).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", dateStyle: "short", timeStyle: "short" }) },
     { header: "Total", primary: true, cell: (r) => formatCurrency(Number(r.total)) },
-    { header: "Pagamento", cell: (r) => <StatusPill status={(r.payments?.[0]?.status ?? "pendente") as never} kind="payment" /> },
+    { header: "Forma de pagamento", cell: (r) => `${paymentMethodLabel(r.payments?.[0]?.method)} · ${r.payments?.[0]?.status ?? "pendente"}` },
     { header: "Status", primary: true, cell: (r) => <OrderStatusSelect orderId={r.id} currentStatus={r.status} /> },
     { header: "Cupom", cell: (r) => <PrintOrderButton orderId={r.id} compact /> },
   ];
