@@ -14,6 +14,7 @@ import { sendTransactionalEmail } from "@/lib/integrations/email";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import { getCurrentStore, getRequestOrigin } from "@/lib/store/current";
 import { getStorePaymentContext, PaymentNotConnectedError, type StorePaymentContext } from "@/lib/integrations/mercadopago/oauth";
+import { calculateOrderTotal } from "@/lib/checkout/totals";
 
 
 /** Avisa o contato da loja (e-mail cadastrado nas configurações) sobre pagamento que não concluiu. Nunca bloqueia a venda. */
@@ -257,7 +258,7 @@ export async function createOrderAction(input: unknown): Promise<ActionResult<Cr
     }
   }
 
-  const total = subtotal + shipping - discount;
+  const total = calculateOrderTotal({ subtotal, shipping, discount });
 
   const { data: order, error: orderError } = await supabase
     .from("orders")

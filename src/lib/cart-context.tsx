@@ -1,5 +1,7 @@
 "use client";
 
+import { couponStillApplies } from "@/lib/checkout/totals";
+
 import {createContext, useContext, useEffect, useMemo, useState, ReactNode} from "react";
 
 const CART_STORAGE_KEY = "vecorion-carrinho-v1";
@@ -135,7 +137,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   );
   const itemCount = useMemo(() => items.reduce((sum, i) => sum + i.quantity, 0), [items]);
   // Cupom só vale para o subtotal em que foi aplicado; se os produtos mudarem, ele deixa de valer.
-  const activeCoupon = coupon && couponSubtotal === subtotal ? coupon : null;
+  const activeCoupon = coupon && couponStillApplies(couponSubtotal, subtotal) ? coupon : null;
 
   return (
     <CartContext.Provider
