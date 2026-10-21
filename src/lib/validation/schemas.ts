@@ -1,3 +1,4 @@
+import { isValidCpf } from "@/lib/validation/cpf";
 import { z } from "zod";
 
 export const signUpSchema = z.object({
@@ -47,7 +48,8 @@ export const createOrderSchema = z.object({
   payerDocument: z
     .string()
     .trim()
-    .regex(/^\d{11}$/, "CPF inválido — informe apenas os 11 números."),
+    .regex(/^\d{11}$/, "CPF inválido — informe apenas os 11 números.")
+    .refine((v) => isValidCpf(v), "CPF inválido. Confira os números."),
   paymentMethod: z.enum(["pix", "cartao", "boleto"]).default("pix"),
   cardToken: z.string().trim().max(200).optional(),
   cardPaymentMethodId: z.string().trim().max(40).optional(),
