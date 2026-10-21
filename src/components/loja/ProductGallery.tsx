@@ -18,7 +18,7 @@ export default function ProductGallery({ media, productName }: { media: GalleryM
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-line bg-surface">
+      <div className="relative aspect-square w-full overflow-hidden rounded-3xl border border-line bg-paper shadow-sm">
         {active.mediaType === "video" ? (
           <video
             key={active.url}
@@ -51,8 +51,8 @@ export default function ProductGallery({ media, productName }: { media: GalleryM
               onClick={() => setActiveIndex(index)}
               aria-label={`Ver mídia ${index + 1} de ${media.length}`}
               aria-current={index === activeIndex}
-              className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-colors ${
-                index === activeIndex ? "border-navy" : "border-line"
+              className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 transition-all duration-200 ${
+                index === activeIndex ? "border-farol ring-2 ring-farol/30" : "border-line hover:border-navy/40"
               }`}
             >
               {item.mediaType === "video" ? (
