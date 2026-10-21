@@ -52,6 +52,7 @@ export default async function PlataformaPage() {
   return (
     <Container className="py-10">
       <h1 className="text-2xl font-semibold text-ink">Painel da plataforma</h1>
+      <a href="/plataforma/cobrancas" className="mt-2 inline-block text-sm font-semibold text-navy hover:underline">Cobranças das lojas →</a>
       <p className="mt-1 text-sm text-ink-soft">
         {rows.length} loja(s) · {late} com mensalidade atrasada · {paused} pausada(s). Atraso não pausa a loja sozinho: você decide aqui.
       </p>
