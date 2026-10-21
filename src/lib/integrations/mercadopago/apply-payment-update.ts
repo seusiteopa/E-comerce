@@ -41,6 +41,13 @@ export async function applyPaymentStatusUpdate(
 
   if (newStatus === "aprovado") {
     await handleApproved(supabase, order, orderId, options.skipEmail ?? false);
+    // Aviso de pedido pago para os aparelhos da loja. Não bloqueia o pedido se falhar.
+    const { sendStorePush } = await import("@/lib/push/send");
+    await sendStorePush(order.store_id, {
+      title: "Novo pedido pago",
+      body: `${order.customer_name ?? order.profiles?.full_name ?? "Cliente"} · R$ ${Number(order.total).toFixed(2).replace(".", ",")}`,
+      url: "/admin/pedidos",
+    }).catch(() => undefined);
   } else if (newStatus === "recusado" || newStatus === "cancelado") {
     await supabase
       .from("orders")

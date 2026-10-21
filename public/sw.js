@@ -99,3 +99,34 @@ self.addEventListener("fetch", (event) => {
     );
   }
 });
+
+// Notificação de pedido pago (chega mesmo com o app fechado). O som é o do próprio celular.
+self.addEventListener("push", (event) => {
+  let data = { title: "Novo pedido", body: "Abra o painel para ver.", url: "/admin/pedidos" };
+  try {
+    data = { ...data, ...event.data.json() };
+  } catch (_) {}
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: "/icons/icon-192x192.png",
+      badge: "/icons/icon-72x72.png",
+      data: { url: data.url },
+      renotify: true,
+      tag: "novo-pedido",
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || "/admin/pedidos";
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
+      for (const client of list) {
+        if ("focus" in client) return client.navigate(url).then(() => client.focus());
+      }
+      return self.clients.openWindow(url);
+    })
+  );
+});

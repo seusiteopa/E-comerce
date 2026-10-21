@@ -4,6 +4,7 @@ import AdminDataTable, { AdminColumn } from "@/components/admin/AdminDataTable";
 import OrderStatusSelect from "@/components/admin/OrderStatusSelect";
 import PrintOrderButton from "@/components/admin/PrintOrderButton";
 import NovoPedidoAlert from "@/components/admin/NovoPedidoAlert";
+import PushToggle from "@/components/admin/PushToggle";
 import { StatusPill } from "@/components/ui/Badge";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentStore } from "@/lib/store/current";
@@ -67,6 +68,7 @@ export default async function AdminPedidosPage() {
     <>
       <AdminHeader title="Pedidos" />
       <Container className="py-8">
+        <div className="mb-4"><PushToggle /></div>
         <NovoPedidoAlert knownPaidIds={rows.filter((r) => r.status === "pago" && r.channel !== "balcao").map((r) => r.id)} />
         <AdminDataTable columns={columns} rows={rows} emptyLabel="Nenhum pedido ainda." />
       </Container>
