@@ -16,6 +16,7 @@ import PwaManager from "@/components/PwaManager";
 import { getSiteSettings } from "@/lib/data/site-settings";
 import { getActiveBanners } from "@/lib/data/banners";
 import { getCurrentStore, getRequestOrigin, type CurrentStore } from "@/lib/store/current";
+import { ogImageUrl, OG_SIZE } from "@/lib/media/og-image";
 
 // viewport-fit=cover libera a área por baixo do notch/câmera-furo para o
 // CSS usar (env(safe-area-inset-*)), necessário pro app rodar em modo
@@ -47,14 +48,14 @@ export async function generateMetadata(): Promise<Metadata> {
   // Prioridade: imagem OG da loja > 1ª foto do banner > logo da loja > imagem gerada com o nome da loja.
   // A loja da plataforma mantém a imagem padrão da marca.
   const ogImage = store.og_image_url
-    ? { url: store.og_image_url, alt: storeName }
+    ? { url: ogImageUrl(store.og_image_url), ...OG_SIZE, alt: storeName }
     : firstBannerPhoto
-      ? { url: firstBannerPhoto.image_url, alt: storeName }
+      ? { url: ogImageUrl(firstBannerPhoto.image_url), ...OG_SIZE, alt: storeName }
       : store.logo_url
-        ? { url: store.logo_url, alt: storeName }
+        ? { url: store.logo_url, ...OG_SIZE, alt: storeName }
         : store.is_platform_owned
           ? { url: "/social/og-image.png", width: 1200, height: 630, alt: storeName }
-          : { url: `${base}/opengraph-image`, width: 1200, height: 630, alt: storeName };
+          : { url: `${base}/og-loja`, ...OG_SIZE, alt: storeName };
 
   return {
     metadataBase: new URL(origin),

@@ -1,11 +1,12 @@
 import { ImageResponse } from "next/og";
 import { getCurrentStore } from "@/lib/store/current";
 
-export const size = { width: 1200, height: 630 };
-export const contentType = "image/png";
-
-/** Imagem de compartilhamento gerada para a loja atual (usada quando a loja não tem banner nem logo). */
-export default async function OpengraphImage() {
+/**
+ * Imagem de compartilhamento gerada para a loja atual (1200 × 630), usada quando a loja
+ * não tem banner, OG ou logo. Rota comum (não é a imagem automática do Next), para não
+ * sobrescrever a imagem da loja nas páginas.
+ */
+export async function GET() {
   const store = await getCurrentStore();
   const name = store.name || "Loja";
   return new ImageResponse(
@@ -15,6 +16,6 @@ export default async function OpengraphImage() {
         <div style={{ fontSize: 88, fontWeight: 700, marginTop: 16, lineHeight: 1.1 }}>{name}</div>
       </div>
     ),
-    size
+    { width: 1200, height: 630 }
   );
 }

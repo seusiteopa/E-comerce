@@ -1,3 +1,4 @@
+import { ogImageUrl, OG_SIZE } from "@/lib/media/og-image";
 import { notFound } from "next/navigation";
 import StoreLink from "@/components/store/StoreLink";
 import { Metadata } from "next";
@@ -48,13 +49,13 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     openGraph: {
       title: productRow.name,
       description: productRow.short_description ?? undefined,
-      images: firstPhoto ? [{ url: firstPhoto.url, alt: productRow.name }] : [{ url: `${base}/opengraph-image`, width: 1200, height: 630, alt: productRow.name }],
+      images: firstPhoto ? [{ url: ogImageUrl(firstPhoto.url), ...OG_SIZE, alt: productRow.name }] : [{ url: `${base}/og-loja`, ...OG_SIZE, alt: productRow.name }],
     },
     twitter: {
       card: "summary_large_image",
       title: productRow.name,
       description: productRow.short_description ?? undefined,
-      images: firstPhoto ? [firstPhoto.url] : [`${base}/opengraph-image`],
+      images: firstPhoto ? [ogImageUrl(firstPhoto.url)] : [`${base}/og-loja`],
     },
   };
 }
