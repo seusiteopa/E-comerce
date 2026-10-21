@@ -110,6 +110,8 @@ export async function createStoreAction(input: unknown): Promise<ActionResult<Cr
       plan: d.plan,
       commission_bps: 0,
       monthly_fee_cents: d.plan === "mensalidade" && fee ? Math.round(fee * 100) : null,
+      // Primeiro mês grátis, sem cartão: a loja já funciona; a cobrança do 2º mês chega por Pix.
+      subscription_status: d.plan === "mensalidade" ? "em_teste" : undefined,
       payer_email: user.email,
     }),
     service.from("store_payment_connections").insert({ store_id: store.id, status: "desconectado" }),

@@ -2,7 +2,6 @@ import CopyLinkButton from "@/components/conta/CopyLinkButton";
 import AdminHeader from "@/components/admin/AdminHeader";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
-import { startSubscriptionAction } from "@/actions/admin/assinatura";
 import DisconnectMercadoPagoButton from "@/components/admin/DisconnectMercadoPagoButton";
 import { requireStoreAdmin } from "@/lib/auth";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
@@ -36,8 +35,6 @@ export default async function AdminPagamentosPage({ searchParams }: { searchPara
   ]);
 
   const connected = conn?.status === "conectado";
-  const needsSubscription =
-    billing?.plan === "mensalidade" && ["sem_assinatura", "pendente", "cancelada", "pausada"].includes(billing.subscription_status);
 
   return (
     <>
@@ -109,20 +106,6 @@ export default async function AdminPagamentosPage({ searchParams }: { searchPara
                 {billing.billing_status === "atrasada" && (
                   <p className="text-status-danger">Não conseguimos cobrar a última mensalidade. Confira o meio de pagamento autorizado no Mercado Pago.</p>
                 )}
-              </div>
-            )}
-            {needsSubscription && (
-              <div className="mt-5 flex flex-col gap-3 rounded-xl border border-line bg-paper p-4">
-                <p className="text-sm font-semibold text-ink">Hoje você paga R$ 0,00.</p>
-                <p className="text-sm text-ink-soft">
-                  O primeiro mês é grátis. A partir do próximo mês, a mensalidade de R$ {((billing?.monthly_fee_cents ?? 0) / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })} é descontada automaticamente, e a loja continua ativa e vendendo.
-                </p>
-                <p className="text-sm text-ink-soft">
-                  Ao tocar no botão, você vai ao Mercado Pago para autorizar com Pix. Nenhum valor é cobrado nessa autorização.
-                </p>
-                <form action={startSubscriptionAction}>
-                  <Button type="submit">Autorizar com Pix no Mercado Pago</Button>
-                </form>
               </div>
             )}
           </section>
