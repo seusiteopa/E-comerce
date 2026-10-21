@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, ReactNode, useRef} from "react";
 
 const CART_STORAGE_KEY = "vecorion-carrinho-v1";
 import { CartItem } from "@/types";
@@ -128,6 +128,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
     () => items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0),
     [items]
   );
+  const lastSubtotal = useRef<number | null>(null);
+  useEffect(() => {
+    if (!restored) return;
+    if (lastSubtotal.current === null) {
+      lastSubtotal.current = subtotal;
+      return;
+    }
+    if (lastSubtotal.current !== subtotal) {
+      lastSubtotal.current = subtotal;
+      if (coupon) setCoupon(null); // o desconto foi calculado para o total antigo
+    }
+  }, [subtotal, restored, coupon]);
   const itemCount = useMemo(() => items.reduce((sum, i) => sum + i.quantity, 0), [items]);
 
   return (

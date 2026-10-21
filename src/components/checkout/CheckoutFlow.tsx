@@ -71,7 +71,7 @@ export default function CheckoutFlow() {
 
       <div className="lg:sticky lg:top-24 lg:self-start">
         <div className="flex flex-col gap-4">
-          <CouponField />
+          {step !== "pagamento" && <CouponField />}
           <CartSummary subtotal={subtotal} shipping={hasPhysicalItem ? shippingPrice : 0} discount={coupon?.discountAmount ?? 0} />
         </div>
       </div>

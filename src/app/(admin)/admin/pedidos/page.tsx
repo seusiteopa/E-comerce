@@ -20,6 +20,7 @@ interface OrderRowView {
   customer_name: string | null;
   payments: { status: string; method: string | null }[];
   profiles: { full_name: string | null; phone: string | null } | null;
+  order_items: { product_name_snapshot: string; quantity: number; unit_price_snapshot: number; products: { short_description: string | null } | null }[];
 }
 
 function paymentMethodLabel(method: string | null | undefined): string {
@@ -33,7 +34,7 @@ export default async function AdminPedidosPage() {
   const { id: storeId } = await getCurrentStore();
   const { data } = await supabase
     .from("orders")
-    .select("id, created_at, status, total, payer_email, channel, customer_name, payments(status, method), profiles(full_name, phone)")
+    .select("id, created_at, status, total, payer_email, channel, customer_name, payments(status, method), profiles(full_name, phone), order_items(product_name_snapshot, quantity, unit_price_snapshot, products(short_description))")
     .eq("store_id", storeId)
     .order("created_at", { ascending: false });
 
@@ -42,11 +43,22 @@ export default async function AdminPedidosPage() {
   const columns: AdminColumn<OrderRowView>[] = [
     { header: "Pedido", primary: true, cell: (r) => `#${r.id.slice(0, 8)}` },
     { header: "Cliente", primary: true, cell: (r) => (r.channel === "balcao" ? `Balcão${r.customer_name ? ` · ${r.customer_name}` : ""}` : r.profiles?.full_name || r.customer_name || "—") },
-    { header: "E-mail", cell: (r) => r.payer_email ?? "—" },
-    { header: "Telefone", cell: (r) => r.profiles?.phone || "—" },
-    { header: "Data e hora", cell: (r) => new Date(r.created_at).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", dateStyle: "short", timeStyle: "short" }) },
+    { header: "Telefone", primary: true, cell: (r) => r.profiles?.phone || "—" },
+    { header: "E-mail", primary: true, cell: (r) => r.payer_email ?? "—" },
+    { header: "Data e hora", primary: true, cell: (r) => new Date(r.created_at).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", dateStyle: "short", timeStyle: "short" }) },
+    { header: "Produtos", primary: true, cell: (r) => (
+      <div className="flex flex-col gap-2">
+        {(r.order_items ?? []).map((it, idx) => (
+          <div key={idx}>
+            <p className="font-medium">{it.quantity}× {it.product_name_snapshot} · {formatCurrency(Number(it.unit_price_snapshot) * it.quantity)}</p>
+            {it.products?.short_description && <p className="text-xs text-ink-soft">{it.products.short_description}</p>}
+          </div>
+        ))}
+        {(r.order_items ?? []).length === 0 && <span>—</span>}
+      </div>
+    ) },
     { header: "Total", primary: true, cell: (r) => formatCurrency(Number(r.total)) },
-    { header: "Forma de pagamento", cell: (r) => `${paymentMethodLabel(r.payments?.[0]?.method)} · ${r.payments?.[0]?.status ?? "pendente"}` },
+    { header: "Forma de pagamento", primary: true, cell: (r) => `${paymentMethodLabel(r.payments?.[0]?.method)} · ${r.payments?.[0]?.status ?? "pendente"}` },
     { header: "Status", primary: true, cell: (r) => <OrderStatusSelect orderId={r.id} currentStatus={r.status} /> },
     { header: "Cupom", cell: (r) => <PrintOrderButton orderId={r.id} compact /> },
   ];

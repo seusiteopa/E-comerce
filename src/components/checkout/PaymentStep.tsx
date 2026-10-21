@@ -129,6 +129,7 @@ export default function PaymentStep({ onBack, addressId, shippingMethod }: Payme
         qrCodeBase64: result.data.qrCodeBase64,
         qrCode: result.data.qrCode,
       });
+      clearCart(); // pedido criado: o carrinho não fica mais guardado
       setSubmitting(false);
       startPolling(result.data.paymentId, result.data.orderId);
     } else {
