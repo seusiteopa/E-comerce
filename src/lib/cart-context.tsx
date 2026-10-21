@@ -40,6 +40,7 @@ const CartContext = createContext<CartContextValue | null>(null);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [coupon, setCoupon] = useState<AppliedCoupon | null>(null);
+  const [couponSubtotal, setCouponSubtotal] = useState<number | null>(null);
   const [lastAddedItem, setLastAddedItem] = useState<{ name: string; at: number } | null>(null);
   const [restored, setRestored] = useState(false);
 
@@ -51,7 +52,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
         if (raw) {
           const saved = JSON.parse(raw) as { items?: CartItem[]; coupon?: AppliedCoupon | null };
           if (Array.isArray(saved.items)) setItems(saved.items);
-          if (saved.coupon) setCoupon(saved.coupon);
+          if (saved.coupon) {
+            setCoupon(saved.coupon);
+            setCouponSubtotal(((saved.items ?? []) as CartItem[]).reduce((sum, i) => sum + i.unitPrice * i.quantity, 0));
+          }
         }
       } catch {
         // Dados corrompidos: começa com carrinho vazio.
@@ -117,6 +121,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
 
   function applyCoupon(newCoupon: AppliedCoupon) {
+    setCouponSubtotal(subtotal);
     setCoupon(newCoupon);
   }
 
@@ -128,18 +133,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
     () => items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0),
     [items]
   );
-  const lastSubtotal = useRef<number | null>(null);
-  useEffect(() => {
-    if (!restored) return;
-    if (lastSubtotal.current === null) {
-      lastSubtotal.current = subtotal;
-      return;
-    }
-    if (lastSubtotal.current !== subtotal) {
-      lastSubtotal.current = subtotal;
-      if (coupon) setCoupon(null); // o desconto foi calculado para o total antigo
-    }
-  }, [subtotal, restored, coupon]);
   const itemCount = useMemo(() => items.reduce((sum, i) => sum + i.quantity, 0), [items]);
 
   return (
@@ -152,7 +145,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         clearCart,
         subtotal,
         itemCount,
-        coupon,
+        coupon: coupon && couponSubtotal === subtotal ? coupon : null,
         applyCoupon,
         removeCoupon,
         lastAddedItem,
