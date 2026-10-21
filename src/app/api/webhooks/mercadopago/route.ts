@@ -129,7 +129,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "internal error" }, { status: 500 });
     }
 
-    await applyPaymentStatusUpdate(payment.externalReference, mappedStatus);
+    if (payment.externalReference.startsWith("fatura:")) {
+      const { applyInvoicePayment } = await import("@/lib/billing/invoice-service");
+      await applyInvoicePayment(payment.externalReference, mappedStatus);
+    } else {
+      await applyPaymentStatusUpdate(payment.externalReference, mappedStatus);
+    }
 
     logger.info("Webhook processado com sucesso", {
       integration: "mercadopago",

@@ -11,6 +11,7 @@ const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const SENDER = { name: "Vecorion", email: "loja@vecorion.com.br" }; // TODO: confirmar e-mail remetente verificado no Brevo
 
 export type TransactionalEmailEvent =
+  | "lembrete_mensalidade"
   | "falha_pagamento"
   | "pedido_criado"
   | "pagamento_aprovado"
@@ -26,6 +27,7 @@ export interface SendTransactionalEmailInput {
 }
 
 const subjectByEvent: Record<TransactionalEmailEvent, string> = {
+  lembrete_mensalidade: "Sua mensalidade Vecorion vence em breve",
   falha_pagamento: "Pagamento não concluído em um pedido — Vecorion",
   pedido_criado: "Recebemos seu pedido — Vecorion",
   pagamento_aprovado: "Pagamento confirmado — Vecorion",
@@ -62,6 +64,8 @@ function buildEmailHtml(event: TransactionalEmailEvent, data: Record<string, str
   const safe = Object.fromEntries(Object.entries(data).map(([key, value]) => [key, escapeHtml(value)]));
 
   switch (event) {
+    case "lembrete_mensalidade":
+      return `<p>Olá!</p><p>Sua mensalidade de R$ ${safe.amount} vence em ${safe.dueDate}.</p><p>Para manter sua loja ativa, pague pelo painel, na tela de Pagamentos e plano. Você tem até 3 dias depois do vencimento.</p>`;
     case "falha_pagamento":
       return `<p>Olá!</p><p>Um pagamento do pedido <strong>#${safe.orderId}</strong> da loja <strong>${safe.storeName}</strong> não foi concluído. Motivo: ${safe.reason}.</p><p>Se o cliente precisar de ajuda, peça para ele tentar outra forma de pagamento.</p>`;
     case "pedido_criado":
