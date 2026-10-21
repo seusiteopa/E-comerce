@@ -110,6 +110,14 @@ function BriefRow({ brief }: { brief: { id: string; title: string; format: strin
         </button>
         <button
           type="button"
+          onClick={() => setStatus("Geração de imagens com IA: em desenvolvimento. Logo estará disponível.")}
+          className="inline-flex items-center gap-1 text-xs font-semibold text-ink-soft hover:underline"
+        >
+          Gerar imagem com IA
+          <span className="rounded-full bg-paper px-2 py-0.5 text-[10px] uppercase tracking-wide text-ink-soft">Em desenvolvimento</span>
+        </button>
+        <button
+          type="button"
           disabled={isPending}
           onClick={() => startTransition(async () => {
             const r = await deleteBriefAction(brief.id);
