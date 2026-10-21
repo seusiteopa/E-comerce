@@ -1,10 +1,10 @@
 import AdminHeader from "@/components/admin/AdminHeader";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
+import { startSubscriptionAction } from "@/actions/admin/assinatura";
 import DisconnectMercadoPagoButton from "@/components/admin/DisconnectMercadoPagoButton";
 import { requireStoreAdmin } from "@/lib/auth";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
-import CardAuthorizationForm from "@/components/billing/CardAuthorizationForm";
 import { formatDate } from "@/lib/format";
 
 const subscriptionLabel: Record<string, string> = {
@@ -76,7 +76,7 @@ export default async function AdminPagamentosPage({ searchParams }: { searchPara
               </p>
             ) : (
               <div className="mt-2 flex flex-col gap-1 text-sm text-ink-soft">
-                <p>Mensalidade de R$ {((billing.monthly_fee_cents ?? 0) / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}, cobrada automaticamente todo mês. O primeiro mês é grátis.</p>
+                <p>Mensalidade de R$ {((billing.monthly_fee_cents ?? 0) / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })} por mês, cobrada automaticamente a partir do segundo mês. O primeiro mês é grátis.</p>
                 <p>Situação: <strong className="text-ink">{subscriptionLabel[billing.subscription_status] ?? billing.subscription_status}</strong></p>
                 {billing.next_due_at && <p>Próxima cobrança: {formatDate(billing.next_due_at)}</p>}
                 {billing.billing_status === "atrasada" && (
@@ -85,7 +85,18 @@ export default async function AdminPagamentosPage({ searchParams }: { searchPara
               </div>
             )}
             {needsSubscription && (
-              <CardAuthorizationForm monthlyFeeLabel={`R$ ${((billing?.monthly_fee_cents ?? 0) / 100).toFixed(2).replace(".", ",")}`} />
+              <div className="mt-5 flex flex-col gap-3 rounded-xl border border-line bg-paper p-4">
+                <p className="text-sm font-semibold text-ink">Hoje você paga R$ 0,00.</p>
+                <p className="text-sm text-ink-soft">
+                  O primeiro mês é grátis. A partir do próximo mês, a mensalidade de R$ {((billing?.monthly_fee_cents ?? 0) / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })} é descontada automaticamente, e a loja continua ativa e vendendo.
+                </p>
+                <p className="text-sm text-ink-soft">
+                  Ao tocar no botão, você vai ao Mercado Pago para autorizar com Pix. Nenhum valor é cobrado nessa autorização.
+                </p>
+                <form action={startSubscriptionAction}>
+                  <Button type="submit">Autorizar com Pix no Mercado Pago</Button>
+                </form>
+              </div>
             )}
           </section>
         )}
