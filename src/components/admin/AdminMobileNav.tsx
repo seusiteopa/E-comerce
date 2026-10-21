@@ -44,7 +44,7 @@ export default function AdminMobileNav() {
   return (
     <div className="border-b border-line bg-surface lg:hidden">
       <div className="flex h-14 items-center justify-between px-4">
-        <div className="flex items-center gap-2">
+        <StoreLink href="/admin" onClick={() => setOpen(false)} className="flex items-center gap-2">
           <Image
             src="/brand/vecorion-icone-navy-transparente.png"
             alt="Vecorion"
@@ -53,7 +53,7 @@ export default function AdminMobileNav() {
             className="h-4 w-auto"
           />
           <span className="text-sm font-semibold text-ink">Painel Admin</span>
-        </div>
+        </StoreLink>
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}

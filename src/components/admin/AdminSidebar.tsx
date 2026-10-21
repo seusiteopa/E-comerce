@@ -34,10 +34,10 @@ const navItems = [
 export default function AdminSidebar() {
   return (
     <aside className="hidden w-64 shrink-0 flex-col border-r border-line bg-surface lg:flex lg:h-screen lg:sticky lg:top-0">
-      <div className="flex h-16 items-center gap-3 border-b border-line px-6">
+      <StoreLink href="/admin" className="flex h-16 items-center gap-3 border-b border-line px-6 hover:bg-paper">
         <Image src="/brand/vecorion-icone-navy-transparente.png" alt="Vecorion" width={36} height={19} className="h-5 w-auto" />
         <span className="text-sm font-semibold text-ink">Painel Admin</span>
-      </div>
+      </StoreLink>
       <nav aria-label="Navegação do painel administrativo" className="flex flex-col gap-1 p-4">
         {navItems.map((item) => {
           const Icon = item.icon;
