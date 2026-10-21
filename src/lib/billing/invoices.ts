@@ -23,3 +23,10 @@ export function isBlockedByOverdue(
 ): boolean {
   return invoices.some((inv) => inv.status === "aberta" && daysBetween(inv.due_date, today) > GRACE_DAYS);
 }
+
+/** Valor da mensalidade com desconto de indicação (em centavos), sem passar de 0 nem do valor cheio. */
+export function discountedAmountCents(feeCents: number, discountPct: number): number {
+  const pct = Math.min(Math.max(Math.round(discountPct), 0), 100);
+  const value = Math.round((feeCents * (100 - pct)) / 100);
+  return Math.min(Math.max(value, 0), feeCents);
+}

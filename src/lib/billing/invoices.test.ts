@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addMonths, daysBetween, isBlockedByOverdue } from "./invoices";
+import { addMonths, daysBetween, discountedAmountCents, isBlockedByOverdue } from "./invoices";
 
 describe("addMonths", () => {
   it("soma meses normalmente", () => {
@@ -35,5 +35,18 @@ describe("isBlockedByOverdue", () => {
   });
   it("sem cobranças abertas, não bloqueia", () => {
     expect(isBlockedByOverdue([], "2026-12-01")).toBe(false);
+  });
+});
+
+describe("discountedAmountCents", () => {
+  it("aplica o desconto de indicação sobre o valor da mensalidade", () => {
+    expect(discountedAmountCents(9000, 20)).toBe(7200);
+  });
+  it("sem desconto, cobra o valor cheio", () => {
+    expect(discountedAmountCents(9000, 0)).toBe(9000);
+  });
+  it("nunca passa de 100% nem fica negativo", () => {
+    expect(discountedAmountCents(9000, 150)).toBe(0);
+    expect(discountedAmountCents(9000, -10)).toBe(9000);
   });
 });

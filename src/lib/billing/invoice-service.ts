@@ -3,7 +3,7 @@ import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import { createPixPayment } from "@/lib/integrations/mercadopago";
 import { sendTransactionalEmail } from "@/lib/integrations/email";
 import { logger } from "@/lib/logger";
-import { addMonths, daysBetween } from "@/lib/billing/invoices";
+import { addMonths, daysBetween, discountedAmountCents } from "@/lib/billing/invoices";
 
 const REFERENCE_PREFIX = "fatura:";
 const CREATE_DAYS_BEFORE = 5;
@@ -16,7 +16,7 @@ function todayIso(): string {
 /** Cria a cobrança do próximo mês quando faltam poucos dias e ainda não existe uma aberta. */
 export async function ensureUpcomingInvoice(storeId: string): Promise<string | null> {
   const service = createSupabaseServiceClient();
-  const { data: billing } = await service.from("store_billing").select("monthly_fee_cents, subscription_status").eq("store_id", storeId).maybeSingle();
+  const { data: billing } = await service.from("store_billing").select("monthly_fee_cents, subscription_status, referral_discount_pct").eq("store_id", storeId).maybeSingle();
   if (!billing || billing.subscription_status === "pendente") return null;
 
   const { data: invoices } = await service.from("billing_invoices").select("id, status, due_date, period_start").eq("store_id", storeId).order("due_date", { ascending: false });
@@ -30,12 +30,22 @@ export async function ensureUpcomingInvoice(storeId: string): Promise<string | n
   const periodStart = last ? addMonths(last.period_start, 1) : todayIso();
   const { data: created, error } = await service
     .from("billing_invoices")
-    .insert({ store_id: storeId, period_start: periodStart, due_date: dueDate, amount_cents: billing.monthly_fee_cents ?? 9000 })
+    .insert({
+      store_id: storeId,
+      period_start: periodStart,
+      due_date: dueDate,
+      // Desconto de indicação entra no valor desta cobrança, uma única vez.
+      amount_cents: discountedAmountCents(billing.monthly_fee_cents ?? 9000, billing.referral_discount_pct ?? 0),
+    })
     .select("id")
     .single();
   if (error) {
     logger.warn("Não foi possível criar a cobrança do mês", { storeId, error: error.message });
     return null;
+  }
+  // Desconto consumido: zera para não aplicar de novo na próxima cobrança.
+  if ((billing.referral_discount_pct ?? 0) > 0) {
+    await service.from("store_billing").update({ referral_discount_pct: 0 }).eq("store_id", storeId);
   }
   return created.id;
 }
