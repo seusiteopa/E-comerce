@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { isValidCpf } from "@/lib/validation/cpf";
 import { registerReferral } from "@/lib/store/referral";
 import { requireAuthenticatedProfile, UnauthorizedError } from "@/lib/auth";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -17,6 +18,7 @@ const RESERVED_SLUGS = new Set([
 ]);
 
 const createStoreSchema = z.object({
+  cpf: z.string().optional().default(""),
   referralCode: z.string().trim().toLowerCase().max(20).optional().default(""),
   name: z.string().trim().min(2, "Informe o nome da loja.").max(80),
   slug: z
@@ -52,6 +54,17 @@ export async function createStoreAction(input: unknown): Promise<ActionResult<Cr
   } catch (error) {
     if (error instanceof UnauthorizedError) return actionError("Entre na sua conta para criar a loja.");
     throw error;
+  }
+  // Quem cria loja (conta de lojista) precisa de CPF válido, salvo uma vez na conta.
+  const supabaseForCpf = await createSupabaseServerClient();
+  const { data: cpfRow } = await supabaseForCpf.from("profiles").select("document").eq("id", profile.id).maybeSingle();
+  if (!cpfRow?.document) {
+    if (!isValidCpf(d.cpf)) return actionError("Informe um CPF válido para criar a loja.");
+    const { error: cpfError } = await supabaseForCpf
+      .from("profiles")
+      .update({ document: d.cpf.replace(/\D/g, "") })
+      .eq("id", profile.id);
+    if (cpfError) return actionError("Não foi possível salvar o CPF agora. Tente de novo.");
   }
 
   const supabase = await createSupabaseServerClient();

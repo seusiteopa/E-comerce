@@ -13,6 +13,8 @@ export default async function CriarLojaPage({ searchParams }: { searchParams: Pr
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   const fee = monthlyFeeFromEnv();
+  const { data: profileRow } = user ? await supabase.from("profiles").select("document").eq("id", user.id).maybeSingle() : { data: null };
+  const needsCpf = Boolean(user) && !profileRow?.document;
 
   return (
     <section className="py-16 sm:py-20">
@@ -21,7 +23,7 @@ export default async function CriarLojaPage({ searchParams }: { searchParams: Pr
         <p className="mt-2 text-sm text-ink-soft">Monte sua loja online em minutos: catálogo, pedidos, Pix, balcão e impressão de cupom.</p>
 
         {user ? (
-          <CreateStoreForm referralCode={referralCode}             rootDomain={process.env.PLATFORM_ROOT_DOMAIN ?? null}
+          <CreateStoreForm needsCpf={needsCpf} referralCode={referralCode}             rootDomain={process.env.PLATFORM_ROOT_DOMAIN ?? null}
             monthlyFee={fee ? fee.toLocaleString("pt-BR", { minimumFractionDigits: 2 }) : null}
           />
         ) : (

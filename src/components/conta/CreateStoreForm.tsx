@@ -16,7 +16,8 @@ function toSlug(value: string) {
     .slice(0, 40);
 }
 
-export default function CreateStoreForm({ rootDomain, monthlyFee, referralCode }: { rootDomain: string | null; monthlyFee: string | null; referralCode?: string }) {
+export default function CreateStoreForm({ rootDomain, monthlyFee, referralCode, needsCpf = false }: { rootDomain: string | null; monthlyFee: string | null; referralCode?: string; needsCpf?: boolean }) {
+  const [cpf, setCpf] = useState("");
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [slugTouched, setSlugTouched] = useState(false);
@@ -30,7 +31,7 @@ export default function CreateStoreForm({ rootDomain, monthlyFee, referralCode }
   function handleSubmit() {
     setError(null);
     startTransition(async () => {
-      const result = await createStoreAction({ name, slug, storeType, whatsapp, plan, referralCode: referralCode ?? "" });
+      const result = await createStoreAction({ name, slug, storeType, whatsapp, plan, referralCode: referralCode ?? "", cpf });
       if (!result.success) {
         setError(result.error);
         return;
@@ -58,6 +59,13 @@ export default function CreateStoreForm({ rootDomain, monthlyFee, referralCode }
 
   return (
     <div className="mt-8 flex flex-col gap-4">
+      {needsCpf && (
+        <div className="flex flex-col gap-2">
+          <label htmlFor="cpf" className="text-sm font-medium text-ink">CPF do titular da conta</label>
+          <input id="cpf" value={cpf} onChange={(e) => setCpf(e.target.value)} inputMode="numeric" placeholder="000.000.000-00" className="rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy" required />
+          <p className="text-xs text-ink-soft">Pedimos o CPF uma vez, para liberar a criação da loja. Ele fica salvo na sua conta.</p>
+        </div>
+      )}
       <div className="rounded-xl border border-line bg-paper p-4 text-sm text-ink">
         <p className="font-semibold">Antes de começar: sua conta no Mercado Pago</p>
         <p className="mt-2 text-ink-soft">
