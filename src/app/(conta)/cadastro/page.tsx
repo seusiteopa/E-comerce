@@ -9,6 +9,7 @@ import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
 import { signUpAction } from "@/actions/auth";
 
+
 export default function CadastroPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);

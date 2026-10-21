@@ -10,6 +10,7 @@ import Button from "@/components/ui/Button";
 import { loginAction, resendConfirmationAction } from "@/actions/auth";
 import { EMAIL_NOT_CONFIRMED_MSG } from "@/lib/auth-messages";
 
+
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();

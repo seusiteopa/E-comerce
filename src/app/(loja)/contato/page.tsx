@@ -5,6 +5,11 @@ import WhatsAppButton from "@/components/ui/WhatsAppButton";
 import { contact } from "@/data/site";
 import { getSiteSettings } from "@/lib/data/site-settings";
 
+export const metadata = {
+  title: "Contato",
+  description: "Fale com a loja pelo WhatsApp ou e-mail.",
+};
+
 export default async function ContatoPage() {
   const custom = await customStorePage("contato");
   if (custom) return custom;
