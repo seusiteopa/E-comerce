@@ -12,7 +12,7 @@ import {
   Store,
   CreditCard,
   Receipt,
-  LogOut, Megaphone } from "lucide-react";
+  LogOut, Megaphone, History } from "lucide-react";
 import { logoutAction } from "@/actions/auth";
 
 const navItems = [
@@ -21,6 +21,7 @@ const navItems = [
   { href: "/admin/categorias", label: "Categorias", icon: FolderTree },
   { href: "/admin/balcao", label: "Pedido de balcão", icon: Receipt },
   { href: "/admin/pedidos", label: "Pedidos", icon: ShoppingBag },
+  { href: "/admin/historico", label: "Histórico", icon: History },
   { href: "/admin/clientes", label: "Clientes", icon: Users },
   { href: "/admin/cupons", label: "Cupons", icon: Ticket },
   { href: "/admin/banners", label: "Banners", icon: ImageIcon },

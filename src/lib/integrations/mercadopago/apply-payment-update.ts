@@ -37,17 +37,34 @@ export async function applyPaymentStatusUpdate(
     throw new Error(`Pedido ${orderId} não encontrado.`);
   }
 
+  // Só conta uma vez: se o pagamento já estava aprovado, avisos repetidos não somam de novo.
+  const { data: currentPayment } = await supabase.from("payments").select("status").eq("order_id", orderId).maybeSingle();
+  const wasApproved = currentPayment?.status === "aprovado";
+
   await supabase.from("payments").update({ status: newStatus, updated_at: new Date().toISOString() }).eq("order_id", orderId);
 
   if (newStatus === "aprovado") {
     await handleApproved(supabase, order, orderId, options.skipEmail ?? false);
+    if (!wasApproved) {
+      // Histórico da loja: soma a venda no dia (horário de Brasília). Não bloqueia a venda.
+      try {
+        const day = new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
+        await supabase.rpc("increment_store_metric", {
+          p_store_id: order.store_id,
+          p_day: day,
+          p_revenue_cents: Math.round(Number(order.total) * 100),
+        });
+      } catch {
+        // histórico é complementar; a venda já está confirmada
+      }
+    }
     // Fidelidade: marco de compras pagas gera cupom de uso único (não bloqueia a venda).
     try {
       const { createSupabaseServiceClient } = await import("@/lib/supabase/service");
       const { grantLoyaltyReward } = await import("@/lib/loyalty/service");
       const service = createSupabaseServiceClient();
       const { data: storeRow } = await service.from("stores").select("name").eq("id", order.store_id).maybeSingle();
-      if (order.profile_id) {
+      if (order.profile_id && !wasApproved) {
         await grantLoyaltyReward({
           storeId: order.store_id,
           profileId: order.profile_id,
