@@ -3,7 +3,7 @@ import Container from "@/components/ui/Container";
 import DeliveryNotice from "@/components/loja/DeliveryNotice";
 import { getUnifiedProducts, type UnifiedProduct } from "@/lib/vitrine/unified";
 import { getEligibleSponsoredStoreIds } from "@/lib/sponsorship/service";
-import { interleaveSponsored, pickTopSponsored } from "@/lib/vitrine/sponsored";
+import { interleaveSponsored, pickTopSponsored, visitRotation } from "@/lib/vitrine/sponsored";
 import { formatCurrency } from "@/lib/format";
 
 export const metadata: Metadata = {
@@ -18,7 +18,7 @@ export default async function VitrineUnificadaPage({ searchParams }: { searchPar
   const sponsoredCards: UnifiedProduct[] = eligibleStores
     .map((id) => products.find((p) => p.storeId === id))
     .filter((p): p is UnifiedProduct => Boolean(p));
-  const rotation = Math.floor(Math.random() * 1000);
+  const rotation = visitRotation();
   const top = pickTopSponsored(sponsoredCards.map((c) => ({ ...c, storeId: c.storeId })), rotation);
   const mixed = interleaveSponsored(products, sponsoredCards, rotation);
 

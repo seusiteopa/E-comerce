@@ -42,3 +42,8 @@ export function interleaveSponsored<P extends { storeId: string }, S extends { s
   });
   return out;
 }
+
+/** Ponto de partida da rotação a cada visita (chamado no servidor, fora da renderização). */
+export function visitRotation(): number {
+  return Math.floor(Math.random() * 1000);
+}
