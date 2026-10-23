@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import { isStoreAuthorized } from "@/lib/billing/authorization";
+import { isBlockedByOverdue } from "@/lib/billing/invoices";
 import "server-only";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ProfileRow } from "@/types/database";
@@ -83,7 +84,10 @@ export async function requireAdminProfile(options?: { allowUnpaid?: boolean }): 
       .eq("store_id", store.id)
       .maybeSingle();
     const authorized = isStoreAuthorized(billing);
-    if (!authorized) {
+    // Cobrança mensal vencida há mais de 3 dias também bloqueia o painel (a tela de pagamentos segue liberada).
+    const { data: invoices } = await service.from("billing_invoices").select("status, due_date").eq("store_id", store.id);
+    const overdue = isBlockedByOverdue(invoices ?? [], new Date().toISOString().slice(0, 10));
+    if (!authorized || overdue) {
       const { storeBasePath } = await import("@/lib/store/base-path");
       redirect(`${await storeBasePath()}/admin/pagamentos`);
     }

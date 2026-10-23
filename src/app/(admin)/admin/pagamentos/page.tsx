@@ -1,7 +1,7 @@
+import CopyLinkButton from "@/components/conta/CopyLinkButton";
 import AdminHeader from "@/components/admin/AdminHeader";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
-import { startSubscriptionAction } from "@/actions/admin/assinatura";
 import DisconnectMercadoPagoButton from "@/components/admin/DisconnectMercadoPagoButton";
 import { requireStoreAdmin } from "@/lib/auth";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
@@ -21,14 +21,20 @@ export default async function AdminPagamentosPage({ searchParams }: { searchPara
   const params = await searchParams;
   const supabase = createSupabaseServiceClient();
 
+  const { data: openInvoice } = await supabase
+    .from("billing_invoices")
+    .select("amount_cents, due_date, pix_qr_code")
+    .eq("store_id", store.id)
+    .eq("status", "aberta")
+    .order("due_date", { ascending: true })
+    .limit(1)
+    .maybeSingle();
   const [{ data: conn }, { data: billing }] = await Promise.all([
     supabase.from("store_payment_connections").select("status, provider_user_id, expires_at").eq("store_id", store.id).maybeSingle(),
     supabase.from("store_billing").select("*").eq("store_id", store.id).maybeSingle(),
   ]);
 
   const connected = conn?.status === "conectado";
-  const needsSubscription =
-    billing?.plan === "mensalidade" && ["sem_assinatura", "pendente", "cancelada", "pausada"].includes(billing.subscription_status);
 
   return (
     <>
@@ -67,6 +73,24 @@ export default async function AdminPagamentosPage({ searchParams }: { searchPara
           )}
         </section>
 
+        {openInvoice && (
+          <div className="rounded-2xl border border-line bg-surface p-5">
+            <h2 className="text-base font-semibold text-ink">Mensalidade do mês</h2>
+            <p className="mt-2 text-sm text-ink-soft">
+              Valor: R$ {(openInvoice.amount_cents / 100).toFixed(2).replace(".", ",")} · vence em{" "}
+              {new Date(`${openInvoice.due_date}T12:00:00Z`).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })}
+            </p>
+            {openInvoice.pix_qr_code ? (
+              <div className="mt-3 flex flex-col gap-2">
+                <p className="text-sm text-ink">Pague com Pix copiando o código abaixo, no seu banco:</p>
+                <code className="break-all rounded-lg bg-paper p-3 text-xs text-ink">{openInvoice.pix_qr_code}</code>
+                <CopyLinkButton url={openInvoice.pix_qr_code} />
+              </div>
+            ) : (
+              <p className="mt-3 text-sm text-ink-soft">O código Pix está sendo gerado. Volte em alguns minutos.</p>
+            )}
+          </div>
+        )}
         {!store.is_platform_owned && billing && (
           <section className="rounded-2xl border border-line bg-surface p-6">
             <h2 className="text-base font-semibold text-ink">Seu plano</h2>
@@ -82,20 +106,6 @@ export default async function AdminPagamentosPage({ searchParams }: { searchPara
                 {billing.billing_status === "atrasada" && (
                   <p className="text-status-danger">Não conseguimos cobrar a última mensalidade. Confira o meio de pagamento autorizado no Mercado Pago.</p>
                 )}
-              </div>
-            )}
-            {needsSubscription && (
-              <div className="mt-5 flex flex-col gap-3 rounded-xl border border-line bg-paper p-4">
-                <p className="text-sm font-semibold text-ink">Hoje você paga R$ 0,00.</p>
-                <p className="text-sm text-ink-soft">
-                  O primeiro mês é grátis. A partir do próximo mês, a mensalidade de R$ {((billing?.monthly_fee_cents ?? 0) / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })} é descontada automaticamente, e a loja continua ativa e vendendo.
-                </p>
-                <p className="text-sm text-ink-soft">
-                  Ao tocar no botão, você vai ao Mercado Pago para autorizar com Pix. Nenhum valor é cobrado nessa autorização.
-                </p>
-                <form action={startSubscriptionAction}>
-                  <Button type="submit">Autorizar com Pix no Mercado Pago</Button>
-                </form>
               </div>
             )}
           </section>

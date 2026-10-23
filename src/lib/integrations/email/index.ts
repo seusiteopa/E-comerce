@@ -13,6 +13,7 @@ const SENDER = { name: "Vecorion", email: "loja@vecorion.com.br" }; // TODO: con
 export type TransactionalEmailEvent =
   | "cupom_fidelidade"
   | "recuperar_carrinho"
+  | "lembrete_mensalidade"
   | "falha_pagamento"
   | "pedido_criado"
   | "pagamento_aprovado"
@@ -30,6 +31,7 @@ export interface SendTransactionalEmailInput {
 const subjectByEvent: Record<TransactionalEmailEvent, string> = {
   cupom_fidelidade: "Você ganhou um cupom de desconto",
   recuperar_carrinho: "Você deixou itens no carrinho",
+  lembrete_mensalidade: "Sua mensalidade Vecorion vence em breve",
   falha_pagamento: "Pagamento não concluído em um pedido — Vecorion",
   pedido_criado: "Recebemos seu pedido — Vecorion",
   pagamento_aprovado: "Pagamento confirmado — Vecorion",
@@ -70,6 +72,8 @@ function buildEmailHtml(event: TransactionalEmailEvent, data: Record<string, str
       return `<p>Olá!</p><p>Obrigado por comprar na ${safe.storeName} de novo. Você ganhou ${safe.discount}% de desconto na próxima compra.</p><p>Seu cupom: <strong>${safe.code}</strong>, válido até ${safe.validUntil}, para uso único.</p>`;
     case "recuperar_carrinho":
       return `<p>Olá!</p><p>Você deixou uma compra pendente na ${safe.storeName}: ${safe.items} (total R$ ${safe.total}).</p><p><a href="${safe.link}">Voltar e finalizar a compra</a></p>`;
+    case "lembrete_mensalidade":
+      return `<p>Olá!</p><p>Sua mensalidade de R$ ${safe.amount} vence em ${safe.dueDate}.</p><p>Para manter sua loja ativa, pague pelo painel, na tela de Pagamentos e plano. Você tem até 3 dias depois do vencimento.</p>`;
     case "falha_pagamento":
       return `<p>Olá!</p><p>Um pagamento do pedido <strong>#${safe.orderId}</strong> da loja <strong>${safe.storeName}</strong> não foi concluído. Motivo: ${safe.reason}.</p><p>Se o cliente precisar de ajuda, peça para ele tentar outra forma de pagamento.</p>`;
     case "pedido_criado":
