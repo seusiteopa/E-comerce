@@ -5,6 +5,7 @@ import { Metadata } from "next";
 import Container from "@/components/ui/Container";
 import { CategoryBadge } from "@/components/ui/Badge";
 import PriceTag from "@/components/ui/PriceTag";
+import StoreDeliveryNotice from "@/components/loja/StoreDeliveryNotice";
 import ProductActions from "@/components/loja/ProductActions";
 import ShareProductButtons from "@/components/loja/ShareProductButtons";
 import { storeBasePath } from "@/lib/store/base-path";
@@ -98,6 +99,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               <p className="mt-4 text-base leading-relaxed text-ink-soft">{product.description}</p>
 
               <div className="mt-8">
+                <div className="mt-3"><StoreDeliveryNotice /></div>
                 <ProductActions product={product} />
                 <ShareProductButtons name={product.name} slug={product.slug} />
               </div>

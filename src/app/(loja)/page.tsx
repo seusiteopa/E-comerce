@@ -9,6 +9,7 @@ import HomeBannerCarousel from "@/components/loja/HomeBannerCarousel";
 import { getFeaturedProducts, getActiveProducts, getActiveCategories, mapToProduct } from "@/lib/data/catalog";
 import CategoryFilterableGrid from "@/components/loja/CategoryFilterableGrid";
 import { getActiveBanners } from "@/lib/data/banners";
+import StoreDeliveryNotice from "@/components/loja/StoreDeliveryNotice";
 
 // Home enxuta: banner + vitrine, sem categorização explícita por tipo de
 // produto e sem blocos de texto longos — pedido do dono da loja.
@@ -51,6 +52,7 @@ export default async function HomePage() {
     catalogo: (
       <section className="pb-14 pt-2 sm:pb-20">
         <Container>
+          <div className="mb-6"><StoreDeliveryNotice /></div>
           <CategoryFilterableGrid products={all} categories={categories.map((c) => ({ slug: c.slug, name: c.name }))} />
         </Container>
       </section>

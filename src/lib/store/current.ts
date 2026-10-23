@@ -11,6 +11,9 @@ export interface CurrentStore {
   slug: string;
   name: string;
   store_type: string;
+  delivery_scope: "local" | "brasil";
+  delivery_base_city: string | null;
+  delivery_cities: string[];
   description: string | null;
   logo_url: string | null;
   og_title: string | null;
@@ -23,7 +26,7 @@ export interface CurrentStore {
 }
 
 const STORE_SELECT =
-  "id, slug, name, store_type, description, logo_url, og_title, og_description, og_image_url, whatsapp, custom_domain, status, is_platform_owned";
+  "id, slug, name, store_type, description, logo_url, og_title, og_description, og_image_url, whatsapp, custom_domain, status, is_platform_owned, delivery_scope, delivery_base_city, delivery_cities";
 
 function routedSlugOrNull(h: Headers): string | null {
   return h.get("x-store-slug");

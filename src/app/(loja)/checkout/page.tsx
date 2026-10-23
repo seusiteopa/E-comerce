@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import Container from "@/components/ui/Container";
 import SectionEyebrow from "@/components/ui/SectionEyebrow";
 import CheckoutFlow from "@/components/checkout/CheckoutFlow";
+import StoreDeliveryNotice from "@/components/loja/StoreDeliveryNotice";
 
 export const metadata: Metadata = { title: "Finalizar compra" };
 
@@ -11,6 +12,7 @@ export default function CheckoutPage() {
       <Container>
         <SectionEyebrow>Checkout</SectionEyebrow>
         <h1 className="mt-3 text-3xl font-semibold text-ink sm:text-4xl">Finalizar compra</h1>
+        <div className="mt-3"><StoreDeliveryNotice /></div>
 
         <div className="mt-10">
           <CheckoutFlow />
