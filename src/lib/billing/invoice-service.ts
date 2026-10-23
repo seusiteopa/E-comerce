@@ -19,7 +19,7 @@ export async function ensureUpcomingInvoice(storeId: string): Promise<string | n
   const { data: billing } = await service.from("store_billing").select("monthly_fee_cents, subscription_status, referral_discount_pct").eq("store_id", storeId).maybeSingle();
   if (!billing || billing.subscription_status === "pendente") return null;
 
-  const { data: invoices } = await service.from("billing_invoices").select("id, status, due_date, period_start").eq("store_id", storeId).order("due_date", { ascending: false });
+  const { data: invoices } = await service.from("billing_invoices").select("id, status, due_date, period_start").eq("store_id", storeId).eq("kind", "mensalidade").order("due_date", { ascending: false });
   if ((invoices ?? []).some((i) => i.status === "aberta")) return null;
 
   const last = invoices?.[0];
@@ -36,6 +36,7 @@ export async function ensureUpcomingInvoice(storeId: string): Promise<string | n
       due_date: dueDate,
       // Desconto de indicação entra no valor desta cobrança, uma única vez.
       amount_cents: discountedAmountCents(billing.monthly_fee_cents ?? 9000, billing.referral_discount_pct ?? 0),
+      kind: "mensalidade",
     })
     .select("id")
     .single();
@@ -106,6 +107,8 @@ export async function runBillingRoutine(): Promise<{ stores: number; created: nu
   const { data: stores } = await service.from("stores").select("id").eq("is_platform_owned", false);
   let created = 0;
   for (const store of stores ?? []) {
+    const { ensureNextSponsorshipInvoice } = await import("@/lib/sponsorship/service");
+    await ensureNextSponsorshipInvoice(store.id);
     const invoiceId = await ensureUpcomingInvoice(store.id);
     if (invoiceId) created++;
     const { data: open } = await service.from("billing_invoices").select("id").eq("store_id", store.id).eq("status", "aberta");

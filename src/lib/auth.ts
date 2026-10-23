@@ -85,7 +85,7 @@ export async function requireAdminProfile(options?: { allowUnpaid?: boolean }): 
       .maybeSingle();
     const authorized = isStoreAuthorized(billing);
     // Cobrança mensal vencida há mais de 3 dias também bloqueia o painel (a tela de pagamentos segue liberada).
-    const { data: invoices } = await service.from("billing_invoices").select("status, due_date").eq("store_id", store.id);
+    const { data: invoices } = await service.from("billing_invoices").select("status, due_date").eq("store_id", store.id).eq("kind", "mensalidade");
     const overdue = isBlockedByOverdue(invoices ?? [], new Date().toISOString().slice(0, 10));
     if (!authorized || overdue) {
       const { storeBasePath } = await import("@/lib/store/base-path");

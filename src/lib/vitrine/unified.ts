@@ -12,6 +12,7 @@ export function escapeSearchTerm(term: string): string {
 
 export type UnifiedProduct = {
   id: string;
+  storeId: string;
   slug: string;
   name: string;
   shortDescription: string | null;
@@ -33,7 +34,7 @@ export async function getUnifiedProducts(term: string): Promise<UnifiedProduct[]
   let query = service
     .from("products")
     .select(
-      "id, slug, name, short_description, price, promo_price, created_at, product_images(url, display_order, media_type), stores!inner(slug, name, is_platform_owned, status, delivery_scope, delivery_base_city, delivery_cities)"
+      "id, store_id, slug, name, short_description, price, promo_price, created_at, product_images(url, display_order, media_type), stores!inner(slug, name, is_platform_owned, status, delivery_scope, delivery_base_city, delivery_cities)"
     )
     .eq("status", "ativo")
     .eq("hidden", false)
@@ -54,6 +55,7 @@ export async function getUnifiedProducts(term: string): Promise<UnifiedProduct[]
     };
     return {
       id: row.id as string,
+      storeId: row.store_id as string,
       slug: row.slug as string,
       name: row.name as string,
       shortDescription: (row.short_description as string | null) ?? null,
