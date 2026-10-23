@@ -38,6 +38,13 @@ export async function previewCouponAction(
     return actionError("Cupom inválido.");
   }
 
+  // Cupom de fidelidade é só de quem ganhou (visitante sem login não usa).
+  const { data: authUser } = await supabase.auth.getUser();
+  const { isLoyaltyCouponForAnotherCustomer } = await import("@/lib/loyalty/service");
+  if (await isLoyaltyCouponForAnotherCustomer({ storeId, code: coupon.code, profileId: authUser.user?.id ?? null })) {
+    return actionError("Cupom inválido.");
+  }
+
   // Uso anterior só é checado de verdade se a pessoa estiver logada —
   // visitante anônimo só vê a prévia, a checagem final acontece no
   // checkout de qualquer forma (exige login pra finalizar compra).

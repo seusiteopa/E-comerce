@@ -41,6 +41,23 @@ export async function applyPaymentStatusUpdate(
 
   if (newStatus === "aprovado") {
     await handleApproved(supabase, order, orderId, options.skipEmail ?? false);
+    // Fidelidade: marco de compras pagas gera cupom de uso único (não bloqueia a venda).
+    try {
+      const { createSupabaseServiceClient } = await import("@/lib/supabase/service");
+      const { grantLoyaltyReward } = await import("@/lib/loyalty/service");
+      const service = createSupabaseServiceClient();
+      const { data: storeRow } = await service.from("stores").select("name").eq("id", order.store_id).maybeSingle();
+      if (order.profile_id) {
+        await grantLoyaltyReward({
+          storeId: order.store_id,
+          profileId: order.profile_id,
+          payerEmail: order.payer_email ?? null,
+          storeName: storeRow?.name ?? "loja",
+        });
+      }
+    } catch {
+      // a venda já está confirmada; a fidelidade é tentada de novo na próxima compra
+    }
   } else if (newStatus === "recusado" || newStatus === "cancelado") {
     await supabase
       .from("orders")

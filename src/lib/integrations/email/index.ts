@@ -11,6 +11,7 @@ const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const SENDER = { name: "Vecorion", email: "loja@vecorion.com.br" }; // TODO: confirmar e-mail remetente verificado no Brevo
 
 export type TransactionalEmailEvent =
+  | "cupom_fidelidade"
   | "recuperar_carrinho"
   | "falha_pagamento"
   | "pedido_criado"
@@ -27,6 +28,7 @@ export interface SendTransactionalEmailInput {
 }
 
 const subjectByEvent: Record<TransactionalEmailEvent, string> = {
+  cupom_fidelidade: "Você ganhou um cupom de desconto",
   recuperar_carrinho: "Você deixou itens no carrinho",
   falha_pagamento: "Pagamento não concluído em um pedido — Vecorion",
   pedido_criado: "Recebemos seu pedido — Vecorion",
@@ -64,6 +66,8 @@ function buildEmailHtml(event: TransactionalEmailEvent, data: Record<string, str
   const safe = Object.fromEntries(Object.entries(data).map(([key, value]) => [key, escapeHtml(value)]));
 
   switch (event) {
+    case "cupom_fidelidade":
+      return `<p>Olá!</p><p>Obrigado por comprar na ${safe.storeName} de novo. Você ganhou ${safe.discount}% de desconto na próxima compra.</p><p>Seu cupom: <strong>${safe.code}</strong>, válido até ${safe.validUntil}, para uso único.</p>`;
     case "recuperar_carrinho":
       return `<p>Olá!</p><p>Você deixou uma compra pendente na ${safe.storeName}: ${safe.items} (total R$ ${safe.total}).</p><p><a href="${safe.link}">Voltar e finalizar a compra</a></p>`;
     case "falha_pagamento":
