@@ -75,8 +75,9 @@ export async function ensureInvoicePix(invoiceId: string): Promise<void> {
 /** Lembrete por e-mail 3 dias antes do vencimento (uma vez por cobrança). */
 export async function sendDueReminder(invoiceId: string): Promise<void> {
   const service = createSupabaseServiceClient();
-  const { data: invoice } = await service.from("billing_invoices").select("id, store_id, due_date, amount_cents, status, reminder_sent_at").eq("id", invoiceId).maybeSingle();
-  if (!invoice || invoice.status !== "aberta" || invoice.reminder_sent_at) return;
+  const { data: invoice } = await service.from("billing_invoices").select("id, store_id, due_date, amount_cents, status, reminder_sent_at, kind").eq("id", invoiceId).maybeSingle();
+  // Lembrete de mensalidade: destaque e implantação têm seus próprios avisos (aqui não).
+  if (!invoice || invoice.kind !== "mensalidade" || invoice.status !== "aberta" || invoice.reminder_sent_at) return;
   if (daysBetween(todayIso(), invoice.due_date) > REMINDER_DAYS_BEFORE) return;
 
   const email = await ownerEmailOf(invoice.store_id);

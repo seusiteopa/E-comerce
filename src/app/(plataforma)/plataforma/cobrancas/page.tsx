@@ -4,6 +4,7 @@ import { requirePlatformAdmin } from "@/lib/platform";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import { formatCurrency } from "@/lib/format";
 import { isBlockedByOverdue } from "@/lib/billing/invoices";
+import OpenSetupForm from "@/components/plataforma/OpenSetupForm";
 
 export const metadata: Metadata = { title: "Cobranças — Painel da plataforma", robots: { index: false, follow: false } };
 
@@ -59,6 +60,10 @@ export default async function PlataformaCobrancasPage() {
           <p className="text-xs text-ink-soft">Lojas bloqueadas por atraso</p>
           <p className="mt-1 text-lg font-semibold text-ink">{blockedStores.length}</p>
         </div>
+      </div>
+
+      <div className="mt-8">
+        <OpenSetupForm stores={(stores ?? []).map((st) => ({ id: st.id, name: st.name }))} />
       </div>
 
       <div className="mt-8 overflow-x-auto rounded-2xl border border-line bg-surface">

@@ -39,6 +39,15 @@ export default async function AdminPagamentosPage({ searchParams }: { searchPara
     .order("due_date", { ascending: true })
     .limit(1)
     .maybeSingle();
+  const { data: openSetupInvoice } = await supabase
+    .from("billing_invoices")
+    .select("amount_cents, due_date, pix_qr_code")
+    .eq("store_id", store.id)
+    .eq("kind", "implantacao")
+    .eq("status", "aberta")
+    .order("due_date", { ascending: true })
+    .limit(1)
+    .maybeSingle();
   const [{ data: conn }, { data: billing }] = await Promise.all([
     supabase.from("store_payment_connections").select("status, provider_user_id, expires_at").eq("store_id", store.id).maybeSingle(),
     supabase.from("store_billing").select("*").eq("store_id", store.id).maybeSingle(),
@@ -83,6 +92,24 @@ export default async function AdminPagamentosPage({ searchParams }: { searchPara
           )}
         </section>
 
+        {openSetupInvoice && (
+          <div className="rounded-2xl border border-line bg-surface p-5">
+            <h2 className="text-base font-semibold text-ink">Criação assistida da loja</h2>
+            <p className="mt-2 text-sm text-ink-soft">
+              Taxa única: R$ {(openSetupInvoice.amount_cents / 100).toFixed(2).replace(".", ",")} · vence em{" "}
+              {new Date(`${openSetupInvoice.due_date}T12:00:00Z`).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })}
+            </p>
+            {openSetupInvoice.pix_qr_code ? (
+              <div className="mt-3 flex flex-col gap-2">
+                <p className="text-sm text-ink">Pague com Pix copiando o código abaixo, no seu banco:</p>
+                <code className="break-all rounded-lg bg-paper p-3 text-xs text-ink">{openSetupInvoice.pix_qr_code}</code>
+                <CopyLinkButton url={openSetupInvoice.pix_qr_code} />
+              </div>
+            ) : (
+              <p className="mt-3 text-sm text-ink-soft">O código Pix está sendo gerado. Volte em alguns minutos.</p>
+            )}
+          </div>
+        )}
         {openSponsorInvoice && (
           <div className="rounded-2xl border border-line bg-surface p-5">
             <h2 className="text-base font-semibold text-ink">Destaque na vitrine</h2>
