@@ -14,6 +14,8 @@ import { sendTransactionalEmail } from "@/lib/integrations/email";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import { getCurrentStore, getRequestOrigin } from "@/lib/store/current";
 import { getStorePaymentContext, PaymentNotConnectedError, type StorePaymentContext } from "@/lib/integrations/mercadopago/oauth";
+import { z } from "zod";
+import { registerCheckoutLead, markCheckoutLeadPaid } from "@/lib/checkout/leads";
 
 
 /** Avisa o contato da loja (e-mail cadastrado nas configurações) sobre pagamento que não concluiu. Nunca bloqueia a venda. */
@@ -381,6 +383,14 @@ export async function createOrderAction(input: unknown): Promise<ActionResult<Cr
     logger.warn("E-mail de pedido criado não pôde ser enviado", { orderId: order.id });
   }
 
+  // Pedido criado: quem concluiu o checkout não recebe o lembrete de carrinho.
+  try {
+    const supabaseUser = await createSupabaseServerClient();
+    const { data: { user: buyer } } = await supabaseUser.auth.getUser();
+    if (buyer?.email) await markCheckoutLeadPaid({ storeId: store.id, email: buyer.email });
+  } catch {
+    // não interrompe a venda
+  }
   logger.info("Pedido criado", { orderId: order.id, userId: profile.id, paymentMethod: parsed.data.paymentMethod });
 
   return actionSuccess(result);
@@ -401,4 +411,22 @@ export async function getPixPaymentStatusAction(
     });
     return actionError("Não foi possível verificar o status do pagamento agora.");
   }
+}
+
+const leadCartSchema = z.object({
+  items: z
+    .array(z.object({ name: z.string().max(200), quantity: z.number().int().min(1).max(999), unitPrice: z.number().min(0) }))
+    .max(50),
+});
+
+/** Registra o carrinho de quem chegou ao pagamento, para o lembrete de 1 hora se não concluir. */
+export async function registerCheckoutLeadAction(input: unknown): Promise<ActionResult> {
+  const parsed = leadCartSchema.safeParse(input);
+  if (!parsed.success) return actionSuccess(undefined);
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.email) return actionSuccess(undefined);
+  const store = await getCurrentStore();
+  await registerCheckoutLead({ storeId: store.id, email: user.email, cart: parsed.data.items });
+  return actionSuccess(undefined);
 }

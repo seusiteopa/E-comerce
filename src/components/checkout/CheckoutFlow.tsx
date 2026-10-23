@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useCart } from "@/lib/cart-context";
+import { registerCheckoutLeadAction } from "@/actions/checkout";
 import CheckoutStepper from "@/components/checkout/CheckoutStepper";
 import IdentificationStep from "@/components/checkout/IdentificationStep";
 import AddressStep from "@/components/checkout/AddressStep";
@@ -16,7 +17,15 @@ export default function CheckoutFlow() {
   const { items, subtotal, coupon } = useCart();
   const hasPhysicalItem = useMemo(() => items.some((i) => i.type === "fisico"), [items]);
 
+
   const [step, setStep] = useState<Step>("identificacao");
+  // Quem chega ao pagamento já está identificado: guarda o carrinho para o lembrete de 1 hora, se não concluir.
+  useEffect(() => {
+    if (step !== "pagamento" || items.length === 0) return;
+    void registerCheckoutLeadAction({
+      items: items.map((i) => ({ name: i.name, quantity: i.quantity, unitPrice: i.unitPrice })),
+    });
+  }, [step, items]);
   const [addressId, setAddressId] = useState<string | undefined>();
   const [shippingPrice, setShippingPrice] = useState<number | null>(null);
   const [shippingMethod, setShippingMethod] = useState<string | undefined>();
