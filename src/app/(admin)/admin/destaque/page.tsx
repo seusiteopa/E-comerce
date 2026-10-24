@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import AdminHeader from "@/components/admin/AdminHeader";
 import DestaqueToggle from "@/components/admin/DestaqueToggle";
 import Container from "@/components/ui/Container";
-import { requireStoreAdmin } from "@/lib/auth";
+import { requireStoreFinanceAdmin } from "@/lib/auth";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import { formatCurrency } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Destaque", robots: { index: false, follow: false } };
 
 export default async function AdminDestaquePage() {
-  const { store } = await requireStoreAdmin();
+  const { store } = await requireStoreFinanceAdmin();
   const service = createSupabaseServiceClient();
   const { data: sponsor } = await service.from("sponsorships").select("status, monthly_fee_cents").eq("store_id", store.id).maybeSingle();
   const active = sponsor?.status === "ativo";

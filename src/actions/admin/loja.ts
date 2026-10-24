@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { resolveHomeOrder } from "@/lib/store/home-order";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { requireStoreAdmin } from "@/lib/auth";
+import { requireStoreAdmin, requireStoreFinanceAdmin } from "@/lib/auth";
 import { ActionResult, actionSuccess, actionError } from "@/lib/action-result";
 import { disconnectStore } from "@/lib/integrations/mercadopago/oauth";
 import { logger } from "@/lib/logger";
@@ -80,7 +80,7 @@ export async function updateStoreProfileAction(input: unknown): Promise<ActionRe
 export async function disconnectMercadoPagoAction(): Promise<ActionResult> {
   let store;
   try {
-    ({ store } = await requireStoreAdmin());
+    ({ store } = await requireStoreFinanceAdmin());
   } catch {
     return actionError("Acesso restrito ao painel administrativo.");
   }

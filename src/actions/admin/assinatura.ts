@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { requireStoreAdmin } from "@/lib/auth";
+import { requireStoreFinanceAdmin } from "@/lib/auth";
 import { startSubscriptionForStore } from "@/lib/billing/subscribe";
 import { createCardSubscription, monthlyFeeFromEnv } from "@/lib/integrations/mercadopago/subscription";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
@@ -15,7 +15,7 @@ import { logger } from "@/lib/logger";
 
 /** Botão "Autorizar mensalidade" do painel: leva o lojista ao Mercado Pago para autorizar as cobranças mensais. */
 export async function startSubscriptionAction(): Promise<void> {
-  const { store } = await requireStoreAdmin();
+  const { store } = await requireStoreFinanceAdmin();
   const base = await storeBasePath();
   if (store.is_platform_owned) redirect(`${base}/admin/pagamentos`);
 
@@ -50,7 +50,7 @@ export async function authorizeCardSubscriptionAction(input: { cardToken: string
   let store;
   let userEmail: string | undefined;
   try {
-    ({ store } = await requireStoreAdmin());
+    ({ store } = await requireStoreFinanceAdmin());
     const supabase = await createSupabaseServerClient();
     const { data: { user } } = await supabase.auth.getUser();
     userEmail = user?.email ?? undefined;

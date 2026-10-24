@@ -3,7 +3,7 @@ import AdminHeader from "@/components/admin/AdminHeader";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
 import DisconnectMercadoPagoButton from "@/components/admin/DisconnectMercadoPagoButton";
-import { requireStoreAdmin } from "@/lib/auth";
+import { requireStoreFinanceAdmin } from "@/lib/auth";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import { formatDate } from "@/lib/format";
 
@@ -17,7 +17,7 @@ const subscriptionLabel: Record<string, string> = {
 };
 
 export default async function AdminPagamentosPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | undefined }> }) {
-  const { store } = await requireStoreAdmin();
+  const { store } = await requireStoreFinanceAdmin();
   const params = await searchParams;
   const supabase = createSupabaseServiceClient();
 

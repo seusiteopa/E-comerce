@@ -2,7 +2,7 @@ import "server-only";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 
-export type ActivePartner = { id: string; name: string };
+export type ActivePartner = { id: string; name: string; owner_user_id: string };
 
 /** Agência logada e ativa, ou null. A agência só enxerga as lojas vinculadas a ela. */
 export async function getActivePartner(): Promise<ActivePartner | null> {
@@ -12,7 +12,7 @@ export async function getActivePartner(): Promise<ActivePartner | null> {
   const service = createSupabaseServiceClient();
   const { data } = await service
     .from("partners")
-    .select("id, name")
+    .select("id, name, owner_user_id")
     .eq("owner_user_id", user.id)
     .eq("status", "ativo")
     .maybeSingle();

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import AdminHeader from "@/components/admin/AdminHeader";
 import Container from "@/components/ui/Container";
-import { requireStoreAdmin } from "@/lib/auth";
+import { requireStoreFinanceAdmin } from "@/lib/auth";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import { buildHistory, type Bucket } from "@/lib/history/buckets";
 import { formatCurrency } from "@/lib/format";
@@ -43,7 +43,7 @@ function Table({ title, rows }: { title: string; rows: Bucket[] }) {
 }
 
 export default async function AdminHistoricoPage() {
-  const { store } = await requireStoreAdmin();
+  const { store } = await requireStoreFinanceAdmin();
   const service = createSupabaseServiceClient();
   const { data } = await service
     .from("store_daily_metrics")

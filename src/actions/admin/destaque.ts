@@ -1,6 +1,6 @@
 "use server";
 
-import { requireStoreAdmin } from "@/lib/auth";
+import { requireStoreFinanceAdmin } from "@/lib/auth";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import { activateSponsorship } from "@/lib/sponsorship/service";
 import { ActionResult, actionSuccess, actionError } from "@/lib/action-result";
@@ -9,7 +9,7 @@ import { ActionResult, actionSuccess, actionError } from "@/lib/action-result";
 export async function setSponsorshipAction(active: boolean): Promise<ActionResult> {
   let store;
   try {
-    ({ store } = await requireStoreAdmin());
+    ({ store } = await requireStoreFinanceAdmin());
   } catch {
     return actionError("Acesso restrito ao painel administrativo.");
   }

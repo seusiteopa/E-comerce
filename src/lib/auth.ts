@@ -94,3 +94,20 @@ export async function requireAdminProfile(options?: { allowUnpaid?: boolean }): 
   }
   return profile;
 }
+
+/**
+ * Acesso ao dinheiro da loja (pagamentos, destaque, histórico de vendas, assinatura).
+ * A agência gerencia a loja, mas não vê nem altera nada financeiro.
+ */
+export async function requireStoreFinanceAdmin(): Promise<{ profile: ProfileRow; store: CurrentStore }> {
+  const { profile, store } = await requireStoreAdmin();
+  const service = createSupabaseServiceClient();
+  const [{ data: member }, { data: platformAdmin }] = await Promise.all([
+    service.from("store_members").select("role").eq("store_id", store.id).eq("user_id", profile.id).maybeSingle(),
+    service.from("platform_admins").select("user_id").eq("user_id", profile.id).maybeSingle(),
+  ]);
+  if (!platformAdmin && member?.role !== "dono") {
+    throw new ForbiddenError();
+  }
+  return { profile, store };
+}
