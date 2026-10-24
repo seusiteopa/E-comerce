@@ -7,11 +7,13 @@ import { ProductTypeBadge } from "@/components/ui/Badge";
 import DeleteProductButton from "@/components/admin/DeleteProductButton";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentStore } from "@/lib/store/current";
+import { storeBasePath } from "@/lib/store/base-path";
 import { requireAdminProfile } from "@/lib/auth";
 import { formatCurrency } from "@/lib/format";
 import { ProductRow } from "@/types/database";
 
 export default async function AdminProdutosPage() {
+  const base = await storeBasePath();
   await requireAdminProfile();
   const supabase = await createSupabaseServerClient();
   const { id: storeId } = await getCurrentStore();
@@ -42,7 +44,7 @@ export default async function AdminProdutosPage() {
       <AdminHeader title="Produtos" />
       <Container className="py-8">
         <div className="mb-5 flex justify-end">
-          <LinkButton href="/admin/produtos/novo">Novo produto</LinkButton>
+          <LinkButton href={`${base}/admin/produtos/novo`}>Novo produto</LinkButton>
         </div>
         <AdminDataTable columns={columns} rows={rows} emptyLabel="Nenhum produto cadastrado ainda." />
       </Container>
