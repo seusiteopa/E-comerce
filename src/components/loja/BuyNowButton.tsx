@@ -16,7 +16,7 @@ export default function BuyNowButton({
   return (
     <Button
       variant="primary"
-      className="mt-4 w-full"
+      className="mt-4 h-12 w-full text-base font-semibold shadow-md transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-lg"
       onClick={() => {
         addItem({
           productId: product.id,

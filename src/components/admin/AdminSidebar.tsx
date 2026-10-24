@@ -1,4 +1,5 @@
 import StoreLink from "@/components/store/StoreLink";
+import AdminNavItem from "@/components/admin/AdminNavItem";
 import Image from "next/image";
 import {
   LayoutDashboard,
@@ -42,17 +43,7 @@ export default function AdminSidebar() {
       </StoreLink>
       <nav aria-label="Navegação do painel administrativo" className="flex flex-col gap-1 p-4">
         {navItems.map((item) => {
-          const Icon = item.icon;
-          return (
-            <StoreLink
-              key={item.href}
-              href={item.href}
-              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink-soft transition-colors hover:bg-paper hover:text-ink"
-            >
-              <Icon size={17} aria-hidden="true" />
-              {item.label}
-            </StoreLink>
-          );
+          return <AdminNavItem key={item.href} href={item.href} label={item.label} icon={item.icon} />;
         })}
       </nav>
       <a href="/lojas/vecorion" className="mx-4 mb-2 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink-soft transition-colors hover:bg-paper hover:text-ink">

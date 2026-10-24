@@ -13,20 +13,22 @@ import HomeBannerCarousel from "@/components/loja/HomeBannerCarousel";
 export default function HomeBanner({ banners }: { banners: BannerRow[] }) {
   if (banners.length === 0) {
     return (
-      <section className="bg-paper py-16 sm:py-24">
-        <Container className="flex flex-col items-center text-center">
-          <div className="relative aspect-square w-full max-w-[220px]">
+      <section className="relative overflow-hidden bg-navy-deep py-16 text-white sm:py-28">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(232,163,62,0.18),transparent_60%)]" />
+        <Container className="relative flex flex-col items-center text-center">
+          <div className="relative aspect-square w-full max-w-[200px]">
             <Image
               src="/brand/vecorion-icone-navy-transparente.png"
               alt=""
               fill
-              className="object-contain"
+              className="object-contain drop-shadow-[0_0_24px_rgba(255,255,255,0.25)]"
               priority
               aria-hidden="true"
             />
           </div>
-          <h1 className="mt-6 text-3xl font-semibold text-ink sm:text-4xl">Vecorion</h1>
-          <LinkButton href="/produtos" variant="primary" className="mt-6">
+          <h1 className="mt-6 text-3xl font-semibold sm:text-5xl">Vecorion</h1>
+          <p className="mt-3 max-w-md text-sm text-white/75 sm:text-base">Produtos e experiências escolhidos para você.</p>
+          <LinkButton href="/produtos" variant="primary" className="mt-8 !bg-farol !text-navy-deep hover:!bg-farol-deep">
             Explorar produtos
           </LinkButton>
         </Container>
