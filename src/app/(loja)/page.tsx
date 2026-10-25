@@ -1,3 +1,6 @@
+import type { Metadata } from "next";
+import { generateMetadata as rootMetadata } from "@/app/layout";
+import { pickShareVideo } from "@/lib/share/video";
 import { Fragment } from "react";
 import { getSiteSettings } from "@/lib/data/site-settings";
 import { resolveHomeOrder, type HomeSection } from "@/lib/store/home-order";
@@ -13,6 +16,21 @@ import StoreDeliveryNotice from "@/components/loja/StoreDeliveryNotice";
 
 // Home enxuta: banner + vitrine, sem categorização explícita por tipo de
 // produto e sem blocos de texto longos — pedido do dono da loja.
+
+/** Prévia da home: a mesma do layout raiz, com o vídeo do primeiro banner principal (se houver). */
+export async function generateMetadata(): Promise<Metadata> {
+  const base = await rootMetadata();
+  const banners = await getActiveBanners("principal").catch(() => []);
+  const video = pickShareVideo(banners.map((b) => ({ url: b.image_url, media_type: b.media_type, display_order: b.display_order })));
+  if (!video) return base;
+  return {
+    ...base,
+    openGraph: {
+      ...(base.openGraph ?? {}),
+      videos: [{ url: video, type: "video/mp4" }],
+    },
+  };
+}
 
 export default async function HomePage() {
   const [featuredRows, allRows, banners, secondaryBanners, categories] = await Promise.all([
