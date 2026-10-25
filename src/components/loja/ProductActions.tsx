@@ -1,5 +1,7 @@
 "use client";
 
+import { useStoreBase, withStoreBase } from "@/components/store/StoreLink";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
@@ -15,6 +17,7 @@ const ctaLabelByType: Record<Product["type"], string> = {
 
 export default function ProductActions({ product }: { product: Product }) {
   const router = useRouter();
+  const storeBase = useStoreBase();
   const { addItem } = useCart();
   const [selectedVariationId, setSelectedVariationId] = useState<string | null>(
     product.variations?.find((v) => v.stock > 0)?.id ?? null
@@ -52,13 +55,13 @@ export default function ProductActions({ product }: { product: Product }) {
       setTimeout(() => setJustAdded(false), 2000);
     } else {
       // Digital com preço fechado: vai direto para o checkout.
-      router.push("/checkout");
+      router.push(withStoreBase(storeBase, "/carrinho"));
     }
   }
 
   function handleBuyNow() {
     addItem(buildCartItem());
-    router.push("/checkout");
+    router.push(withStoreBase(storeBase, "/carrinho"));
   }
 
   return (
