@@ -1,6 +1,6 @@
 import Footer from "@/components/layout/Footer";
 import SiteChrome from "@/components/layout/SiteChrome";
-import CartAddedToast from "@/components/loja/CartAddedToast";
+import CartDrawer from "@/components/loja/CartDrawer";
 import WelcomeCouponPopup from "@/components/loja/WelcomeCouponPopup";
 import ThemeOverride from "@/components/layout/ThemeOverride";
 import { getSiteSettings } from "@/lib/data/site-settings";
@@ -31,7 +31,7 @@ export default async function LojaLayout({ children }: { children: React.ReactNo
         {children}
       </main>
       <Footer settings={settings} />
-      <CartAddedToast />
+      <CartDrawer />
       <WelcomeCouponPopup couponCode={settings.popup_coupon_code} message={settings.popup_coupon_message} />
     </>
     </StoreBaseProvider>

@@ -2,6 +2,7 @@ import StoreLink from "@/components/store/StoreLink";
 import Image from "next/image";
 import { Product } from "@/types";
 import PriceTag from "@/components/ui/PriceTag";
+import QuickBuyButtons from "@/components/loja/QuickBuyButtons";
 
 import { optimizeCloudinaryUrl } from "@/lib/cloudinary-optimizer";
 export default function ProductCard({ product }: { product: Product }) {
@@ -10,6 +11,7 @@ export default function ProductCard({ product }: { product: Product }) {
     product.variations?.every((v) => v.stock === 0);
 
   return (
+    <div className="flex h-full flex-col gap-2">
     <StoreLink
       href={`/produtos/${product.slug}`}
       className="group flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-navy/40 hover:shadow-xl"
@@ -35,5 +37,7 @@ export default function ProductCard({ product }: { product: Product }) {
         <PriceTag price={product.price} promoPrice={product.promoPrice} size="sm" />
       </div>
     </StoreLink>
+    <QuickBuyButtons product={product} />
+    </div>
   );
 }

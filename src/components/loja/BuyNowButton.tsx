@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
 import Button from "@/components/ui/Button";
+import { useStoreBase, withStoreBase } from "@/components/store/StoreLink";
 
 /** Botão de compra direta de produto digital (1 unidade), exibido embaixo da galeria de imagens. */
 export default function BuyNowButton({
@@ -12,6 +13,7 @@ export default function BuyNowButton({
 }) {
   const { addItem } = useCart();
   const router = useRouter();
+  const storeBase = useStoreBase();
 
   return (
     <Button
@@ -29,7 +31,7 @@ export default function BuyNowButton({
           unitPrice: product.promoPrice ?? product.price,
           image: product.images[0]?.url ?? "/placeholder-product.svg",
         });
-        router.push("/checkout");
+        router.push(withStoreBase(storeBase, "/carrinho"));
       }}
     >
       Comprar agora
