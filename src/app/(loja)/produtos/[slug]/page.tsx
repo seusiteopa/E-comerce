@@ -1,3 +1,4 @@
+import { pickShareVideo } from "@/lib/share/video";
 import { ogImageUrl, OG_SIZE } from "@/lib/media/og-image";
 import { notFound } from "next/navigation";
 import StoreLink from "@/components/store/StoreLink";
@@ -38,6 +39,13 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     .sort((a, b) => a.display_order - b.display_order)
     .find((img) => img.media_type !== "video");
 
+  // Vídeo do produto (se houver): a prévia mostra a capa com o botão de play e abre o vídeo.
+  const shareVideo = pickShareVideo((productRow.product_images ?? []).map((img) => ({
+    url: img.url,
+    media_type: img.media_type,
+    display_order: img.display_order,
+  })));
+
   return {
     title: productRow.name,
     description: productRow.short_description ?? undefined,
@@ -51,6 +59,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
       title: productRow.name,
       description: productRow.short_description ?? undefined,
       images: firstPhoto ? [{ url: ogImageUrl(firstPhoto.url), ...OG_SIZE, alt: productRow.name }] : [{ url: `${base}/og-loja`, ...OG_SIZE, alt: productRow.name }],
+      videos: shareVideo ? [{ url: shareVideo, type: "video/mp4" }] : undefined,
     },
     twitter: {
       card: "summary_large_image",
