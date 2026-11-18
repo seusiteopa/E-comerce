@@ -1,3 +1,5 @@
+"use client"
+
 import StoreLink from "@/components/store/StoreLink";
 import AdminNavItem from "@/components/admin/AdminNavItem";
 import Image from "next/image";
