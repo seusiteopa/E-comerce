@@ -6,7 +6,6 @@ import { registerReferral } from "@/lib/store/referral";
 import { requireAuthenticatedProfile, UnauthorizedError } from "@/lib/auth";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
-import { startSubscriptionForStore } from "@/lib/billing/subscribe";
 import { monthlyFeeFromEnv } from "@/lib/integrations/mercadopago/subscription";
 import { storeOrigin } from "@/lib/store/urls";
 import { ActionResult, actionSuccess, actionError } from "@/lib/action-result";
@@ -40,7 +39,7 @@ export interface CreateStoreResult {
   subscriptionFailed: boolean;
 }
 
-/** Cadastro de loja nova: cria a loja, o dono, o plano e (se for mensalidade) a assinatura recorrente. */
+/** Cadastro de loja nova: cria a loja, o dono e o plano. A loja nasce liberada; a mensalidade é cobrada depois, por Pix. */
 export async function createStoreAction(input: unknown): Promise<ActionResult<CreateStoreResult>> {
   const parsed = createStoreSchema.safeParse(input);
   if (!parsed.success) return actionError(parsed.error.issues[0]?.message ?? "Confira os dados da loja.");
@@ -125,27 +124,8 @@ export async function createStoreAction(input: unknown): Promise<ActionResult<Cr
   }
 
   const origin = await storeOrigin(store);
-  let authorizationUrl: string | null = null;
-  let subscriptionFailed = false;
-
-  if (d.plan === "mensalidade") {
-    try {
-      const result = await startSubscriptionForStore({
-        storeId: store.id,
-        storeName: store.name,
-        payerEmail: user.email,
-        returnUrl: `${origin}/admin/pagamentos?assinatura=1`,
-      });
-      authorizationUrl = result.authorizationUrl;
-    } catch (error) {
-      // A loja já existe; o lojista autoriza depois em "Pagamentos e plano".
-      subscriptionFailed = true;
-      logger.error("Loja criada, mas a assinatura falhou", {
-        storeId: store.id,
-        error: error instanceof Error ? error.message : String(error),
-      });
-    }
-  }
+  const authorizationUrl: string | null = null;
+  const subscriptionFailed = false;
 
   logger.info("Loja criada", { storeId: store.id, slug: store.slug, plan: d.plan });
   if (parsed.data.referralCode) await registerReferral(store.id, parsed.data.referralCode).catch(() => undefined);

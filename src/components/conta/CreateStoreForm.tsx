@@ -118,15 +118,15 @@ export default function CreateStoreForm({ rootDomain, monthlyFee, referralCode, 
         <legend className="px-1 text-sm font-medium text-ink">Plano da loja</legend>
         {monthlyFee && (
           <p className="text-sm text-ink">
-            <strong>Mensalidade de R$ {monthlyFee}</strong>, sem comissão sobre as vendas. <strong>Primeiro mês grátis:</strong> você autoriza no seu cartão agora e a cobrança automática só começa daqui a 1 mês.
-            <span className="mt-1 block text-xs text-ink-soft">A mensalidade é cobrada no cartão de crédito. O Pix não é aceito nessa cobrança automática.</span>
+            <strong>Mensalidade de R$ {monthlyFee}</strong>, sem comissão sobre as vendas. <strong>Primeiro mês grátis:</strong> a cobrança só começa daqui a 1 mês, por Pix.
+            <span className="mt-1 block text-xs text-ink-soft">Você começa sem pagar nada agora. A mensalidade é cobrada depois, por Pix, na tela de Pagamentos.</span>
           </p>
         )}
       </fieldset>
 
       {error && <p role="alert" className="text-sm text-status-danger">{error}</p>}
       <Button type="button" onClick={handleSubmit} disabled={isPending || !name || !slug}>
-        {isPending ? "Criando..." : plan === "mensalidade" ? "Criar loja e autorizar no banco" : "Criar loja"}
+        {isPending ? "Criando..." : "Criar loja"}
       </Button>
     </div>
   );
