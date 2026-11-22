@@ -2,6 +2,9 @@
 export const HOME_SECTIONS = ["banner", "secundarios", "destaques", "catalogo"] as const;
 export type HomeSection = (typeof HOME_SECTIONS)[number];
 
+/** Ordem padrão: banner principal, destaques, banners secundários e catálogo. */
+export const DEFAULT_HOME_ORDER: HomeSection[] = ["banner", "destaques", "secundarios", "catalogo"];
+
 export const HOME_SECTION_LABELS: Record<HomeSection, string> = {
   banner: "Banner principal",
   secundarios: "Banners secundários",
@@ -16,6 +19,6 @@ export function resolveHomeOrder(raw?: string): HomeSection[] {
     .map((s) => s.trim())
     .filter((s): s is HomeSection => (HOME_SECTIONS as readonly string[]).includes(s));
   const unique = [...new Set(picked)];
-  const missing = HOME_SECTIONS.filter((s) => !unique.includes(s));
+  const missing = DEFAULT_HOME_ORDER.filter((s) => !unique.includes(s));
   return [...unique, ...missing];
 }
