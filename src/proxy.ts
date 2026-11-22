@@ -71,7 +71,7 @@ export async function proxy(request: NextRequest) {
   if (pathname === "/") {
     const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "";
     if (isPlatformRootHost(host)) {
-      return NextResponse.rewrite(new URL("/inicio-plataforma", request.url), { request: { headers: sanitizedHeaders(request) } });
+      return NextResponse.rewrite(new URL("/plataforma-home", request.url), { request: { headers: sanitizedHeaders(request) } });
     }
     return NextResponse.next({ request: { headers: sanitizedHeaders(request) } });
   }

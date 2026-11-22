@@ -15,8 +15,8 @@ interface AppliedCoupon {
 interface CartContextValue {
   items: CartItem[];
   addItem: (item: CartItem) => void;
-  removeItem: (productSlug: string, variationId?: string) => void;
-  updateQuantity: (productSlug: string, quantity: number, variationId?: string) => void;
+  removeItem: (productSlug: string, variationId?: string, optionIds?: string[]) => void;
+  updateQuantity: (productSlug: string, quantity: number, variationId?: string, optionIds?: string[]) => void;
   clearCart: () => void;
   subtotal: number;
   itemCount: number;
@@ -82,7 +82,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const isDigital = newItem.type === "digital";
     setItems((prev) => {
       const existing = prev.find(
-        (i) => i.productSlug === newItem.productSlug && i.variationId === newItem.variationId
+        (i) => i.productSlug === newItem.productSlug && i.variationId === newItem.variationId && (i.optionIds ?? []).join(",") === (newItem.optionIds ?? []).join(",")
       );
       if (existing) {
         return prev.map((i) =>
@@ -96,16 +96,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setLastAddedItem({ name: newItem.name, at: Date.now() });
   }
 
-  function removeItem(productSlug: string, variationId?: string) {
-    setItems((prev) =>
-      prev.filter((i) => !(i.productSlug === productSlug && i.variationId === variationId))
-    );
+  const sameLine = (i: CartItem, productSlug: string, variationId?: string, optionIds?: string[]) =>
+    i.productSlug === productSlug && i.variationId === variationId && (i.optionIds ?? []).join(",") === (optionIds ?? []).join(",");
+
+  function removeItem(productSlug: string, variationId?: string, optionIds?: string[]) {
+    setItems((prev) => prev.filter((i) => !sameLine(i, productSlug, variationId, optionIds)));
   }
 
-  function updateQuantity(productSlug: string, quantity: number, variationId?: string) {
+  function updateQuantity(productSlug: string, quantity: number, variationId?: string, optionIds?: string[]) {
     setItems((prev) =>
       prev.map((i) =>
-        i.productSlug === productSlug && i.variationId === variationId
+        sameLine(i, productSlug, variationId, optionIds)
           ? { ...i, quantity: Math.max(1, quantity) }
           : i
       )
