@@ -1,3 +1,4 @@
+import PrimeirosPassos from "@/components/admin/PrimeirosPassos";
 import { CircleDollarSign, Clock, Package, Receipt, ShoppingBag, TrendingUp, Users } from "lucide-react";
 import AdminHeader from "@/components/admin/AdminHeader";
 import Container from "@/components/ui/Container";
@@ -37,6 +38,7 @@ export default async function AdminDashboardPage() {
     <>
       <AdminHeader title="Dashboard" />
       <Container className="py-8">
+        <PrimeirosPassos />
         <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <StatCard label="Produtos cadastrados" value={String(productCount ?? 0)} icon={Package} />
           <StatCard label="Pedidos totais" value={String(orderCount ?? 0)} icon={ShoppingBag} />

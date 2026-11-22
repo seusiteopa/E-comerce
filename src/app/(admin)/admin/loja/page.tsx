@@ -1,5 +1,6 @@
 import AdminHeader from "@/components/admin/AdminHeader";
 import Container from "@/components/ui/Container";
+import StoreStatusControls from "@/components/admin/StoreStatusControls";
 import StoreProfileForm from "@/components/admin/StoreProfileForm";
 import StorePagesForm from "@/components/admin/StorePagesForm";
 import HomeOrderForm from "@/components/admin/HomeOrderForm";
@@ -17,11 +18,20 @@ export default async function AdminLojaPage() {
     .from("site_settings")
     .select("key, value")
     .eq("store_id", store.id)
-    .in("key", ["site_description", "contact_email", "instagram_url", "home_order", "page_sobre", "page_faq", "page_contato", "page_politica_privacidade", "page_politica_termos", "page_politica_trocas"]);
+    .in("key", ["site_description", "contact_email", "instagram_url", "home_order", "page_sobre", "page_faq", "page_contato", "page_politica_privacidade", "page_politica_termos", "page_politica_trocas", "vitrine_colunas"]);
   const cfg = Object.fromEntries((rows ?? []).map((r) => [r.key, r.value ?? ""]));
   const pageValues = Object.fromEntries(
     ["page_sobre", "page_faq", "page_contato", "page_politica_privacidade", "page_politica_termos", "page_politica_trocas"].map((k) => [k, cfg[k] ?? ""])
   );
+
+  const { data: pendingRequest } = await supabase
+    .from("store_requests")
+    .select("id")
+    .eq("store_id", store.id)
+    .eq("kind", "exclusao")
+    .eq("status", "pendente")
+    .maybeSingle();
+  const hasPendingExclusion = Boolean(pendingRequest);
 
   return (
     <>
@@ -34,10 +44,18 @@ export default async function AdminLojaPage() {
             <DeliveryForm scope={store.delivery_scope} baseCity={store.delivery_base_city} cities={deliveryCities} />
           </div>
         </section>
+        <section className="mb-10 rounded-2xl border border-line bg-surface p-5">
+          <h2 className="text-base font-semibold text-ink">Situação da loja</h2>
+          <div className="mt-4">
+            <StoreStatusControls status={store.status ?? "ativa"} hasPendingExclusion={hasPendingExclusion} />
+          </div>
+        </section>
         <StoreProfileForm
           folder={`vecorion/lojas/${store.slug}`}
           store={{
             name: store.name,
+            slug: store.slug,
+            vitrine_columns: cfg.vitrine_colunas ?? "2",
             footer_text: cfg.site_description ?? "",
             contact_email: cfg.contact_email ?? "",
             instagram_url: cfg.instagram_url ?? "",

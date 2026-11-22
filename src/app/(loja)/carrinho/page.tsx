@@ -1,3 +1,4 @@
+import StoreClosedNotice from "@/components/loja/StoreClosedNotice";
 import { Metadata } from "next";
 import Container from "@/components/ui/Container";
 import SectionEyebrow from "@/components/ui/SectionEyebrow";
@@ -11,6 +12,7 @@ export default function CarrinhoPage() {
   return (
     <section className="py-16 sm:py-20">
       <Container>
+        <StoreClosedNotice />
         <SectionEyebrow>Carrinho</SectionEyebrow>
         <h1 className="mt-3 text-3xl font-semibold text-ink sm:text-4xl">Seu carrinho</h1>
 

@@ -1,3 +1,5 @@
+import { getProductGroups } from "@/lib/produto/opcoes-data";
+import type { SelectableGroup } from "@/lib/produto/opcoes";
 import { pickShareVideo } from "@/lib/share/video";
 import { ogImageUrl, OG_SIZE } from "@/lib/media/og-image";
 import { notFound } from "next/navigation";
@@ -80,6 +82,19 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const relatedRows = await getRelatedProducts(productRow);
   const relatedProducts = relatedRows.map(mapToProduct);
 
+  const selectableGroups: SelectableGroup[] = (await getProductGroups(product.id))
+    .filter((g): g is typeof g & { id: string } => Boolean(g.id))
+    .map((g) => ({
+      id: g.id,
+      name: g.name,
+      required: g.required,
+      min_choices: g.min_choices,
+      max_choices: g.max_choices,
+      options: g.options
+        .filter((o): o is typeof o & { id: string } => Boolean(o.id))
+        .map((o) => ({ id: o.id, name: o.name, extra_price: o.extra_price })),
+    }));
+
   return (
     <>
       <section className="bg-paper py-16 sm:py-20">
@@ -109,7 +124,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
               <div className="mt-8">
                 <div className="mt-3"><StoreDeliveryNotice /></div>
-                <ProductActions product={product} />
+                <ProductActions product={product} groups={selectableGroups} />
                 <ShareProductButtons name={product.name} slug={product.slug} />
               </div>
             </div>

@@ -16,7 +16,7 @@ export default async function NovoProdutoPage() {
     <>
       <AdminHeader title="Novo Produto" />
       <Container className="max-w-2xl py-8">
-        <ProductForm categories={(data ?? []) as CategoryRow[]} />
+        <ProductForm categories={(data ?? []) as CategoryRow[]} storeType={(await getCurrentStore()).store_type} />
       </Container>
     </>
   );
