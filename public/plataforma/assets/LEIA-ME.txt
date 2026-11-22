@@ -1,0 +1,2 @@
+Salve aqui a logo oficial da Vecorion com o nome: logo-vecorion.png
+(arquivo ainda nao enviado; o index.html ja aponta para este caminho)
