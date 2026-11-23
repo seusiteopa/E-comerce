@@ -21,7 +21,7 @@ export interface CurrentStore {
   og_image_url: string | null;
   whatsapp: string | null;
   custom_domain: string | null;
-  status: "ativa" | "pausada";
+  status: "ativa" | "pausada" | "encerrada";
   is_platform_owned: boolean;
 }
 

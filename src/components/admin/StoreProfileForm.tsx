@@ -9,6 +9,8 @@ import { uploadFileToCloudinary } from "@/lib/cloudinary-client";
 
 interface StoreProfile {
   name: string;
+  slug: string;
+  vitrine_columns?: string;
   footer_text: string;
   contact_email: string;
   instagram_url: string;
@@ -68,6 +70,15 @@ export default function StoreProfileForm({
       <div>
         <label htmlFor="name" className="text-sm font-medium text-ink">Nome da loja</label>
         <input id="name" value={values.name} onChange={(e) => set("name", e.target.value)} className={inputClass} />
+        <label htmlFor="slug" className="mt-4 block text-sm font-medium text-ink">Endereço da loja</label>
+        <input id="slug" value={values.slug} onChange={(e) => set("slug", e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))} className={inputClass} />
+        <p className="mt-1 text-xs text-ink-soft">Trocar o endereço muda o link da loja. O link antigo deixa de funcionar, e os links que você já divulgou precisam ser atualizados.</p>
+        <label htmlFor="vitrine_columns" className="mt-4 block text-sm font-medium text-ink">Produtos por linha na vitrine</label>
+        <select id="vitrine_columns" value={values.vitrine_columns ?? "2"} onChange={(e) => set("vitrine_columns", e.target.value)} className={inputClass}>
+          <option value="1">1 produto por linha (um embaixo do outro)</option>
+          <option value="2">2 produtos por linha</option>
+          <option value="3">3 produtos por linha</option>
+        </select>
       </div>
       <div>
         <label htmlFor="description" className="text-sm font-medium text-ink">Descrição curta</label>

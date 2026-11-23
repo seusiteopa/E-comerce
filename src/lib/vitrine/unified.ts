@@ -38,7 +38,7 @@ export async function getUnifiedProducts(term: string): Promise<UnifiedProduct[]
     )
     .eq("status", "ativo")
     .eq("hidden", false)
-    .neq("stores.status", "pausada")
+    .not("stores.status", "in", "(pausada,encerrada)")
     .order("created_at", { ascending: false })
     .limit(60);
 

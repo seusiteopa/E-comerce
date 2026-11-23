@@ -1,3 +1,4 @@
+import VendasPorTipo from "@/components/plataforma/VendasPorTipo";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -51,8 +52,16 @@ export default async function PlataformaPage() {
 
   return (
     <Container className="py-10">
+      <VendasPorTipo />
       <h1 className="text-2xl font-semibold text-ink">Painel da plataforma</h1>
       <a href="/plataforma/cobrancas" className="mt-2 inline-block text-sm font-semibold text-navy hover:underline">Cobranças das lojas →</a>
+      <div className="mt-2 flex flex-wrap gap-4">
+        <a href="/plataforma/clientes" className="text-sm font-semibold text-navy hover:underline">Clientes e lojas →</a>
+        <a href="/plataforma/pedidos" className="text-sm font-semibold text-navy hover:underline">Pedidos das lojas →</a>
+        <a href="/plataforma/parceiros" className="text-sm font-semibold text-navy hover:underline">Agências →</a>
+        <a href="/plataforma/sites" className="text-sm font-semibold text-navy hover:underline">Sites dos clientes →</a>
+        <a href="/plataforma/imagem-compartilhamento" className="text-sm font-semibold text-navy hover:underline">Imagem da página inicial →</a>
+      </div>
       <p className="mt-1 text-sm text-ink-soft">
         {rows.length} loja(s) · {late} com mensalidade atrasada · {paused} pausada(s). Atraso não pausa a loja sozinho: você decide aqui.
       </p>

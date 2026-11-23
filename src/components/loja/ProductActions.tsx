@@ -1,4 +1,7 @@
 "use client";
+import { findVariation } from "@/lib/produto/combinacoes";
+import ProductOptionsPicker from "@/components/loja/ProductOptionsPicker";
+import { checkSelection, type SelectableGroup } from "@/lib/produto/opcoes";
 
 import { useStoreBase, withStoreBase } from "@/components/store/StoreLink";
 
@@ -15,7 +18,7 @@ const ctaLabelByType: Record<Product["type"], string> = {
   digital: "Comprar agora",
 };
 
-export default function ProductActions({ product }: { product: Product }) {
+export default function ProductActions({ product, groups = [] }: { product: Product; groups?: SelectableGroup[] }) {
   const router = useRouter();
   const storeBase = useStoreBase();
   const { addItem } = useCart();
@@ -24,8 +27,28 @@ export default function ProductActions({ product }: { product: Product }) {
   );
   const [quantity, setQuantity] = useState(1);
   const [justAdded, setJustAdded] = useState(false);
+  const [selectedOptionIds, setSelectedOptionIds] = useState<string[]>([]);
+  const [optionError, setOptionError] = useState<string | null>(null);
+  const optionCheck = groups.length > 0 ? checkSelection(groups, selectedOptionIds) : { extra: 0, labels: [] as string[] };
+  const optionsValid = !("error" in optionCheck);
+  const optionExtra = "error" in optionCheck ? 0 : optionCheck.extra;
+  const optionLabels = "error" in optionCheck ? [] : optionCheck.labels;
 
-  const selectedVariation = product.variations?.find((v) => v.id === selectedVariationId);
+  // Grupos de escolha única definem a combinação (ex.: Cor × Tamanho), e cada combinação tem o seu estoque.
+  const choiceGroups = groups.filter((g) => g.max_choices === 1);
+  const hasChoiceGroups = choiceGroups.length > 0;
+  const chosenAttrs: Record<string, string> = {};
+  for (const g of choiceGroups) {
+    const chosen = g.options.find((o) => selectedOptionIds.includes(o.id));
+    if (chosen) chosenAttrs[g.name] = chosen.name;
+  }
+  const comboComplete = hasChoiceGroups && Object.keys(chosenAttrs).length === choiceGroups.length;
+  const comboVariation = comboComplete && product.variations
+    ? findVariation(product.variations.map((v) => ({ ...v, attributes: v.attributes as Record<string, string> })), chosenAttrs)
+    : undefined;
+  const selectedVariation = hasChoiceGroups
+    ? comboVariation
+    : product.variations?.find((v) => v.id === selectedVariationId);
   const isPhysical = product.type === "fisico";
   const isOutOfStock = isPhysical && (!selectedVariation || selectedVariation.stock === 0);
 
@@ -41,13 +64,25 @@ export default function ProductActions({ product }: { product: Product }) {
       type: product.type,
       variationId: selectedVariation?.id,
       variationLabel,
+      optionIds: selectedOptionIds.length > 0 ? [...selectedOptionIds].sort() : undefined,
+      optionsLabel: optionLabels.length > 0 ? optionLabels.join(", ") : undefined,
       quantity,
-      unitPrice: product.promoPrice ?? product.price,
+      unitPrice: (product.promoPrice ?? product.price) + optionExtra,
       image: product.images[0]?.url ?? "/placeholder-product.svg",
     };
   }
 
+  function ensureOptions(): boolean {
+    if (!optionsValid) {
+      setOptionError("error" in optionCheck ? optionCheck.error : null);
+      return false;
+    }
+    setOptionError(null);
+    return true;
+  }
+
   function handleAction() {
+    if (!ensureOptions()) return;
     addItem(buildCartItem());
 
     if (isPhysical) {
@@ -60,18 +95,26 @@ export default function ProductActions({ product }: { product: Product }) {
   }
 
   function handleBuyNow() {
+    if (!ensureOptions()) return;
     addItem(buildCartItem());
     router.push(withStoreBase(storeBase, "/carrinho"));
   }
 
   return (
     <div className="flex flex-col gap-5">
-      {product.variations && product.variations.length > 0 && (
+      {!hasChoiceGroups && product.variations && product.variations.length > 0 && (
         <VariationPicker
           variations={product.variations}
           selectedId={selectedVariationId}
           onSelect={setSelectedVariationId}
         />
+      )}
+
+      {groups.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <ProductOptionsPicker groups={groups} selectedIds={selectedOptionIds} onChange={(ids) => { setSelectedOptionIds(ids); setOptionError(null); }} />
+          {optionError && <p role="alert" className="text-xs text-status-danger">{optionError}</p>}
+        </div>
       )}
 
       {isPhysical && (

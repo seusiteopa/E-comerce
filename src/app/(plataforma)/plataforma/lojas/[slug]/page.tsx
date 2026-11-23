@@ -104,6 +104,7 @@ export default async function PlataformaLojaPage({ params }: { params: Promise<{
             folder={`vecorion/lojas/${store.slug}`}
             store={{
               name: profileRow?.name ?? store.name,
+              slug: store.slug,
               description: profileRow?.description ?? "",
               whatsapp: profileRow?.whatsapp ?? "",
               og_title: profileRow?.og_title ?? "",

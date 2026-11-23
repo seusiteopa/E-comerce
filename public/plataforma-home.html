@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vecorion | Lojas, sites, vídeos, imagens e banners personalizados</title>
+<meta name="description" content="A Vecorion cria lojas digitais, sites, vídeos, imagens e banners personalizados para o seu negócio.">
+<meta name="theme-color" content="#07090D">
+
+<!-- ================= CONFIGURAÇÃO PENDENTE =================
+ 1) URL institucional definitiva ainda NÃO confirmada.
+    Quando souber o endereço, troque TODOS os "https://acessvecorion.netlify.app" abaixo
+    (canonical, og:url, og:image, twitter:image) pelo domínio real, sem barra no final.
+ 2) A OG Image está em assets/og-image.png (arte enviada, sem alterações, 1536x1024).
+ 3) /plataforma/assets/logo-vecorion.png é o símbolo recortado da OG Image; substitua pela logo oficial (PNG transparente) quando tiver, e remova mix-blend-mode do CSS.
+========================================================== -->
+<link rel="canonical" href="https://acessvecorion.netlify.app/">
+
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="Vecorion">
+<meta property="og:title" content="Vecorion | Criação de Lojas Digitais">
+<meta property="og:description" content="Transforme sua ideia em uma loja digital. Conheça a Vecorion e descubra novas possibilidades para o seu negócio.">
+<meta property="og:url" content="https://acessvecorion.netlify.app/">
+<meta property="og:image" content="https://acessvecorion.netlify.app//plataforma/assets/og-image.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="800">
+<meta property="og:image:alt" content="Identidade visual da Vecorion para criação de lojas digitais.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Vecorion | Criação de Lojas Digitais">
+<meta name="twitter:description" content="Transforme sua ideia em uma loja digital.">
+<meta name="twitter:image" content="https://acessvecorion.netlify.app//plataforma/assets/og-image.jpg">
+
+<style>
+:root{
+  --bg:#07090D;--bg2:#10141B;--surf:#151B24;--cy:#36D6F2;--tx:#EAF0F5;--mut:#929DAA;--ln:#242D38;
+  --font:"Inter","Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+  --pad:clamp(20px,5vw,72px);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:76px;-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--tx);font-family:var(--font);line-height:1.6;overflow-x:hidden}
+img,svg{display:block;max-width:100%}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--cy);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1240px;margin:0 auto;padding:0 var(--pad)}
+section{position:relative}
+h1,h2,h3{font-weight:800;line-height:1.02;letter-spacing:-.025em;text-transform:uppercase}
+h2{font-size:clamp(1.9rem,4.6vw,3.6rem);max-width:15ch}
+.lead{color:var(--mut);font-size:clamp(1rem,1.5vw,1.2rem);max-width:46ch}
+.tag{font-size:.78rem;letter-spacing:.18em;color:var(--cy);text-transform:uppercase;font-weight:600}
+
+/* Botões */
+.btn{display:inline-flex;align-items:center;gap:.6em;min-height:54px;padding:0 30px;border-radius:2px;background:var(--cy);color:#041016;font-weight:800;letter-spacing:.06em;text-decoration:none;font-size:.95rem;border:1px solid var(--cy);transition:transform .2s,background .2s,box-shadow .2s}
+.btn:hover{background:#6ae4f8;transform:translateY(-2px);box-shadow:0 10px 30px -12px rgba(54,214,242,.55)}
+.btn:active{transform:translateY(0) scale(.98)}
+.btn-sm{min-height:40px;padding:0 18px;font-size:.8rem;background:transparent;color:var(--cy)}
+.btn-sm:hover{background:var(--cy);color:#041016}
+
+/* Cabeçalho */
+header{position:fixed;inset:0 0 auto 0;z-index:50;background:rgba(7,9,13,.88);backdrop-filter:blur(10px);border-bottom:1px solid var(--ln)}
+.bar{display:flex;align-items:center;justify-content:space-between;height:68px}
+.logo img{height:46px;width:auto;mix-blend-mode:screen}
+nav{display:flex;align-items:center;gap:clamp(14px,3vw,32px)}
+nav a:not(.btn){color:var(--mut);text-decoration:none;font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;padding:10px 2px}
+nav a:not(.btn):hover{color:var(--tx)}
+
+/* Hero */
+.hero{min-height:100svh;display:flex;align-items:center;padding:110px 0 90px;overflow:hidden}
+.hero .wrap{display:grid;grid-template-columns:1.25fr .75fr;gap:40px;align-items:center;width:100%}
+.hero h1{font-size:clamp(2.3rem,6.4vw,5.4rem);margin:18px 0 26px;max-width:12ch}
+.hero .lead{margin-bottom:38px}
+.orbit{position:relative;aspect-ratio:1;width:100%;max-width:520px;justify-self:end}
+.orbit svg{width:100%;height:100%;overflow:visible}
+.spin{transform-origin:260px 260px;animation:spin 60s linear infinite}
+.spin.r{animation-duration:90s;animation-direction:reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.hero .tag,.hero h1,.hero .lead,.hero .btn{animation:rise .9s cubic-bezier(.2,.7,.2,1) both}
+.hero h1{animation-delay:.12s}.hero .lead{animation-delay:.24s}.hero .btn{animation-delay:.36s}
+.scroll{position:absolute;bottom:26px;left:50%;width:1px;height:46px;background:linear-gradient(var(--cy),transparent);transform:translateX(-50%)}
+.scroll::after{content:"";position:absolute;left:-2px;top:0;width:5px;height:5px;border-radius:50%;background:var(--cy);animation:drop 2.2s ease-in-out infinite}
+@keyframes drop{0%{top:0;opacity:1}100%{top:100%;opacity:0}}
+
+/* Seção 2 */
+.concept{padding:clamp(80px,12vw,160px) 0;border-top:1px solid var(--ln)}
+.concept .wrap{display:grid;grid-template-columns:1fr 1.1fr;gap:clamp(30px,6vw,90px);align-items:center}
+.concept h2{margin-bottom:28px}
+.concept p+p{margin-top:16px}
+.blocks svg{width:100%;height:auto}
+
+/* Seção 3 */
+.showcase{padding:clamp(80px,12vw,160px) 0;background:var(--bg2);border-block:1px solid var(--ln)}
+.showcase header.head{position:static;background:none;border:0;backdrop-filter:none;display:grid;grid-template-columns:1fr 1fr;gap:30px 60px;align-items:end;margin-bottom:56px}
+.demo{display:grid;grid-template-columns:1fr 210px;gap:28px;align-items:end}
+.frame{background:var(--bg);border:1px solid var(--ln);border-radius:10px;overflow:hidden}
+.chrome{display:flex;align-items:center;gap:6px;padding:10px 14px;border-bottom:1px solid var(--ln);background:var(--surf)}
+.chrome i{width:9px;height:9px;border-radius:50%;background:var(--ln)}
+.chrome span{margin-left:auto;font-size:.68rem;letter-spacing:.14em;color:var(--cy);text-transform:uppercase}
+.shop{padding:18px}
+.shop-nav{display:flex;gap:16px;align-items:center;padding-bottom:14px;border-bottom:1px solid var(--ln);font-size:.78rem;color:var(--mut)}
+.shop-nav b{color:var(--tx);margin-right:auto;letter-spacing:.1em}
+.banner{margin:18px 0;height:150px;border-radius:6px;border:1px solid var(--ln);background:linear-gradient(120deg,var(--surf),#0c1118);position:relative;overflow:hidden;padding:22px}
+.banner::after{content:"";position:absolute;right:-30px;top:-30px;width:190px;height:190px;border-radius:50%;border:1px solid var(--cy);opacity:.45;box-shadow:inset 0 0 0 26px rgba(54,214,242,.04)}
+.banner b{display:block;font-size:1.15rem;max-width:12ch;line-height:1.15}
+.banner small{color:var(--mut)}
+.cats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.cats span{font-size:.72rem;padding:6px 12px;border:1px solid var(--ln);border-radius:20px;color:var(--mut)}
+.cats span:first-child{border-color:var(--cy);color:var(--cy)}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.prod{background:var(--surf);border:1px solid var(--ln);border-radius:6px;padding:8px;font-size:.7rem;color:var(--mut)}
+.prod div{aspect-ratio:1;border-radius:4px;background:repeating-linear-gradient(135deg,#1a222d 0 8px,#141a23 8px 16px);margin-bottom:8px}
+.prod em{display:block;height:6px;width:60%;background:var(--ln);border-radius:3px;margin-top:6px}
+.phone{border:1px solid var(--ln);border-radius:26px;background:var(--bg);padding:12px;box-shadow:0 0 0 6px var(--surf)}
+.phone .banner{height:100px;margin:10px 0;padding:14px}
+.phone .banner b{font-size:.9rem}
+.phone .grid4{grid-template-columns:1fr 1fr;gap:8px}
+.phone .shop-nav{padding-bottom:8px}
+.phone .notch{width:46px;height:5px;border-radius:3px;background:var(--ln);margin:0 auto 6px}
+.benefits{display:grid;grid-template-columns:repeat(3,1fr);margin:56px 0 44px;border-top:1px solid var(--ln)}
+.benefits p{padding:22px 24px 0 0;color:var(--tx);font-weight:600;border-right:1px solid var(--ln);margin-right:24px}
+.benefits p:last-child{border:0}
+.benefits span{display:block;width:26px;height:2px;background:var(--cy);margin-bottom:14px}
+
+/* Seção 4 */
+.process{padding:clamp(80px,12vw,160px) 0}
+.process h2{margin-bottom:72px;max-width:18ch}
+.line{position:relative;max-width:900px;margin:0 auto}
+.line::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--ln)}
+.step{position:relative;width:50%;padding:0 54px 70px 0;text-align:right}
+.step:nth-child(even){margin-left:50%;padding:0 0 70px 54px;text-align:left}
+.step:last-child{padding-bottom:0}
+.step::after{content:"";position:absolute;top:22px;right:-5px;width:9px;height:9px;border-radius:50%;background:var(--cy);box-shadow:0 0 0 5px var(--bg)}
+.step:nth-child(even)::after{right:auto;left:-5px}
+.step .n{font-size:clamp(4rem,9vw,7rem);font-weight:800;line-height:1;color:transparent;-webkit-text-stroke:1px #3a4656;letter-spacing:-.04em}
+.step h3{font-size:1.25rem;letter-spacing:.04em;margin:6px 0 8px}
+.step p{color:var(--mut);max-width:30ch;display:inline-block}
+.js .step{opacity:0;transform:translateY(24px);transition:opacity .7s,transform .7s}
+.js .step.in{opacity:1;transform:none}
+
+/* Seção 5 */
+.final{padding:clamp(110px,18vw,240px) 0;border-top:1px solid var(--ln);text-align:center;background:radial-gradient(ellipse at 50% 100%,rgba(54,214,242,.07),transparent 60%)}
+.final h2{margin:0 auto 26px;max-width:16ch;font-size:clamp(2rem,6vw,4.8rem)}
+.final .lead{margin:0 auto 40px}
+
+/* Rodapé */
+footer{border-top:1px solid var(--ln);padding:44px 0 110px}
+.foot{display:grid;grid-template-columns:1.3fr 1fr;gap:30px;align-items:start}
+.foot img{height:56px;width:auto;margin-bottom:14px;mix-blend-mode:screen}
+.foot p{color:var(--mut);font-size:.92rem;max-width:36ch}
+.foot .k{color:var(--cy);font-size:.72rem;letter-spacing:.18em;margin-top:12px;display:block}
+.links{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.links a{color:var(--tx);text-decoration:none;padding:6px 0;font-size:.95rem;border-bottom:1px solid transparent}
+.links a:hover{border-color:var(--cy)}
+.copy{margin-top:34px;padding-top:20px;border-top:1px solid var(--ln);color:var(--mut);font-size:.8rem}
+
+/* WhatsApp */
+.wa{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));z-index:60;width:58px;height:58px;border-radius:50%;background:#25D366;color:#06210f;display:grid;place-items:center;box-shadow:0 8px 24px -8px rgba(0,0,0,.7);transition:transform .2s;animation:rise .8s 1.4s both}
+.wa:hover{transform:scale(1.07)}
+.wa svg{width:30px;height:30px;fill:currentColor}
+
+/* Responsivo */
+@media (max-width:860px){
+  nav a:not(.btn){display:none}
+  .hero .wrap,.concept .wrap,.foot,.showcase header.head{grid-template-columns:1fr}
+  .orbit{max-width:300px;justify-self:center;order:-1;margin-bottom:-10px}
+  .hero{align-items:flex-start;padding-top:100px}
+  .demo{grid-template-columns:1fr}
+  .phone{max-width:230px;margin:0 auto}
+  .benefits{grid-template-columns:1fr}
+  .benefits p{border:0;border-bottom:1px solid var(--ln);margin:0;padding:18px 0}
+  .line::before{left:7px}
+  .step,.step:nth-child(even){width:100%;margin:0;padding:0 0 54px 36px;text-align:left}
+  .step::after,.step:nth-child(even)::after{left:3px;right:auto}
+}
+@media (max-width:520px){.grid4{grid-template-columns:1fr 1fr}.btn{width:100%;justify-content:center}.btn-sm{width:auto}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+  .js .step{opacity:1;transform:none}
+}
+
+.ctas{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.btn-ghost{background:transparent;color:var(--tx);border:1px solid var(--ln)}
+.opcoes{margin-top:68px;border-bottom:1px solid var(--ln);background:var(--bg2)}
+.opc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+.opc{display:flex;flex-direction:column;gap:6px;padding:22px 20px;border-right:1px solid var(--ln);color:var(--tx);text-decoration:none;transition:background .2s}
+.opc:last-child{border-right:0}
+.opc:hover{background:var(--surf)}
+.opc span{color:var(--cy);font-size:12px;font-weight:600}
+.opc b{font-size:16px}
+.svc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:56px 0 44px;border-top:1px solid var(--ln)}
+.svc{padding:28px 24px 28px 0;border-right:1px solid var(--ln);margin-right:24px}
+.svc:last-child{border-right:0}
+.svc-n{display:block;color:var(--cy);font-size:13px;font-weight:600;margin-bottom:14px}
+.svc h3{color:var(--tx);font-size:18px;margin-bottom:10px}
+.svc p{color:var(--mut);font-size:15px;line-height:1.6}
+@media (max-width: 900px){.opc-grid{grid-template-columns:repeat(2,1fr)}.opc{border-bottom:1px solid var(--ln)}.svc-grid{grid-template-columns:1fr}.svc{border-right:0;border-bottom:1px solid var(--ln);margin-right:0}}
+</style>
+</head>
+<body>
+<script>document.documentElement.classList.add('js')</script>
+
+<header>
+  <div class="wrap bar">
+    <!-- LOGO: símbolo recortado da arte oficial (/plataforma/assets/logo-vecorion.png); mix-blend-mode:screen funde o fundo preto com a página -->
+    <a class="logo" href="#inicio" aria-label="Vecorion — início"><img src="/plataforma/assets/logo-vecorion.png" alt="Vecorion" height="46"></a>
+    <nav aria-label="Principal">
+      <a href="#servicos">Serviços</a>
+      <a href="#processo">Processo</a>
+      <a href="/login" rel="noopener">Entrar</a>
+      <a class="btn btn-sm" href="/lojas/vecorion" rel="noopener">Acessar a loja Vecorion ↗</a>
+    </nav>
+  </div>
+</header>
+
+<!-- OPÇÕES EM DESTAQUE -->
+<section class="opcoes" aria-label="Nossas opções">
+  <div class="wrap opc-grid">
+    <a class="opc" href="#loja"><span>01</span><b>Criação de lojas</b></a>
+    <a class="opc" href="#sites"><span>02</span><b>Sites personalizados</b></a>
+    <a class="opc" href="#imagens"><span>03</span><b>Imagens e banners</b></a>
+    <a class="opc" href="#videos"><span>04</span><b>Vídeos personalizados</b></a>
+  </div>
+</section>
+
+<main id="inicio">
+<!-- 01 HERO -->
+<section class="hero" aria-labelledby="t1">
+  <div class="wrap">
+    <div>
+      <span class="tag">Criação digital para o seu negócio</span>
+      <h1 id="t1">Criamos a presença digital do seu negócio.</h1>
+      <p class="lead">Lojas virtuais, sites, vídeos, imagens e banners feitos sob medida para o que você vende.</p>
+      <div class="ctas"><a class="btn btn-ghost" href="/login" rel="noopener">ENTRAR</a></div>
+    </div>
+    <div class="orbit" aria-hidden="true">
+      <svg viewBox="0 0 520 520" fill="none" stroke="#242D38">
+        <g class="spin">
+          <ellipse cx="260" cy="260" rx="250" ry="96" transform="rotate(-24 260 260)" stroke="#36D6F2" stroke-opacity=".55"/>
+          <circle cx="470" cy="190" r="6" fill="#36D6F2" stroke="none"/>
+        </g>
+        <g class="spin r">
+          <ellipse cx="260" cy="260" rx="250" ry="96" transform="rotate(24 260 260)"/>
+          <circle cx="60" cy="190" r="4" fill="#EAF0F5" stroke="none"/>
+        </g>
+        <circle cx="260" cy="260" r="170"/>
+        <circle cx="260" cy="260" r="110" stroke-dasharray="3 9"/>
+        <circle cx="260" cy="260" r="46" stroke="#36D6F2" stroke-opacity=".7"/>
+        <path d="M260 20v110M260 390v110M20 260h110M390 260h110" stroke-opacity=".7"/>
+        <circle cx="260" cy="260" r="6" fill="#36D6F2" stroke="none"/>
+      </svg>
+    </div>
+  </div>
+  <div class="scroll" aria-hidden="true"></div>
+</section>
+
+<!-- 02 CONCEITO -->
+<section class="concept" id="conceito" aria-labelledby="t2">
+  <div class="wrap">
+    <div>
+      <h2 id="t2">Sua ideia merece existir no digital.</h2>
+      <p class="lead">Uma loja digital precisa ser mais do que uma página bonita. Ela precisa apresentar seus produtos, facilitar a navegação e ajudar seus clientes a comprar.</p>
+      <p class="lead">A Vecorion transforma essa necessidade em uma experiência digital planejada para o seu negócio.</p>
+    </div>
+    <div class="blocks" aria-hidden="true">
+      <svg viewBox="0 0 560 420" fill="none" stroke="#242D38" stroke-width="1.2">
+        <rect x="20" y="20" width="520" height="56" rx="6" fill="#10141B"/>
+        <rect x="38" y="38" width="90" height="20" rx="3" fill="#242D38" stroke="none"/>
+        <rect x="430" y="38" width="90" height="20" rx="3" stroke="#36D6F2"/>
+        <path d="M80 76v54M300 76v54M480 76v30" stroke="#36D6F2" stroke-dasharray="3 5" stroke-opacity=".7"/>
+        <rect x="20" y="130" width="300" height="150" rx="6" fill="#151B24"/>
+        <circle cx="250" cy="205" r="52" stroke="#36D6F2" stroke-opacity=".5"/>
+        <rect x="40" y="150" width="120" height="12" rx="3" fill="#242D38" stroke="none"/>
+        <rect x="40" y="174" width="80" height="8" rx="3" fill="#1c2430" stroke="none"/>
+        <rect x="340" y="106" width="200" height="80" rx="6" stroke-dasharray="5 6"/>
+        <rect x="340" y="200" width="200" height="80" rx="6" fill="#10141B"/>
+        <path d="M170 280v50M440 280v50" stroke="#36D6F2" stroke-dasharray="3 5" stroke-opacity=".7"/>
+        <rect x="20" y="330" width="140" height="70" rx="6" fill="#10141B"/>
+        <rect x="180" y="330" width="140" height="70" rx="6" stroke-dasharray="5 6"/>
+        <rect x="340" y="330" width="200" height="70" rx="6" fill="#151B24"/>
+        <circle cx="440" cy="330" r="4" fill="#36D6F2" stroke="none"/><circle cx="80" cy="76" r="4" fill="#36D6F2" stroke="none"/>
+        <circle cx="300" cy="76" r="4" fill="#36D6F2" stroke="none"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- 03 SERVIÇOS -->
+<section class="showcase" id="servicos" aria-labelledby="t3">
+  <div class="wrap">
+    <header class="head">
+      <h2 id="t3">Tudo o que o seu negócio precisa para aparecer no digital.</h2>
+      <p class="lead">Criamos cada peça sob medida, para a sua marca e para o seu público.</p>
+    </header>
+    <div class="svc-grid">
+      <article class="svc" id="loja"><span class="svc-n">01</span><h3>Criação de lojas</h3><p>Criamos a sua loja virtual completa, com catálogo, pagamento, painel de gestão e controle de pedidos.</p></article>
+      <article class="svc" id="sites"><span class="svc-n">02</span><h3>Desenvolvimento de sites personalizados</h3><p>Desenvolvemos sites sob medida, da estrutura ao visual, para apresentar a sua marca e receber contatos ou vendas.</p></article>
+      <article class="svc" id="imagens"><span class="svc-n">03</span><h3>Imagens e banners personalizados</h3><p>Criamos imagens e banners sob medida para produtos, redes sociais, sites e campanhas.</p></article>
+      <article class="svc" id="videos"><span class="svc-n">04</span><h3>Vídeos personalizados</h3><p>Produzimos vídeos para divulgar produtos, serviços e a sua marca nas redes sociais.</p></article>
+    </div>
+    <a class="btn" href="https://wa.me/5519991892801?text=Ol%C3%A1%21%20Conheci%20a%20Vecorion%20e%20gostaria%20de%20saber%20mais%20sobre%20a%20cria%C3%A7%C3%A3o%20de%20uma%20loja%20digital%20para%20o%20meu%20neg%C3%B3cio." rel="noopener">FALE COM A GENTE ↗</a>
+  </div>
+</section>
+
+<!-- 04 COMO FUNCIONA -->
+<section class="process" id="processo" aria-labelledby="t4">
+  <div class="wrap">
+    <h2 id="t4">Da ideia à sua loja digital.</h2>
+    <ol class="line" style="list-style:none">
+      <li class="step"><div class="n" aria-hidden="true">01</div><h3>Conversamos</h3><p>Você conta o que deseja vender e como imagina sua loja.</p></li>
+      <li class="step"><div class="n" aria-hidden="true">02</div><h3>Planejamos</h3><p>Definimos a estrutura, a apresentação dos produtos e a experiência de navegação.</p></li>
+      <li class="step"><div class="n" aria-hidden="true">03</div><h3>Construímos</h3><p>Desenvolvemos a loja de acordo com o projeto definido.</p></li>
+    </ol>
+  </div>
+</section>
+
+<!-- 05 CHAMADA FINAL -->
+<section class="final" aria-labelledby="t5">
+  <div class="wrap">
+    <h2 id="t5">O próximo negócio digital pode ser o seu.</h2>
+    <p class="lead">Conte sua ideia. Vamos conversar sobre o que você precisa para o seu negócio.</p>
+    <div class="ctas"><a class="btn" href="/criar-loja" rel="noopener">CRIAR MINHA LOJA ↗</a><a class="btn btn-ghost" href="https://wa.me/5519991892801?text=Ol%C3%A1%21%20Conheci%20a%20Vecorion%20e%20gostaria%20de%20saber%20mais%20sobre%20a%20cria%C3%A7%C3%A3o%20de%20uma%20loja%20digital%20para%20o%20meu%20neg%C3%B3cio." rel="noopener">FALAR NO WHATSAPP ↗</a></div>
+  </div>
+</section>
+</main>
+
+<!-- 06 RODAPÉ -->
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <img src="/plataforma/assets/logo-vecorion.png" alt="Vecorion" height="56">
+        <p>Tecnologia para transformar ideias em experiências digitais.</p>
+        <span class="k">LOJAS · SITES · VÍDEOS · IMAGENS · BANNERS</span>
+      </div>
+      <div class="links">
+        <a href="/criar-loja" rel="noopener">Criar loja ↗</a>
+        <a href="/login" rel="noopener">Entrar</a>
+        <a href="https://wa.me/5519991892801?text=Ol%C3%A1%21%20Conheci%20a%20Vecorion%20e%20gostaria%20de%20saber%20mais%20sobre%20a%20cria%C3%A7%C3%A3o%20de%20uma%20loja%20digital%20para%20o%20meu%20neg%C3%B3cio." rel="noopener">WhatsApp comercial</a>
+      </div>
+    </div>
+    <p class="copy">© 2026 Vecorion. Todos os direitos reservados.</p>
+  </div>
+</footer>
+
+<a class="wa" href="https://wa.me/5519991892801?text=Ol%C3%A1%21%20Conheci%20a%20Vecorion%20e%20gostaria%20de%20saber%20mais%20sobre%20a%20cria%C3%A7%C3%A3o%20de%20uma%20loja%20digital%20para%20o%20meu%20neg%C3%B3cio." rel="noopener" aria-label="Falar com a Vecorion" title="Falar com a Vecorion">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2a9.9 9.9 0 0 0-8.4 15.1L2 22l5-1.6A9.9 9.9 0 1 0 12.04 2zm5.8 14c-.25.7-1.4 1.3-1.9 1.35-.5.05-1.1.07-1.8-.12-.4-.13-.95-.3-1.6-.6-2.8-1.2-4.6-4-4.75-4.2-.14-.2-1.1-1.5-1.1-2.8s.7-2 .95-2.3c.25-.25.5-.3.7-.3h.5c.17 0 .4-.05.6.45l.8 1.9c.1.2.15.4 0 .6l-.35.5c-.15.15-.3.3-.15.6.15.3.7 1.15 1.5 1.85 1 .9 1.9 1.2 2.2 1.3.3.15.45.1.6-.05l.85-1c.2-.25.4-.2.65-.1l1.8.9c.25.1.4.2.45.3.05.15.05.7-.2 1.4z"/></svg>
+</a>
+
+<script>
+(function(){
+  var s=document.querySelectorAll('.step');
+  if(!('IntersectionObserver' in window)){s.forEach(function(e){e.classList.add('in')});return}
+  var o=new IntersectionObserver(function(a){a.forEach(function(x){if(x.isIntersecting){x.target.classList.add('in');o.unobserve(x.target)}})},{threshold:.25});
+  s.forEach(function(e){o.observe(e)});
+})();
+</script>
+</body>
+</html>

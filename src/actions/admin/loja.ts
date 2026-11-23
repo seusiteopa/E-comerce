@@ -1,5 +1,6 @@
 "use server";
 
+import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { resolveHomeOrder } from "@/lib/store/home-order";
@@ -9,14 +10,28 @@ import { ActionResult, actionSuccess, actionError } from "@/lib/action-result";
 import { disconnectStore } from "@/lib/integrations/mercadopago/oauth";
 import { logger } from "@/lib/logger";
 
+const RESERVED_SLUGS = new Set([
+  "www", "app", "api", "admin", "painel", "plataforma", "vecorion", "login", "cadastro", "conta", "suporte",
+  "ajuda", "loja", "lojas", "mail", "email", "ftp", "static", "assets", "cdn", "blog", "docs", "status", "teste", "test",
+]);
+
 const storeProfileSchema = z.object({
   name: z.string().trim().min(2, "Informe o nome da loja.").max(80),
+  slug: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .min(3, "O endereço precisa de pelo menos 3 letras.")
+    .max(40)
+    .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "Use só letras minúsculas, números e hífen.")
+    .optional(),
   description: z.string().trim().max(300).optional().default(""),
   whatsapp: z.string().trim().max(20).optional().default(""),
   og_title: z.string().trim().max(90).optional().default(""),
   og_description: z.string().trim().max(200).optional().default(""),
   og_image_url: z.string().trim().max(500).optional().default(""),
   logo_url: z.string().trim().max(500).optional().default(""),
+  vitrine_columns: z.enum(["1", "2", "3"]).optional(),
   printer_app: z.enum(["thermer", "rawbt"]),
   footer_text: z.string().trim().max(300).optional().default(""),
   contact_email: z.string().trim().max(120).optional().default(""),
@@ -41,10 +56,22 @@ export async function updateStoreProfileAction(input: unknown): Promise<ActionRe
   }
 
   const d = parsed.data;
-  const supabase = await createSupabaseServerClient();
-  const { error } = await supabase
+
+  // Endereço: só troca se mudou, não é reservado e não está em uso por outra loja.
+  let newSlug: string | undefined;
+  if (d.slug && d.slug !== store.slug) {
+    if (RESERVED_SLUGS.has(d.slug)) return actionError("Este endereço não está disponível. Escolha outro.");
+    const serviceCheck = createSupabaseServiceClient();
+    const { data: taken } = await serviceCheck.from("stores").select("id").eq("slug", d.slug).maybeSingle();
+    if (taken) return actionError("Este endereço já está em uso. Escolha outro.");
+    newSlug = d.slug;
+  }
+
+  const service = createSupabaseServiceClient();
+  const { error } = await service
     .from("stores")
     .update({
+      ...(newSlug ? { slug: newSlug } : {}),
       name: d.name,
       description: d.description || null,
       whatsapp: d.whatsapp.replace(/\D/g, "") || null,
@@ -66,8 +93,9 @@ export async function updateStoreProfileAction(input: unknown): Promise<ActionRe
     { store_id: store.id, key: "site_description", value: d.footer_text },
     { store_id: store.id, key: "contact_email", value: d.contact_email },
     { store_id: store.id, key: "instagram_url", value: d.instagram_url },
+    ...(d.vitrine_columns ? [{ store_id: store.id, key: "vitrine_colunas", value: d.vitrine_columns }] : []),
   ];
-  const { error: settingsError } = await supabase.from("site_settings").upsert(settingsRows, { onConflict: "store_id,key" });
+  const { error: settingsError } = await service.from("site_settings").upsert(settingsRows, { onConflict: "store_id,key" });
   if (settingsError) {
     logger.error("Erro ao salvar rodapé da loja", { storeId: store.id, error: settingsError.message });
     return actionError("Não foi possível salvar o rodapé agora. Tente novamente.");

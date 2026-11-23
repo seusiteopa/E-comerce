@@ -75,6 +75,10 @@ export interface CartItem {
   type: ProductType;
   variationId?: string;
   variationLabel?: string;
+  /** Escolhas de opções (grupos) feitas pelo cliente. */
+  optionIds?: string[];
+  /** Nomes das opções escolhidas, para mostrar no carrinho. */
+  optionsLabel?: string;
   quantity: number;
   unitPrice: number;
   image: string;

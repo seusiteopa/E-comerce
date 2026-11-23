@@ -5,6 +5,7 @@ import OrderStatusSelect from "@/components/admin/OrderStatusSelect";
 import PrintOrderButton from "@/components/admin/PrintOrderButton";
 import NovoPedidoAlert from "@/components/admin/NovoPedidoAlert";
 import PushToggle from "@/components/admin/PushToggle";
+import { groupOrderLines } from "@/lib/pedidos/agrupar";
 import { StatusPill } from "@/components/ui/Badge";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentStore } from "@/lib/store/current";
@@ -21,7 +22,7 @@ interface OrderRowView {
   customer_name: string | null;
   payments: { status: string; method: string | null }[];
   profiles: { full_name: string | null; phone: string | null } | null;
-  order_items: { product_name_snapshot: string; quantity: number; unit_price_snapshot: number; products: { short_description: string | null } | null }[];
+  order_items: { product_name_snapshot: string; product_type_snapshot: string; quantity: number; unit_price_snapshot: number; products: { short_description: string | null } | null }[];
 }
 
 function paymentMethodLabel(method: string | null | undefined): string {
@@ -32,10 +33,12 @@ function paymentMethodLabel(method: string | null | undefined): string {
 export default async function AdminPedidosPage() {
   await requireAdminProfile();
   const supabase = await createSupabaseServerClient();
-  const { id: storeId } = await getCurrentStore();
+  const currentStore = await getCurrentStore();
+  const storeId = currentStore.id;
+  const storeType = currentStore.store_type;
   const { data } = await supabase
     .from("orders")
-    .select("id, created_at, status, total, payer_email, channel, customer_name, payments(status, method), profiles(full_name, phone), order_items(product_name_snapshot, quantity, unit_price_snapshot, products(short_description))")
+    .select("id, created_at, status, total, payer_email, channel, customer_name, payments(status, method), profiles(full_name, phone), order_items(product_name_snapshot, product_type_snapshot, quantity, unit_price_snapshot, products(short_description))")
     .eq("store_id", storeId)
     .order("created_at", { ascending: false });
 
@@ -49,10 +52,19 @@ export default async function AdminPedidosPage() {
     { header: "Data e hora", primary: true, cell: (r) => new Date(r.created_at).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", dateStyle: "short", timeStyle: "short" }) },
     { header: "Produtos", primary: true, cell: (r) => (
       <div className="flex flex-col gap-2">
-        {(r.order_items ?? []).map((it, idx) => (
-          <div key={idx}>
-            <p className="font-medium">{it.quantity}× {it.product_name_snapshot} · {formatCurrency(Number(it.unit_price_snapshot) * it.quantity)}</p>
-            {it.products?.short_description && <p className="text-xs text-ink-soft">{it.products.short_description}</p>}
+        {groupOrderLines(
+          (r.order_items ?? []).map((it) => ({
+            name: it.product_name_snapshot,
+            quantity: it.quantity,
+            unitPrice: Number(it.unit_price_snapshot),
+            type: it.product_type_snapshot === "digital" && storeType === "curso" ? "curso" : it.product_type_snapshot,
+          }))
+        ).map((section) => (
+          <div key={section.key}>
+            <p className="font-mono-label text-xs uppercase text-ink-soft">{section.label}</p>
+            {section.lines.map((line, idx) => (
+              <p key={idx} className="font-medium">{line.quantity}× {line.name} · {formatCurrency(line.unitPrice * line.quantity)}</p>
+            ))}
           </div>
         ))}
         {(r.order_items ?? []).length === 0 && <span>—</span>}

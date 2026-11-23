@@ -15,7 +15,7 @@ const schema = z.object({
   name: z.string().trim().min(2, "Informe o nome da loja.").max(80),
   slug: z.string().trim().toLowerCase().min(3, "O endereço precisa de pelo menos 3 letras.").max(40)
     .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "Use só letras minúsculas, números e hífen."),
-  storeType: z.enum(["loja", "restaurante", "digital", "misto"]),
+  storeType: z.enum(["loja", "restaurante", "digital", "curso"]),
   whatsapp: z.string().trim().max(20).optional().default(""),
   clientEmail: z.string().trim().email("Informe o e-mail do cliente, que será o responsável pelo pagamento."),
 });

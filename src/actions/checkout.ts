@@ -12,6 +12,8 @@ import { ProductRow, ProductVariationRow } from "@/types/database";
 import { createCardPayment, createPaymentPreference, createPixPayment, fetchPaymentStatus } from "@/lib/integrations/mercadopago";
 import { sendTransactionalEmail } from "@/lib/integrations/email";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
+import { getStoreOpenStatus } from "@/lib/store/hours-data";
+import { checkSelection } from "@/lib/produto/opcoes";
 import { getCurrentStore, getRequestOrigin } from "@/lib/store/current";
 import { getStorePaymentContext, PaymentNotConnectedError, type StorePaymentContext } from "@/lib/integrations/mercadopago/oauth";
 import { z } from "zod";
@@ -107,8 +109,18 @@ export async function createOrderAction(input: unknown): Promise<ActionResult<Cr
   const storeId = store.id;
 
   // Loja pausada pelo dono da plataforma não aceita pedidos novos.
-  if (store.status === "pausada") {
+  if (store.status === "pausada" || store.status === "encerrada") {
     return actionError("Esta loja está temporariamente indisponível.");
+  }
+
+  // Fora do horário de funcionamento a loja não finaliza pedido (a navegação continua).
+  const openStatus = await getStoreOpenStatus(storeId);
+  if (!openStatus.open) {
+    return actionError(
+      openStatus.opensAt
+        ? `A loja está fechada agora. Abre hoje às ${openStatus.opensAt}.`
+        : "A loja está fechada agora. Tente no próximo dia de funcionamento."
+    );
   }
   // Cada loja cobra com a PRÓPRIA conta Mercado Pago (OAuth). Sem conexão, não há como cobrar:
   // nunca usar o token de outra conta (o dinheiro cairia no lugar errado).
@@ -163,6 +175,43 @@ export async function createOrderAction(input: unknown): Promise<ActionResult<Cr
     const product = (products as ProductRow[]).find((p) => p.id === item.productId);
     if (!product) return actionError("Produto não encontrado.");
 
+    // Opções escolhidas: confere grupos, limites e soma o valor extra no servidor (nunca confia no carrinho).
+    let optionExtra = 0;
+    let optionLabels: string[] = [];
+    if (item.optionIds && item.optionIds.length > 0) {
+      const { data: groupRows } = await supabase
+        .from("product_option_groups")
+        .select("id, name, required, min_choices, max_choices")
+        .eq("product_id", product.id)
+        .order("position");
+      const { data: optionRows } = await supabase
+        .from("product_options")
+        .select("id, group_id, name, extra_price")
+        .eq("product_id", product.id);
+      const selectable = (groupRows ?? []).map((g) => ({
+        id: g.id,
+        name: g.name,
+        required: g.required,
+        min_choices: g.min_choices,
+        max_choices: g.max_choices,
+        options: (optionRows ?? [])
+          .filter((o) => o.group_id === g.id)
+          .map((o) => ({ id: o.id, name: o.name, extra_price: Number(o.extra_price) })),
+      }));
+      const check = checkSelection(selectable, item.optionIds);
+      if ("error" in check) return actionError(`${product.name}: ${check.error}`);
+      optionExtra = check.extra;
+      optionLabels = check.labels;
+    } else {
+      // Grupos obrigatórios também valem sem escolha enviada.
+      const { data: required } = await supabase
+        .from("product_option_groups")
+        .select("name, required, min_choices")
+        .eq("product_id", product.id)
+        .eq("required", true);
+      if ((required ?? []).length > 0) return actionError(`${product.name}: escolha as opções obrigatórias antes de comprar.`);
+    }
+
     itemTypes.push(product.type);
 
     const unitPrice = Number(product.promo_price ?? product.price);
@@ -177,16 +226,17 @@ export async function createOrderAction(input: unknown): Promise<ActionResult<Cr
       }
     }
 
+    const linePrice = unitPrice + optionExtra;
     orderItemsToInsert.push({
       product_id: product.id,
       variation_id: item.variationId ?? null,
-      product_name_snapshot: product.name,
+      product_name_snapshot: optionLabels.length > 0 ? `${product.name} (${optionLabels.join(", ")})` : product.name,
       product_type_snapshot: product.type,
-      unit_price_snapshot: unitPrice,
+      unit_price_snapshot: linePrice,
       quantity: item.quantity,
     });
 
-    subtotal += unitPrice * item.quantity;
+    subtotal += linePrice * item.quantity;
   }
 
   const needsAddress = orderRequiresAddress(itemTypes);

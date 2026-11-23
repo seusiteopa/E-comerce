@@ -37,6 +37,7 @@ export const quoteRequestSchema = z.object({
 export const createOrderItemSchema = z.object({
   productId: z.string().uuid(),
   variationId: z.string().uuid().optional(),
+  optionIds: z.array(z.string().uuid()).max(50).optional(),
   quantity: z.number().int().positive(),
 });
 

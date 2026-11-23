@@ -103,3 +103,9 @@ h1, h2, h3, h4 {
     transform: translateY(0);
   }
 }
+
+
+/* Colunas da vitrine escolhidas pelo lojista (1, 2 ou 3). Padrão: 2 no celular, 3 no tablet, 4 no computador. */
+[data-vitrine-cols="1"] .vitrine-grid { grid-template-columns: minmax(0, 1fr) !important; }
+[data-vitrine-cols="2"] .vitrine-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+[data-vitrine-cols="3"] .vitrine-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
