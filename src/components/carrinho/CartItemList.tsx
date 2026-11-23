@@ -42,7 +42,7 @@ export default function CartItemList() {
               </div>
               <button
                 type="button"
-                onClick={() => removeItem(item.productSlug, item.variationId)}
+                onClick={() => removeItem(item.productSlug, item.variationId, item.optionIds)}
                 aria-label={`Remover ${item.name} do carrinho`}
                 className="flex h-8 w-8 items-center justify-center rounded-full text-ink-soft hover:bg-paper hover:text-status-danger"
               >
@@ -54,7 +54,7 @@ export default function CartItemList() {
               {item.type === "fisico" ? (
                 <QuantitySelector
                   quantity={item.quantity}
-                  onChange={(q) => updateQuantity(item.productSlug, q, item.variationId)}
+                  onChange={(q) => updateQuantity(item.productSlug, q, item.variationId, item.optionIds)}
                 />
               ) : (
                 <span className="text-xs text-ink-soft">Quantidade: 1</span>

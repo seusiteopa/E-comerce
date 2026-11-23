@@ -23,7 +23,9 @@ export default function ProductForm({
   existingMedia = [],
   currentStock,
   currentDigitalFileUrl,
+  storeType = "misto",
 }: {
+  storeType?: string;
   categories: CategoryRow[];
   product?: ProductRow;
   existingMedia?: ExistingMedia[];
@@ -33,7 +35,12 @@ export default function ProductForm({
   const router = useRouter();
   const storeBase = useStoreBase();
   const [error, setError] = useState<string | null>(null);
-  const [type, setType] = useState<"fisico" | "digital">(product?.type ?? "fisico");
+  // Tipo de produto conforme o tipo da loja: física e lanchonete = físico; virtual e curso = digital.
+  const allowedTypes: ("fisico" | "digital")[] =
+    storeType === "digital" || storeType === "curso" ? ["digital"] : storeType === "loja" || storeType === "restaurante" ? ["fisico"] : ["fisico", "digital"];
+  const [type, setType] = useState<"fisico" | "digital">(
+    product?.type && allowedTypes.includes(product.type as "fisico" | "digital") ? (product.type as "fisico" | "digital") : allowedTypes[0]
+  );
   const [creatingCategory, setCreatingCategory] = useState(false);
   const [media, setMedia] = useState(existingMedia);
   const [isPending, startTransition] = useTransition();
@@ -124,11 +131,12 @@ export default function ProductForm({
             id="type"
             name="type"
             value={type}
+            disabled={allowedTypes.length === 1}
             onChange={(e) => setType(e.target.value as "fisico" | "digital")}
             className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy"
           >
-            <option value="fisico">Físico</option>
-            <option value="digital">Digital</option>
+            {allowedTypes.includes("fisico") && <option value="fisico">Físico</option>}
+            {allowedTypes.includes("digital") && <option value="digital">{storeType === "curso" ? "Curso (vídeos e aulas)" : "Digital"}</option>}
           </select>
         </div>
         <div>

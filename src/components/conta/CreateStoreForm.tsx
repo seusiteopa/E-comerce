@@ -103,10 +103,10 @@ export default function CreateStoreForm({ rootDomain, monthlyFee, referralCode, 
       <div>
         <label htmlFor="storeType" className="text-sm font-medium text-ink">Tipo de loja</label>
         <select id="storeType" value={storeType} onChange={(e) => setStoreType(e.target.value)} className={inputClass}>
-          <option value="loja">Loja (produtos)</option>
-          <option value="restaurante">Lanchonete / restaurante</option>
-          <option value="digital">Produtos digitais</option>
-          <option value="misto">Misto</option>
+          <option value="loja">Produtos físicos</option>
+          <option value="digital">Produtos virtuais (e-books e arquivos)</option>
+          <option value="curso">Cursos (vídeos e aulas)</option>
+          <option value="restaurante">Lanchonete ou restaurante</option>
         </select>
       </div>
       <div>
