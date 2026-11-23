@@ -7,36 +7,34 @@ import { useStoreBase, withStoreBase } from "@/components/store/StoreLink";
 import { formatCurrency } from "@/lib/format";
 
 /**
- * Painel lateral do carrinho, aberto ao adicionar um produto.
- * Tocar fora fecha e a pessoa continua comprando. Tocar dentro vai para a página do carrinho.
+ * Aba lateral do carrinho, aberta ao adicionar um produto.
+ * Fecha com o X, com "Continuar comprando" ou tocando fora. Só vai ao carrinho pelo botão "Ver carrinho".
  */
 export default function CartDrawer() {
   const { lastAddedItem, items, subtotal } = useCart();
   const router = useRouter();
   const base = useStoreBase();
-  // Fechar guarda o instante do último item adicionado; um novo item abre o painel de novo.
+  // Fechar guarda o instante do último item; um novo item abre a aba de novo.
   const [dismissedAt, setDismissedAt] = useState<number | null>(null);
   const open = lastAddedItem !== null && dismissedAt !== lastAddedItem.at;
 
   if (!open || items.length === 0) return null;
 
+  const close = () => setDismissedAt(lastAddedItem?.at ?? null);
+
   return (
     <div className="fixed inset-0 z-[60]">
-      <button
-        type="button"
-        aria-label="Fechar carrinho e continuar comprando"
-        onClick={() => setDismissedAt(lastAddedItem?.at ?? null)}
-        className="absolute inset-0 bg-ink/30"
-      />
+      <button type="button" aria-label="Fechar carrinho" onClick={close} className="absolute inset-0 bg-ink/30" />
       <aside
         role="dialog"
         aria-label="Carrinho"
-        onClick={() => router.push(withStoreBase(base, "/carrinho"))}
-        className="absolute right-0 top-0 flex h-full w-full max-w-sm cursor-pointer flex-col gap-4 bg-surface p-5 shadow-xl"
+        className="absolute bottom-0 left-0 right-0 flex max-h-[62vh] flex-col gap-4 rounded-t-2xl bg-surface p-5 shadow-xl sm:bottom-auto sm:left-auto sm:right-0 sm:top-0 sm:h-full sm:max-h-none sm:w-[360px] sm:rounded-none"
       >
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-ink">Seu carrinho</h2>
-          <span className="text-xs text-ink-soft">{items.length} {items.length === 1 ? "item" : "itens"}</span>
+          <h2 className="text-base font-semibold text-ink">Produto adicionado</h2>
+          <button type="button" aria-label="Fechar" onClick={close} className="flex h-8 w-8 items-center justify-center rounded-full text-ink-soft hover:bg-paper">
+            ✕
+          </button>
         </div>
 
         <ul className="flex flex-1 flex-col gap-3 overflow-y-auto">
@@ -56,7 +54,18 @@ export default function CartDrawer() {
             <span>Subtotal</span>
             <span>{formatCurrency(subtotal)}</span>
           </div>
-          <p className="mt-2 text-center text-xs text-ink-soft">Toque aqui para ver o carrinho completo e finalizar</p>
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            <button type="button" onClick={close} className="flex h-11 items-center justify-center rounded-full border border-line text-sm font-medium text-ink hover:bg-paper">
+              Continuar comprando
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push(withStoreBase(base, "/carrinho"))}
+              className="flex h-11 items-center justify-center rounded-full bg-navy text-sm font-semibold text-white hover:opacity-90"
+            >
+              Ver carrinho
+            </button>
+          </div>
         </div>
       </aside>
     </div>

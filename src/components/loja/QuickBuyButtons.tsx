@@ -16,7 +16,7 @@ export default function QuickBuyButtons({ product }: { product: Product }) {
     return (
       <StoreLink
         href={`/produtos/${product.slug}`}
-        className="mt-1 flex h-10 items-center justify-center rounded-full border border-line text-sm font-medium text-ink hover:bg-paper"
+        className="mt-1 flex h-10 w-full items-center justify-center rounded-full bg-navy text-sm font-semibold text-white hover:opacity-90"
       >
         Escolher opções
       </StoreLink>
@@ -36,32 +36,24 @@ export default function QuickBuyButtons({ product }: { product: Product }) {
   };
 
   return (
-    <div className="mt-1 flex flex-col gap-1">
-      <div className="grid grid-cols-2 gap-2">
-        <button
-          type="button"
-          onClick={() => addItem(item)}
-          className="flex h-10 items-center justify-center rounded-full border border-line text-xs font-medium text-ink hover:bg-paper sm:text-sm"
-        >
-          Adicionar ao carrinho
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            addItem(item);
-            router.push(withStoreBase(base, "/carrinho"));
-          }}
-          className="flex h-10 items-center justify-center rounded-full bg-navy text-xs font-semibold text-white hover:opacity-90 sm:text-sm"
-        >
-          Comprar
-        </button>
-      </div>
-      <StoreLink
-        href={`/produtos/${product.slug}`}
-        className="flex h-9 items-center justify-center rounded-full text-xs font-medium text-ink-soft underline-offset-4 hover:underline"
+    <div className="mt-1 flex flex-col gap-2">
+      <button
+        type="button"
+        onClick={() => addItem(item)}
+        className="flex h-10 w-full items-center justify-center rounded-full bg-navy text-sm font-semibold text-white hover:opacity-90"
       >
-        Mais opções
-      </StoreLink>
+        Adicionar ao carrinho
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          addItem(item);
+          router.push(withStoreBase(base, "/carrinho"));
+        }}
+        className="flex h-8 w-full items-center justify-center rounded-full text-xs font-medium text-ink-soft underline-offset-4 hover:text-ink hover:underline"
+      >
+        Comprar agora
+      </button>
     </div>
   );
 }

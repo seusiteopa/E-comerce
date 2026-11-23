@@ -1,10 +1,9 @@
 import StoreLink from "@/components/store/StoreLink";
-import Image from "next/image";
 import { Product } from "@/types";
 import PriceTag from "@/components/ui/PriceTag";
 import QuickBuyButtons from "@/components/loja/QuickBuyButtons";
 
-import { optimizeCloudinaryUrl } from "@/lib/cloudinary-optimizer";
+import ProductImageSlider from "@/components/loja/ProductImageSlider";
 export default function ProductCard({ product }: { product: Product }) {
   const outOfStock =
     product.type === "fisico" &&
@@ -16,20 +15,11 @@ export default function ProductCard({ product }: { product: Product }) {
       href={`/produtos/${product.slug}`}
       className="group flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-navy/40 hover:shadow-xl"
     >
-      <div className="relative aspect-square w-full overflow-hidden bg-paper">
-        <Image
-          src={product.images[0] ? optimizeCloudinaryUrl(product.images[0].url, { width: 400, height: 400, quality: "auto" }) : "/placeholder-product.svg"}
-          alt={product.images[0]?.alt ?? product.name}
-          fill
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-        />
-        {outOfStock && (
-          <span className="absolute left-3 top-3 rounded-full bg-ink/80 px-3 py-1 text-xs font-semibold text-white">
-            Esgotado
-          </span>
-        )}
-      </div>
+      <ProductImageSlider
+        images={product.images.map((img) => ({ url: img.url, alt: img.alt }))}
+        name={product.name}
+        outOfStock={outOfStock}
+      />
 
       <div className="flex flex-1 flex-col gap-2 p-4">
         <h3 className="text-sm font-semibold leading-snug text-ink">{product.name}</h3>
