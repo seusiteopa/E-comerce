@@ -18,7 +18,7 @@ import {
   Receipt,
   Menu,
   X,
-  LogOut, Megaphone, History, Star } from "lucide-react";
+  LogOut, Megaphone, History, Star, Clock } from "lucide-react";
 import { logoutAction } from "@/actions/auth";
 
 const navItems = [
@@ -29,6 +29,7 @@ const navItems = [
   { href: "/admin/pedidos", label: "Pedidos", icon: ShoppingBag },
   { href: "/admin/historico", label: "Histórico", icon: History },
   { href: "/admin/destaque", label: "Destaque", icon: Star },
+  { href: "/admin/horario", label: "Horário", icon: Clock },
   { href: "/admin/clientes", label: "Clientes", icon: Users },
   { href: "/admin/cupons", label: "Cupons", icon: Ticket },
   { href: "/admin/banners", label: "Banners", icon: ImageIcon },
