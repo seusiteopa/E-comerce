@@ -15,11 +15,12 @@ import {
   Store,
   CreditCard,
   Receipt,
-  LogOut, Megaphone, History, Star, Clock } from "lucide-react";
+  LogOut, Megaphone, History, Star, Clock, LayoutGrid, Shield } from "lucide-react";
 import { logoutAction } from "@/actions/auth";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/loja", label: "Minha loja", icon: LayoutGrid },
   { href: "/admin/produtos", label: "Produtos", icon: Package },
   { href: "/admin/categorias", label: "Categorias", icon: FolderTree },
   { href: "/admin/balcao", label: "Pedido de balcão", icon: Receipt },
@@ -37,7 +38,7 @@ const navItems = [
   { href: "/conta/lojas", label: "Trocar de loja", icon: Store },
 ];
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ isPlatformAdmin = false }: { isPlatformAdmin?: boolean }) {
   return (
     <aside className="hidden w-64 shrink-0 flex-col border-r border-line bg-surface lg:flex lg:h-screen lg:sticky lg:top-0">
       <StoreLink href="/admin" className="flex h-16 items-center gap-3 border-b border-line px-6 hover:bg-paper">
@@ -49,6 +50,12 @@ export default function AdminSidebar() {
           return <AdminNavItem key={item.href} href={item.href} label={item.label} icon={item.icon} />;
         })}
       </nav>
+      {isPlatformAdmin && (
+        <a href="/plataforma" className="mx-4 mb-2 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-navy transition-colors hover:bg-paper">
+          <Shield size={17} aria-hidden="true" />
+          Painel da plataforma
+        </a>
+      )}
       <a href="/lojas/vecorion" className="mx-4 mb-2 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink-soft transition-colors hover:bg-paper hover:text-ink">
         <Store size={17} aria-hidden="true" />
         Loja da Vecorion

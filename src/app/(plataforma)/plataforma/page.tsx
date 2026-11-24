@@ -59,6 +59,7 @@ export default async function PlataformaPage() {
         <a href="/plataforma/clientes" className="text-sm font-semibold text-navy hover:underline">Clientes e lojas →</a>
         <a href="/plataforma/pedidos" className="text-sm font-semibold text-navy hover:underline">Pedidos das lojas →</a>
         <a href="/plataforma/parceiros" className="text-sm font-semibold text-navy hover:underline">Agências →</a>
+        <a href="/plataforma/briefings" className="text-sm font-semibold text-navy hover:underline">Pedidos de serviço →</a>
         <a href="/plataforma/sites" className="text-sm font-semibold text-navy hover:underline">Sites dos clientes →</a>
         <a href="/plataforma/imagem-compartilhamento" className="text-sm font-semibold text-navy hover:underline">Imagem da página inicial →</a>
       </div>

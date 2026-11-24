@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Package, Download, Heart, MapPin, User, Store } from "lucide-react";
+import { Package, Download, Heart, MapPin, User, Store, Shield } from "lucide-react";
 
 const items = [
   { href: "/conta/pedidos", label: "Meus Pedidos", icon: Package },
@@ -10,10 +10,11 @@ const items = [
   { href: "/conta/lojas", label: "Minhas lojas", icon: Store },
 ];
 
-export default function AccountNav() {
+export default function AccountNav({ isPlatformAdmin = false }: { isPlatformAdmin?: boolean }) {
+  const all = isPlatformAdmin ? [...items, { href: "/plataforma", label: "Painel da plataforma", icon: Shield }] : items;
   return (
     <nav aria-label="Navegação da conta" className="flex gap-2 overflow-x-auto pb-2 lg:flex-col lg:overflow-visible lg:pb-0">
-      {items.map((item) => {
+      {all.map((item) => {
         const Icon = item.icon;
         return (
           <Link
