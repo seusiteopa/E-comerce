@@ -24,6 +24,8 @@ export function useStoreHref(href: string): string {
 
 export function withStoreBase(base: string, href: string): string {
   if (!base || !href.startsWith("/") || href.startsWith("//")) return href;
+  // Já tem o prefixo desta loja: não repete (evita endereços como /lojas/x/lojas/x/...).
+  if (href === base || href.startsWith(`${base}/`) || href.startsWith(`${base}?`)) return href;
   if (UNPREFIXED.some((p) => href === p || href.startsWith(p + "/") || href.startsWith(p + "?"))) return href;
   return href === "/" ? base : `${base}${href}`;
 }
