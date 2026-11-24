@@ -195,6 +195,7 @@ footer{border-top:1px solid var(--ln);padding:44px 0 110px}
 .svc-n{display:block;color:var(--cy);font-size:13px;font-weight:600;margin-bottom:14px}
 .svc h3{color:var(--tx);font-size:18px;margin-bottom:10px}
 .svc p{color:var(--mut);font-size:15px;line-height:1.6}
+.svc .btn{margin-top:18px}
 @media (max-width: 900px){.opc-grid{grid-template-columns:repeat(2,1fr)}.opc{border-bottom:1px solid var(--ln)}.svc-grid{grid-template-columns:1fr}.svc{border-right:0;border-bottom:1px solid var(--ln);margin-right:0}}
 </style>
 </head>
@@ -217,10 +218,10 @@ footer{border-top:1px solid var(--ln);padding:44px 0 110px}
 <!-- OPÇÕES EM DESTAQUE -->
 <section class="opcoes" aria-label="Nossas opções">
   <div class="wrap opc-grid">
-    <a class="opc" href="#loja"><span>01</span><b>Criação de lojas</b></a>
-    <a class="opc" href="#sites"><span>02</span><b>Sites personalizados</b></a>
-    <a class="opc" href="#imagens"><span>03</span><b>Imagens e banners</b></a>
-    <a class="opc" href="#videos"><span>04</span><b>Vídeos personalizados</b></a>
+    <a class="opc" href="/criar-loja"><span>01</span><b>Criação de lojas</b></a>
+    <a class="opc" href="/pedido?tipo=site"><span>02</span><b>Sites personalizados</b></a>
+    <a class="opc" href="/pedido?tipo=imagens"><span>03</span><b>Imagens e banners</b></a>
+    <a class="opc" href="/pedido?tipo=videos"><span>04</span><b>Vídeos personalizados</b></a>
   </div>
 </section>
 
@@ -294,12 +295,12 @@ footer{border-top:1px solid var(--ln);padding:44px 0 110px}
       <p class="lead">Criamos cada peça sob medida, para a sua marca e para o seu público.</p>
     </header>
     <div class="svc-grid">
-      <article class="svc" id="loja"><span class="svc-n">01</span><h3>Criação de lojas</h3><p>Criamos a sua loja virtual completa, com catálogo, pagamento, painel de gestão e controle de pedidos.</p></article>
-      <article class="svc" id="sites"><span class="svc-n">02</span><h3>Desenvolvimento de sites personalizados</h3><p>Desenvolvemos sites sob medida, da estrutura ao visual, para apresentar a sua marca e receber contatos ou vendas.</p></article>
-      <article class="svc" id="imagens"><span class="svc-n">03</span><h3>Imagens e banners personalizados</h3><p>Criamos imagens e banners sob medida para produtos, redes sociais, sites e campanhas.</p></article>
-      <article class="svc" id="videos"><span class="svc-n">04</span><h3>Vídeos personalizados</h3><p>Produzimos vídeos para divulgar produtos, serviços e a sua marca nas redes sociais.</p></article>
+      <article class="svc" id="loja"><span class="svc-n">01</span><h3>Criação de lojas</h3><p>Criamos a sua loja virtual completa, com catálogo, pagamento, painel de gestão e controle de pedidos.</p><a class="btn btn-sm" href="/criar-loja">Criar minha loja ↗</a></article>
+      <article class="svc" id="sites"><span class="svc-n">02</span><h3>Desenvolvimento de sites personalizados</h3><p>Desenvolvemos sites sob medida, da estrutura ao visual, para apresentar a sua marca e receber contatos ou vendas.</p><a class="btn btn-sm" href="/pedido?tipo=site">Pedir meu site ↗</a></article>
+      <article class="svc" id="imagens"><span class="svc-n">03</span><h3>Imagens e banners personalizados</h3><p>Criamos imagens e banners sob medida para produtos, redes sociais, sites e campanhas.</p><a class="btn btn-sm" href="/pedido?tipo=imagens">Pedir imagens e banners ↗</a></article>
+      <article class="svc" id="videos"><span class="svc-n">04</span><h3>Vídeos personalizados</h3><p>Produzimos vídeos para divulgar produtos, serviços e a sua marca nas redes sociais.</p><a class="btn btn-sm" href="/pedido?tipo=videos">Pedir meu vídeo ↗</a></article>
     </div>
-    <a class="btn" href="https://wa.me/5519991892801?text=Ol%C3%A1%21%20Conheci%20a%20Vecorion%20e%20gostaria%20de%20saber%20mais%20sobre%20a%20cria%C3%A7%C3%A3o%20de%20uma%20loja%20digital%20para%20o%20meu%20neg%C3%B3cio." rel="noopener">FALE COM A GENTE ↗</a>
+    <a class="btn btn-ghost" href="https://wa.me/5519991892801?text=Ol%C3%A1%21%20Conheci%20a%20Vecorion%20e%20gostaria%20de%20saber%20mais%20sobre%20a%20cria%C3%A7%C3%A3o%20de%20uma%20loja%20digital%20para%20o%20meu%20neg%C3%B3cio." rel="noopener">TIRAR DÚVIDAS NO WHATSAPP ↗</a>
   </div>
 </section>
 
