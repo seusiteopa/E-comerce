@@ -18,11 +18,12 @@ import {
   Receipt,
   Menu,
   X,
-  LogOut, Megaphone, History, Star, Clock } from "lucide-react";
+  LogOut, Megaphone, History, Star, Clock, LayoutGrid, Shield } from "lucide-react";
 import { logoutAction } from "@/actions/auth";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/loja", label: "Minha loja", icon: LayoutGrid },
   { href: "/admin/produtos", label: "Produtos", icon: Package },
   { href: "/admin/categorias", label: "Categorias", icon: FolderTree },
   { href: "/admin/balcao", label: "Pedido de balcão", icon: Receipt },
@@ -40,7 +41,7 @@ const navItems = [
   { href: "/conta/lojas", label: "Trocar de loja", icon: Store },
 ];
 
-export default function AdminMobileNav() {
+export default function AdminMobileNav({ isPlatformAdmin = false }: { isPlatformAdmin?: boolean }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -94,6 +95,15 @@ export default function AdminMobileNav() {
           >
             Ver loja
           </StoreLink>
+          {isPlatformAdmin && (
+            <a
+              href="/plataforma"
+              className="mt-2 flex items-center gap-3 rounded-lg border-t border-line px-3 pt-4 text-sm font-medium text-navy"
+            >
+              <Shield size={17} aria-hidden="true" />
+              Painel da plataforma
+            </a>
+          )}
           <a
             href="/lojas/vecorion"
             className="mt-2 flex items-center gap-3 rounded-lg border-t border-line px-3 pt-4 text-sm font-medium text-ink-soft hover:text-ink"

@@ -5,6 +5,7 @@ import { StoreBaseProvider } from "@/components/store/StoreLink";
 import { storeBasePath } from "@/lib/store/base-path";
 import { redirect } from "next/navigation";
 import { requireAdminProfile, ForbiddenError, UnauthorizedError } from "@/lib/auth";
+import { requirePlatformAdmin } from "@/lib/platform";
 
 // Um único app instalável para o domínio inteiro (evita o conflito de dois
 // apps/manifests/service workers para a mesma origem no Android). O admin
@@ -23,13 +24,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     throw err;
   }
   const base = await storeBasePath();
+  const isPlatformAdmin = await requirePlatformAdmin().then(() => true, () => false);
 
   return (
     <StoreBaseProvider value={base}>
       <div className="flex min-h-screen">
-        <AdminSidebar />
+        <AdminSidebar isPlatformAdmin={isPlatformAdmin} />
         <div className="flex-1">
-          <AdminMobileNav />
+          <AdminMobileNav isPlatformAdmin={isPlatformAdmin} />
           {children}
         </div>
       </div>
