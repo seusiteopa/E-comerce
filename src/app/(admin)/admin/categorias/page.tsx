@@ -18,7 +18,7 @@ interface CategoryRow {
 export default async function AdminCategoriasPage() {
   await requireAdminProfile();
   const supabase = await createSupabaseServerClient();
-  const { id: storeId } = await getCurrentStore();
+  const { id: storeId, store_type: storeType } = await getCurrentStore();
   const { data } = await supabase.from("categories").select("id, slug, name, product_type, active").eq("store_id", storeId).order("name");
   const rows = (data ?? []) as CategoryRow[];
 
@@ -34,7 +34,7 @@ export default async function AdminCategoriasPage() {
       <AdminHeader title="Categorias" />
       <Container className="py-8">
         <div className="mb-8 max-w-lg">
-          <CategoryForm />
+          <CategoryForm storeType={storeType} />
         </div>
         <p className="mb-4 text-xs text-ink-soft">
           Não é possível excluir uma categoria enquanto algum produto estiver usando ela — edite o produto e troque a categoria dele primeiro.

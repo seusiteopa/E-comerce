@@ -1,4 +1,5 @@
 import { requireStoreAdmin } from "@/lib/auth";
+import StoreLink from "@/components/store/StoreLink";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 
 /** Lista de primeiros passos do lojista. Some quando tudo estiver feito. */
@@ -28,7 +29,7 @@ export default async function PrimeirosPassos() {
         {steps.map((s) => (
           <li key={s.label} className="flex items-center gap-3 text-sm">
             <span aria-hidden="true" className={`inline-block h-4 w-4 rounded-full border ${s.done ? "border-green-500 bg-green-500" : "border-line"}`} />
-            {s.done ? <span className="text-ink-soft line-through">{s.label}</span> : <a href={s.href} className="font-medium text-navy hover:underline">{s.label}</a>}
+            {s.done ? <span className="text-ink-soft line-through">{s.label}</span> : <StoreLink href={s.href} className="font-medium text-navy hover:underline">{s.label}</StoreLink>}
           </li>
         ))}
       </ul>

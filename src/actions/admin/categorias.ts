@@ -7,6 +7,7 @@ import { requireAdminProfile, ForbiddenError, UnauthorizedError } from "@/lib/au
 import { categoryAdminSchema } from "@/lib/validation/admin-schemas";
 import { ActionResult, actionSuccess, actionError } from "@/lib/action-result";
 import { logger } from "@/lib/logger";
+import { resolveCategoryType } from "@/lib/store/product-types";
 
 async function guardAdmin() {
   try {
@@ -33,12 +34,14 @@ export async function createCategoryAction(formData: FormData): Promise<ActionRe
     return actionError("Acesso restrito ao painel administrativo.");
   }
 
+  const store = await getCurrentStore();
   const name = (formData.get("name") as string)?.trim() ?? "";
+  // O tipo da categoria segue o tipo da loja (loja virtual só tem categoria digital, e assim por diante).
   const parsed = categoryAdminSchema.safeParse({
     slug: slugify(name),
     name,
     description: (formData.get("description") as string)?.trim() || undefined,
-    productType: formData.get("productType") as string,
+    productType: resolveCategoryType(store.store_type, formData.get("productType") as string | null),
   });
 
   if (!parsed.success) {
@@ -46,7 +49,7 @@ export async function createCategoryAction(formData: FormData): Promise<ActionRe
   }
 
   const supabase = await createSupabaseServerClient();
-  const { id: storeId } = await getCurrentStore();
+  const storeId = store.id;
   const { error } = await supabase.from("categories").insert({
     store_id: storeId,
     slug: parsed.data.slug,
