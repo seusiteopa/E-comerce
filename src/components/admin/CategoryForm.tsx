@@ -4,8 +4,10 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import { createCategoryAction } from "@/actions/admin/categorias";
+import { allowedProductTypes } from "@/lib/store/product-types";
 
-export default function CategoryForm() {
+export default function CategoryForm({ storeType = "misto" }: { storeType?: string }) {
+  const allowed = allowedProductTypes(storeType);
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -38,18 +40,22 @@ export default function CategoryForm() {
         />
       </div>
 
-      <div>
-        <label htmlFor="productType" className="text-sm font-medium text-ink">Tipo de produto</label>
-        <select
-          id="productType"
-          name="productType"
-          defaultValue="fisico"
-          className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy"
-        >
-          <option value="fisico">Físico</option>
-          <option value="digital">Digital</option>
-        </select>
-      </div>
+      {allowed.length > 1 ? (
+        <div>
+          <label htmlFor="productType" className="text-sm font-medium text-ink">Tipo de produto</label>
+          <select
+            id="productType"
+            name="productType"
+            defaultValue="fisico"
+            className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-navy"
+          >
+            <option value="fisico">Físico</option>
+            <option value="digital">Digital</option>
+          </select>
+        </div>
+      ) : (
+        <input type="hidden" name="productType" value={allowed[0]} />
+      )}
 
       <div>
         <label htmlFor="description" className="text-sm font-medium text-ink">Descrição (opcional)</label>

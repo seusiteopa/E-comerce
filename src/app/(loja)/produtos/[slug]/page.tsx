@@ -11,6 +11,8 @@ import PriceTag from "@/components/ui/PriceTag";
 import StoreDeliveryNotice from "@/components/loja/StoreDeliveryNotice";
 import ProductActions from "@/components/loja/ProductActions";
 import ShareProductButtons from "@/components/loja/ShareProductButtons";
+import FavoriteButton from "@/components/loja/FavoriteButton";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { storeBasePath } from "@/lib/store/base-path";
 import ProductGallery from "@/components/loja/ProductGallery";
 import BuyNowButton from "@/components/loja/BuyNowButton";
@@ -82,6 +84,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const relatedRows = await getRelatedProducts(productRow);
   const relatedProducts = relatedRows.map(mapToProduct);
 
+  // Se a pessoa está logada, o coração já aparece marcado quando o produto é favorito.
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: favorite } = user
+    ? await supabase.from("favorites").select("product_id").eq("profile_id", user.id).eq("product_id", product.id).maybeSingle()
+    : { data: null };
+
   const selectableGroups: SelectableGroup[] = (await getProductGroups(product.id))
     .filter((g): g is typeof g & { id: string } => Boolean(g.id))
     .map((g) => ({
@@ -126,6 +135,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 <div className="mt-3"><StoreDeliveryNotice /></div>
                 <ProductActions product={product} groups={selectableGroups} />
                 <ShareProductButtons name={product.name} slug={product.slug} />
+                <FavoriteButton productId={product.id} initialFavorited={Boolean(favorite)} />
               </div>
             </div>
           </div>

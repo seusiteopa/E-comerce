@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Container from "@/components/ui/Container";
+import { requirePlatformPage } from "@/lib/platform";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 
 export const metadata: Metadata = { title: "Clientes e lojas", robots: { index: false, follow: false } };
 
 export default async function PlataformaClientesPage() {
+  await requirePlatformPage();
   const service = createSupabaseServiceClient();
   const { data: members } = await service
     .from("store_members")
@@ -29,17 +31,19 @@ export default async function PlataformaClientesPage() {
     byOwner.set(m.user_id, entry);
   }
   const owners = [...byOwner.values()].sort((a, b) => a.name.localeCompare(b.name));
+  const totalLojas = owners.reduce((sum, o) => sum + o.stores.length, 0);
 
   return (
     <section className="py-10">
       <Container>
         <p className="text-xs font-semibold uppercase tracking-wide text-navy">Plataforma</p>
         <h1 className="mt-2 text-3xl font-semibold text-ink">Clientes e lojas</h1>
+        <p className="mt-2 text-sm text-ink-soft">{owners.length} lojista(s) · {totalLojas} loja(s) no total.</p>
         <div className="mt-8 flex flex-col gap-4">
           {owners.length === 0 && <p className="text-sm text-ink-soft">Nenhum cliente com loja ainda.</p>}
           {owners.map((o) => (
             <div key={o.name + o.stores[0]?.slug} className="rounded-2xl border border-line bg-surface p-5">
-              <p className="font-semibold text-ink">{o.name}</p>
+              <p className="font-semibold text-ink">{o.name} <span className="text-sm font-normal text-ink-soft">· {o.stores.length} {o.stores.length === 1 ? "loja" : "lojas"}</span></p>
               <ul className="mt-3 flex flex-col gap-2">
                 {o.stores.map((s) => (
                   <li key={s.slug} className="text-sm text-ink">

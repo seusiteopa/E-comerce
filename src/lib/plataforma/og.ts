@@ -1,5 +1,6 @@
 /** Imagem de compartilhamento da plataforma (página inicial). Separada da imagem de cada loja. */
 export const OG_SETTING_KEY = "og_image_plataforma";
+export const LOGO_SETTING_KEY = "logo_plataforma";
 export const OG_MAX_BYTES = 800_000;
 
 /** Converte "data:image/png;base64,..." em tipo e bytes. Null se não for uma imagem aceita. */
