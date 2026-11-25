@@ -3,6 +3,7 @@ import Container from "@/components/ui/Container";
 import AdminDataTable, { AdminColumn } from "@/components/admin/AdminDataTable";
 import CouponForm from "@/components/admin/CouponForm";
 import DeleteCouponButton from "@/components/admin/DeleteCouponButton";
+import ToggleCouponButton from "@/components/admin/ToggleCouponButton";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentStore } from "@/lib/store/current";
 import { requireAdminProfile } from "@/lib/auth";
@@ -22,8 +23,13 @@ export default async function AdminCuponsPage() {
   const columns: AdminColumn<CouponRowWithId>[] = [
     { header: "Código", primary: true, cell: (r) => r.code },
     { header: "Desconto", primary: true, cell: (r) => (r.discount_type === "percentual" ? `${r.discount_value}%` : `R$ ${r.discount_value}`) },
-    { header: "Ativo", primary: true, cell: (r) => (r.active ? "Sim" : "Não") },
-    { header: "Ações", primary: true, cell: (r) => <DeleteCouponButton code={r.code} /> },
+    { header: "Ativo", primary: true, cell: (r) => (r.active ? "Sim" : "Pausado") },
+    { header: "Ações", primary: true, cell: (r) => (
+      <div className="flex items-center gap-3">
+        <ToggleCouponButton code={r.code} active={r.active} />
+        <DeleteCouponButton code={r.code} />
+      </div>
+    ) },
   ];
 
   return (

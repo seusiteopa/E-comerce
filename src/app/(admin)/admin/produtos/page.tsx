@@ -5,6 +5,7 @@ import AdminDataTable, { AdminColumn } from "@/components/admin/AdminDataTable";
 import { LinkButton } from "@/components/ui/Button";
 import { ProductTypeBadge } from "@/components/ui/Badge";
 import DeleteProductButton from "@/components/admin/DeleteProductButton";
+import ProductStatusSelect from "@/components/admin/ProductStatusSelect";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentStore } from "@/lib/store/current";
 import { requireAdminProfile } from "@/lib/auth";
@@ -22,7 +23,7 @@ export default async function AdminProdutosPage() {
     { header: "Nome", primary: true, cell: (r) => <StoreLink href={`/produtos/${r.slug}`} className="hover:underline">{r.name}</StoreLink> },
     { header: "Tipo", primary: true, cell: (r) => <ProductTypeBadge type={r.type} /> },
     { header: "Preço", cell: (r) => formatCurrency(Number(r.price)) },
-    { header: "Status", primary: true, cell: (r) => r.status },
+    { header: "Status", primary: true, cell: (r) => <ProductStatusSelect productId={r.id} status={r.status as "ativo" | "inativo" | "rascunho"} /> },
     {
       header: "Ações",
       primary: true,
