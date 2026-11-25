@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Container from "@/components/ui/Container";
+import { requirePlatformPage } from "@/lib/platform";
 import PartnersAdmin from "@/components/plataforma/PartnersAdmin";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 
 export const metadata: Metadata = { title: "Agências", robots: { index: false, follow: false } };
 
 export default async function PlataformaParceirosPage() {
+  await requirePlatformPage();
   const service = createSupabaseServiceClient();
   const [{ data: partners }, { data: stores }] = await Promise.all([
     service.from("partners").select("id, name, status").order("name"),

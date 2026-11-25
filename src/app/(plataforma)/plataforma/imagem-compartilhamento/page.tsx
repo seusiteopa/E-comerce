@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Container from "@/components/ui/Container";
+import { requirePlatformPage } from "@/lib/platform";
 import OgImageForm from "@/components/plataforma/OgImageForm";
 
 export const metadata: Metadata = { title: "Imagens da página inicial", robots: { index: false, follow: false } };
 
-export default function PlataformaImagemPage() {
+export default async function PlataformaImagemPage() {
+  await requirePlatformPage();
   return (
     <section className="py-10">
       <Container>

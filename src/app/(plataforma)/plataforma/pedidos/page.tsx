@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Container from "@/components/ui/Container";
+import { requirePlatformPage } from "@/lib/platform";
 import StoreRequestsList from "@/components/plataforma/StoreRequestsList";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 
 export const metadata: Metadata = { title: "Pedidos das lojas", robots: { index: false, follow: false } };
 
 export default async function PlataformaPedidosPage() {
+  await requirePlatformPage();
   const service = createSupabaseServiceClient();
   const { data } = await service
     .from("store_requests")

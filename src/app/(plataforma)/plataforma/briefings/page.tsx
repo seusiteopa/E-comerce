@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Container from "@/components/ui/Container";
+import { requirePlatformPage } from "@/lib/platform";
 import BriefingsList, { type BriefRow } from "@/components/plataforma/BriefingsList";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import { BRIEF_LABEL, whatsappLink, type BriefKind, type BriefStatus } from "@/lib/briefing/schema";
@@ -7,6 +8,7 @@ import { BRIEF_LABEL, whatsappLink, type BriefKind, type BriefStatus } from "@/l
 export const metadata: Metadata = { title: "Pedidos de serviço", robots: { index: false, follow: false } };
 
 export default async function PlataformaBriefingsPage() {
+  await requirePlatformPage();
   const service = createSupabaseServiceClient();
   const { data } = await service
     .from("service_briefs")

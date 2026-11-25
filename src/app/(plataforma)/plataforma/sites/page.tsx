@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Container from "@/components/ui/Container";
+import { requirePlatformPage } from "@/lib/platform";
 import SiteDeliveryForm from "@/components/plataforma/SiteDeliveryForm";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 
 export const metadata: Metadata = { title: "Sites dos clientes", robots: { index: false, follow: false } };
 
 export default async function PlataformaSitesPage() {
+  await requirePlatformPage();
   const service = createSupabaseServiceClient();
   const { data: product } = await service.from("products").select("id").eq("slug", "site-personalizado").maybeSingle();
   const { data: items } = product
