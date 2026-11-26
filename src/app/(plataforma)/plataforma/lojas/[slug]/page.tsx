@@ -8,6 +8,7 @@ import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import { formatDate } from "@/lib/format";
 import StoreProfileForm from "@/components/admin/StoreProfileForm";
 import PlatformSettingsForm from "@/components/admin/PlatformSettingsForm";
+import DeleteStorePanel from "@/components/plataforma/DeleteStorePanel";
 import { updateStoreProfileForStoreAction, updateStorePlatformSettingsAction } from "@/actions/plataforma";
 
 export const metadata: Metadata = { title: "Loja — Painel da plataforma", robots: { index: false, follow: false } };
@@ -74,6 +75,9 @@ export default async function PlataformaLojaPage({ params }: { params: Promise<{
         <Link href={`/lojas/${store.slug}`} className="rounded-xl bg-navy px-5 py-3 text-sm font-semibold text-white hover:opacity-90">
           Abrir a loja
         </Link>
+        <Link href={`/lojas/${store.slug}/admin`} className="rounded-xl border border-navy px-5 py-3 text-sm font-semibold text-navy hover:bg-navy hover:text-white">
+          Abrir o painel desta loja
+        </Link>
       </div>
 
       <section className="mt-8 rounded-2xl border border-line bg-surface p-6">
@@ -132,6 +136,7 @@ export default async function PlataformaLojaPage({ params }: { params: Promise<{
           />
         </div>
       </section>
+      {!store.is_platform_owned && <DeleteStorePanel storeId={store.id} slug={store.slug} name={store.name} />}
     </Container>
   );
 }

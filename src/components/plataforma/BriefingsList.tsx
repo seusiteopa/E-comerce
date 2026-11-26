@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { updateBriefStatusAction } from "@/actions/plataforma/briefings";
+import { deleteBriefAction } from "@/actions/plataforma/exclusoes";
 import { BRIEF_STATUS, BRIEF_STATUS_LABEL, type BriefStatus } from "@/lib/briefing/schema";
 
 export type BriefRow = {
@@ -29,6 +30,16 @@ export default function BriefingsList({ briefs }: { briefs: BriefRow[] }) {
     startTransition(async () => {
       const r = await updateBriefStatusAction(id, status);
       if (r.success) setRows((prev) => prev.map((x) => (x.id === id ? { ...x, status } : x)));
+      else setMessage(r.error);
+    });
+  }
+
+  function remove(id: string) {
+    if (!window.confirm("Excluir este pedido de serviço?")) return;
+    setMessage(null);
+    startTransition(async () => {
+      const r = await deleteBriefAction(id);
+      if (r.success) setRows((prev) => prev.filter((x) => x.id !== id));
       else setMessage(r.error);
     });
   }
@@ -64,6 +75,7 @@ export default function BriefingsList({ briefs }: { briefs: BriefRow[] }) {
           <p className="text-sm">
             <a href={r.whatsappUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-navy underline">Chamar no WhatsApp</a>
             <span className="text-ink-soft"> · {r.whatsapp}{r.email ? ` · ${r.email}` : ""}</span>
+            <button type="button" onClick={() => remove(r.id)} disabled={pending} className="ml-3 text-xs font-semibold text-status-danger hover:underline disabled:opacity-50">Excluir</button>
           </p>
         </div>
       ))}

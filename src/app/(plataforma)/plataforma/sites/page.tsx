@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Container from "@/components/ui/Container";
 import { requirePlatformPage } from "@/lib/platform";
 import SiteDeliveryForm from "@/components/plataforma/SiteDeliveryForm";
+import DeleteSiteButton from "@/components/plataforma/DeleteSiteButton";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 
 export const metadata: Metadata = { title: "Sites dos clientes", robots: { index: false, follow: false } };
@@ -51,7 +52,7 @@ export default async function PlataformaSitesPage() {
               {sites.map((s) => (
                 <li key={s.slug} className="flex flex-wrap items-center justify-between gap-2 text-ink">
                   <a href={`/sites/${s.slug}`} target="_blank" rel="noopener noreferrer" className="font-semibold text-navy hover:underline">/sites/{s.slug}</a>
-                  <span className="text-ink-soft">{s.cliente} · {new Date(s.updated_at).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })}</span>
+                  <span className="flex items-center gap-3 text-ink-soft">{s.cliente} · {new Date(s.updated_at).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })}<DeleteSiteButton slug={s.slug} /></span>
                 </li>
               ))}
             </ul>

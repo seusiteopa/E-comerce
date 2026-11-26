@@ -6,6 +6,7 @@ import { LinkButton } from "@/components/ui/Button";
 import { ProductTypeBadge } from "@/components/ui/Badge";
 import DeleteProductButton from "@/components/admin/DeleteProductButton";
 import ProductStatusSelect from "@/components/admin/ProductStatusSelect";
+import ProductFeaturedToggle from "@/components/admin/ProductFeaturedToggle";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentStore } from "@/lib/store/current";
 import { requireAdminProfile } from "@/lib/auth";
@@ -24,6 +25,7 @@ export default async function AdminProdutosPage() {
     { header: "Tipo", primary: true, cell: (r) => <ProductTypeBadge type={r.type} /> },
     { header: "Preço", cell: (r) => formatCurrency(Number(r.price)) },
     { header: "Status", primary: true, cell: (r) => <ProductStatusSelect productId={r.id} status={r.status as "ativo" | "inativo" | "rascunho"} /> },
+    { header: "Destaque", primary: true, cell: (r) => <ProductFeaturedToggle productId={r.id} featured={Boolean(r.featured)} status={r.status} /> },
     {
       header: "Ações",
       primary: true,

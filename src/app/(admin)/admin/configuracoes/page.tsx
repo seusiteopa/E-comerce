@@ -1,9 +1,7 @@
 import AdminHeader from "@/components/admin/AdminHeader";
 import Container from "@/components/ui/Container";
 import SiteSettingsForm from "@/components/admin/SiteSettingsForm";
-import StorePagesForm from "@/components/admin/StorePagesForm";
-import HomeOrderForm from "@/components/admin/HomeOrderForm";
-import { resolveHomeOrder } from "@/lib/store/home-order";
+import StoreLink from "@/components/store/StoreLink";
 import { requireAdminProfile } from "@/lib/auth";
 import { getSiteSettings } from "@/lib/data/site-settings";
 
@@ -13,20 +11,13 @@ export default async function AdminConfiguracoesPage() {
 
   return (
     <>
-      <AdminHeader title="Configurações da loja" />
+      <AdminHeader title="Aparência e promoções" />
       <Container className="max-w-2xl py-8">
+        <p className="mb-6 text-sm text-ink-soft">
+          Aqui ficam a faixa de avisos, as cores e o cupom de boas-vindas. Nome, endereço, páginas, ordem da página inicial e área de entrega estão em{" "}
+          <StoreLink href="/admin/loja" className="font-semibold text-navy hover:underline">Minha loja</StoreLink>.
+        </p>
         <SiteSettingsForm settings={settings} />
-        <StorePagesForm
-          initial={{
-            page_sobre: settings.page_sobre ?? "",
-            page_faq: settings.page_faq ?? "",
-            page_contato: settings.page_contato ?? "",
-            page_politica_privacidade: settings.page_politica_privacidade ?? "",
-            page_politica_termos: settings.page_politica_termos ?? "",
-            page_politica_trocas: settings.page_politica_trocas ?? "",
-          }}
-        />
-        <HomeOrderForm initial={resolveHomeOrder(settings.home_order)} />
       </Container>
     </>
   );
