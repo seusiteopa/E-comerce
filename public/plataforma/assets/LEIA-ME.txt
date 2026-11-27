@@ -1,2 +1,3 @@
-Salve aqui a logo oficial da Vecorion com o nome: logo-vecorion.png
-(arquivo ainda nao enviado; o index.html ja aponta para este caminho)
+A logo oficial da Vecorion pode ser enviada de duas formas:
+1) Pelo painel: Painel da plataforma > Imagens da pagina inicial (recomendado).
+2) Salvando aqui o arquivo com o nome: logo-vecorion.png (se existir, ele tem prioridade).
