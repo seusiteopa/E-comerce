@@ -73,6 +73,7 @@ export default function BriefingsList({ briefs }: { briefs: BriefRow[] }) {
           <p className="whitespace-pre-line text-sm text-ink">{r.description}</p>
           {r.references_text && <p className="whitespace-pre-line text-xs text-ink-soft">Referências: {r.references_text}</p>}
           <p className="text-sm">
+            <a href={`/plataforma/briefings/${r.id}`} className="mr-3 font-semibold text-navy underline">Abrir entrega</a>
             <a href={r.whatsappUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-navy underline">Chamar no WhatsApp</a>
             <span className="text-ink-soft"> · {r.whatsapp}{r.email ? ` · ${r.email}` : ""}</span>
             <button type="button" onClick={() => remove(r.id)} disabled={pending} className="ml-3 text-xs font-semibold text-status-danger hover:underline disabled:opacity-50">Excluir</button>

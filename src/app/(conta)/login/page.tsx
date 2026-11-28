@@ -31,7 +31,7 @@ function LoginForm() {
         } else if (result.data.isAdmin) {
           router.push("/admin");  // sem destino salvo: painel da loja principal
         } else {
-          router.push("/conta/pedidos");
+          router.push("/conta");
         }
       } else {
         setError(result.error);
